@@ -15,10 +15,10 @@
     color: var(--text); background: var(--bg); line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-  .shell { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
-  .col { padding: 56px 48px; }
+  .shell { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; }
+  .col { padding: 56px 48px; overflow-y: auto; }
   .col-left { border-right: 1px solid var(--border); }
-  .col-right { background: var(--panel); }
+  .col-right { background: var(--panel); position: sticky; top: 0; }
 
   h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 0; }
   h1 span { color: var(--muted); font-weight: 400; }
@@ -87,6 +87,7 @@
     display: flex; align-items: center; gap: 10px; padding: 10px 12px;
     border: 1px solid var(--border); border-radius: var(--radius);
     cursor: pointer; font-size: 13px; transition: all 0.15s; user-select: none;
+    height: 44px;
   }
   .addon:hover { border-color: #ccc; background: rgba(0,0,0,0.008); }
   .addon.checked { border-color: var(--accent); background: rgba(0,0,0,0.02); }
@@ -96,7 +97,9 @@
   .addon-qty {
     width: 48px !important; padding: 5px 6px !important; font-size: 13px !important;
     text-align: center; border-radius: 6px !important; flex-shrink: 0;
+    visibility: hidden;
   }
+  .addon.checked .addon-qty { visibility: visible; }
 
   /* Buttons */
   .btn {
@@ -122,8 +125,9 @@
   }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--text); border-bottom-color: var(--accent); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+  .tab-content { display: none; opacity: 0; transition: opacity 0.15s ease; }
+  .tab-content.active { display: block; opacity: 1; }
+  .tab-content.fade-in { opacity: 1; }
 
   /* Settings rows */
   .cfg-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 13px; }
@@ -201,11 +205,20 @@
   .item-details { font-size: 12px; color: var(--muted); line-height: 1.7; }
   .item-right { display: flex; align-items: flex-start; gap: 10px; padding-left: 16px; flex-shrink: 0; }
   .item-amount { font-weight: 600; font-size: 15px; white-space: nowrap; }
-  .item-remove {
-    background: none; border: none; color: var(--light); cursor: pointer;
-    font-size: 18px; line-height: 1; padding: 0; transition: color 0.15s;
+  .item-actions {
+    display: flex; gap: 8px; align-items: center; opacity: 0; transition: opacity 0.15s;
+    position: absolute; right: 20px; bottom: 10px;
   }
-  .item-remove:hover { color: #c0392b; }
+  .item { position: relative; }
+  .item:hover .item-actions { opacity: 1; }
+  .item-action {
+    background: none; border: none; color: var(--light); cursor: pointer;
+    font-size: 11px; padding: 0; transition: color 0.15s; font-family: inherit;
+  }
+  .item-action:hover { color: var(--text); }
+  .item-action.remove:hover { color: #c0392b; }
+  .item.dragging { opacity: 0.5; }
+  .item.drag-over { border-top: 2px solid var(--accent); margin-top: -1px; }
   .empty-state {
     text-align: center; padding: 64px 24px; color: var(--light); font-size: 14px;
     line-height: 1.8;
@@ -269,6 +282,67 @@
   }
   .no-print .btn { width: auto; }
 
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: #fff; padding: 10px 24px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; z-index: 999; opacity: 0;
+    transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .toast-undo {
+    margin-left: 12px; background: rgba(255,255,255,0.2); border: none; color: #fff;
+    padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    font-weight: 600; font-family: inherit;
+  }
+  .toast-undo:hover { background: rgba(255,255,255,0.35); }
+
+  /* Quick client modal */
+  .quick-modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s; pointer-events: none;
+  }
+  .quick-modal-bg.open { opacity: 1; pointer-events: auto; }
+  .quick-modal {
+    background: #fff; border-radius: 12px; padding: 28px 32px; width: 380px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15); max-width: 90vw;
+  }
+  .quick-modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 20px; }
+  .quick-modal .field { margin-bottom: 16px; }
+
+  /* Running total */
+  .panel-total { font-size: 13px; font-weight: 600; }
+
+  /* Client select row */
+  .client-row { display: flex; gap: 8px; align-items: stretch; }
+  .client-row select { flex: 1; }
+  .client-add-btn {
+    flex-shrink: 0; width: 42px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); border-radius: var(--radius); background: #fff;
+    cursor: pointer; font-size: 18px; color: var(--muted); transition: all 0.15s;
+  }
+  .client-add-btn:hover { border-color: var(--text); color: var(--text); }
+
+  /* Autosave indicator */
+  .autosave-indicator {
+    font-size: 11px; color: var(--light); transition: opacity 0.3s;
+  }
+
+  /* Item highlight animation */
+  @keyframes itemFlash {
+    0% { background: #f0f7ff; }
+    100% { background: #fff; }
+  }
+  .item.just-added { animation: itemFlash 1s ease-out; }
+
+  /* Form section divider */
+  .form-section-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--light); margin-bottom: 20px; font-weight: 500;
+  }
+
   .loading::after {
     content: ''; display: inline-block; width: 10px; height: 10px;
     border: 1.5px solid var(--border); border-top-color: var(--accent);
@@ -306,9 +380,10 @@
   .btn-row .btn { flex: 1; }
 
   @media (max-width: 768px) {
-    .shell { grid-template-columns: 1fr; }
-    .col { padding: 36px 24px; }
+    .shell { grid-template-columns: 1fr; height: auto; }
+    .col { padding: 36px 24px; overflow-y: visible; }
     .col-left { border-right: none; border-bottom: 1px solid var(--border); }
+    .col-right { position: static; }
     .row { flex-direction: column; gap: 0; }
     .row > * + * { margin-top: 12px; }
     .addons { grid-template-columns: 1fr; }
@@ -321,6 +396,19 @@
 </head>
 <body>
 
+<div class="toast" id="toast"></div>
+<div class="quick-modal-bg" id="quickClientModal" onclick="if(event.target===this)closeQuickClient()">
+  <div class="quick-modal">
+    <h3>New Client</h3>
+    <div class="field"><div class="label">Name</div><input type="text" id="qcName" placeholder="Client name"></div>
+    <div class="field"><div class="label">Company</div><input type="text" id="qcCompany" placeholder="Company (optional)"></div>
+    <div class="field"><div class="label">Email</div><input type="text" id="qcEmail" placeholder="Email (optional)"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveQuickClient()">Add Client</button>
+      <button class="btn btn-outline" onclick="closeQuickClient()">Cancel</button>
+    </div>
+  </div>
+</div>
 <div id="form-view">
   <div class="shell">
     <div class="col col-left">
@@ -335,11 +423,21 @@
 
       <!-- ── INVOICE TAB ── -->
       <div class="tab-content active" id="tab-invoice">
-        <div class="field">
-          <div class="label">Client</div>
-          <select id="clientSelect">
-            <option value="" disabled selected>Select client</option>
-          </select>
+        <div class="form-section-label">Invoice details</div>
+        <div class="row">
+          <div class="field">
+            <div class="label">Client</div>
+            <div class="client-row">
+              <select id="clientSelect">
+                <option value="" disabled selected>Select client</option>
+              </select>
+              <button class="client-add-btn" onclick="openQuickClient()" title="New client">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <div class="label">Invoice #</div>
+            <input type="text" id="invoiceNumber" placeholder="INV-2026-001">
+          </div>
         </div>
 
         <div class="field">
@@ -354,6 +452,7 @@
 
         <hr class="hr">
 
+        <div class="form-section-label">Add listing</div>
         <div class="field">
           <div class="label">Listing Address</div>
           <div class="addr-wrap">
@@ -458,8 +557,8 @@
     <!-- RIGHT: Items list -->
     <div class="col col-right">
       <div class="panel-header">
-        <h2>Listings</h2>
-        <span class="count" id="itemCount">0 items</span>
+        <div><h2 style="display:inline;">Listings</h2> <span class="count" id="itemCount">0 items</span></div>
+        <span class="panel-total" id="runningTotal"></span>
       </div>
       <div id="itemsList"><div class="empty-state">Add listings to build your invoice.</div></div>
       <div id="totalsBlock" style="display:none;">
@@ -469,6 +568,7 @@
             <button class="btn" onclick="generateInvoice()">Generate Invoice</button>
             <button class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
           </div>
+          <div class="autosave-indicator" id="autosaveStatus"></div>
         </div>
       </div>
     </div>
@@ -524,14 +624,49 @@ let debounceTimer = null;
 let selectedClientId = null;
 let editingIndex = null;
 
+// ── Toast ──
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.innerHTML = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function showToastUndo(msg, undoFn) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `${msg} <button class="toast-undo" onclick="event.stopPropagation()">Undo</button>`;
+  el.querySelector('.toast-undo').addEventListener('click', () => {
+    el.classList.remove('show');
+    clearTimeout(toastTimer);
+    undoFn();
+  });
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ── Sequential invoice number ──
+function nextInvoiceNumber() {
+  let seq = parseInt(localStorage.getItem('inv_seq') || '0') + 1;
+  localStorage.setItem('inv_seq', seq);
+  const yr = new Date().getFullYear();
+  return `INV-${yr}-${String(seq).padStart(3, '0')}`;
+}
+
 // ── Tabs ──
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     const ids = ['invoice','drafts','settings','clients','data'];
     t.classList.toggle('active', ids[i] === name);
   });
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(tc => {
+    tc.classList.remove('active', 'fade-in');
+  });
+  const target = document.getElementById('tab-' + name);
+  target.classList.add('active');
+  requestAnimationFrame(() => requestAnimationFrame(() => target.classList.add('fade-in')));
   if (name === 'settings') renderSettingsTab();
   if (name === 'clients') renderClientsTab();
   if (name === 'drafts') renderDraftsTab();
@@ -604,6 +739,7 @@ function saveSettings() {
   saveConfig();
   rebuildInvoiceTab();
   switchTab('invoice');
+  showToast('Pricing saved');
 }
 
 function esc(s) { return (s||'').replace(/"/g,'&quot;'); }
@@ -724,6 +860,7 @@ function saveClient(ci) {
   saveClients();
   renderClientsTab();
   rebuildClientDropdown();
+  showToast('Client saved');
   // Re-open saved card
   const el = document.getElementById('cc-'+ci);
   if (el) el.classList.add('open');
@@ -786,7 +923,7 @@ function rebuildInvoiceTab() {
     const price = getPrice('addon', a.id);
     const div = document.createElement('div');
     div.className = 'addon';
-    const qtyHtml = a.qty ? `<input type="number" class="addon-qty" data-addon="${a.id}" min="1" value="1" onclick="event.stopPropagation()" style="display:none;">` : '';
+    const qtyHtml = a.qty ? `<input type="number" class="addon-qty" data-addon="${a.id}" min="1" value="1" onclick="event.stopPropagation()">` : '';
     div.innerHTML = `<input type="checkbox" value="${a.id}"><span class="addon-name">${a.name||'(unnamed)'}</span>${qtyHtml}<span class="addon-price">$${price}${a.qty?'/ea':''}</span>`;
     const cb = div.querySelector('input[type="checkbox"]');
     const qtyInput = div.querySelector('.addon-qty');
@@ -794,7 +931,6 @@ function rebuildInvoiceTab() {
       if (e.target.tagName==='INPUT'&&e.target.type==='number') return;
       cb.checked = !cb.checked;
       div.classList.toggle('checked', cb.checked);
-      if (qtyInput) qtyInput.style.display = cb.checked ? 'block' : 'none';
     });
     grid.appendChild(div);
   });
@@ -826,6 +962,7 @@ function shiftMonth(delta) {
 // ── Init ──
 rebuildClientDropdown();
 rebuildInvoiceTab();
+document.getElementById('invoiceNumber').value = nextInvoiceNumber();
 
 // When client changes, refresh prices
 document.getElementById('clientSelect').addEventListener('change', () => {
@@ -845,6 +982,16 @@ document.getElementById('packageSelect').addEventListener('change', () => {
     document.getElementById('extrasQty').placeholder = pkg.price === 0 ? 'Enter amount' : '0';
   } else {
     field.style.display = 'none';
+  }
+});
+
+// ── Keyboard: Enter to add listing ──
+document.getElementById('tab-invoice').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') {
+    // Don't trigger if autocomplete is open
+    if (document.getElementById('addrSuggestions').classList.contains('open')) return;
+    e.preventDefault();
+    addItem();
   }
 });
 
@@ -973,13 +1120,18 @@ function addItem() {
     total: pkgAmount + extrasAmount + addonsTotal + currentTravel.fee,
   };
 
+  let highlightIdx;
   if (editingIndex !== null) {
     items[editingIndex] = newItem;
+    highlightIdx = editingIndex;
     editingIndex = null;
     document.getElementById('addItemBtn').textContent = 'Add Listing';
     document.getElementById('cancelEditBtn').style.display = 'none';
+    showToast('Listing updated');
   } else {
     items.push(newItem);
+    highlightIdx = items.length - 1;
+    showToast('Listing added');
   }
 
   // Reset
@@ -989,18 +1141,47 @@ function addItem() {
   document.getElementById('extrasField').style.display = 'none';
   grid.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
   grid.querySelectorAll('.addon').forEach(el => el.classList.remove('checked'));
-  grid.querySelectorAll('.addon-qty').forEach(el => { el.value='1'; el.style.display='none'; });
+  grid.querySelectorAll('.addon-qty').forEach(el => { el.value='1'; });
   travelResult.textContent = '';
   currentTravel = { distance: 0, fee: 0, calculated: false };
   renderItems();
+
+  // Highlight the new/updated item
+  const allItems = document.querySelectorAll('.item');
+  if (allItems[highlightIdx]) {
+    allItems[highlightIdx].classList.add('just-added');
+    allItems[highlightIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
   addressInput.focus();
 }
 
+let undoItem = null, undoIdx = null, undoTimer = null;
 function removeItem(i) {
+  undoItem = items[i];
+  undoIdx = i;
   items.splice(i, 1);
   if (editingIndex === i) cancelEdit();
   else if (editingIndex !== null && editingIndex > i) editingIndex--;
   renderItems();
+  showToastUndo('Listing removed', () => {
+    items.splice(undoIdx, 0, undoItem);
+    undoItem = null;
+    renderItems();
+    showToast('Listing restored');
+  });
+}
+
+function duplicateItem(i) {
+  const copy = JSON.parse(JSON.stringify(items[i]));
+  copy.address = copy.address + ' (copy)';
+  items.splice(i + 1, 0, copy);
+  renderItems();
+  showToast('Listing duplicated');
+  const allItems = document.querySelectorAll('.item');
+  if (allItems[i + 1]) {
+    allItems[i + 1].classList.add('just-added');
+    allItems[i + 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function editItem(i) {
@@ -1034,10 +1215,7 @@ function editItem(i) {
     const div = cb.closest('.addon');
     div.classList.toggle('checked', !!addon);
     const qtyInput = div.querySelector('.addon-qty');
-    if (qtyInput) {
-      qtyInput.style.display = addon ? 'block' : 'none';
-      if (addon) qtyInput.value = addon.count;
-    }
+    if (qtyInput && addon) qtyInput.value = addon.count;
   });
 
   document.getElementById('addItemBtn').textContent = 'Update Listing';
@@ -1057,7 +1235,7 @@ function cancelEdit() {
   const grid = document.getElementById('addonsGrid');
   grid.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
   grid.querySelectorAll('.addon').forEach(el => el.classList.remove('checked'));
-  grid.querySelectorAll('.addon-qty').forEach(el => { el.value = '1'; el.style.display = 'none'; });
+  grid.querySelectorAll('.addon-qty').forEach(el => { el.value = '1'; });
   travelResult.textContent = '';
   currentTravel = { distance: 0, fee: 0, calculated: false };
 }
@@ -1069,6 +1247,7 @@ function renderItems() {
   if (!items.length) {
     list.innerHTML = '<div class="empty-state">Add listings to build your invoice.</div>';
     document.getElementById('totalsBlock').style.display = 'none';
+    document.getElementById('runningTotal').textContent = '';
     return;
   }
 
@@ -1077,14 +1256,34 @@ function renderItems() {
     if (item.extrasQty > 0) parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);
     item.addons.forEach(a => parts.push((a.count>1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice}`));
     if (item.travel.fee > 0) parts.push(`Travel $${item.travel.fee.toFixed(2)}`);
-    return `<div class="item${editingIndex===i?' editing':''}" onclick="editItem(${i})" style="cursor:pointer;"><div>
+    return `<div class="item${editingIndex===i?' editing':''}" draggable="true" data-idx="${i}" onclick="editItem(${i})" style="cursor:pointer;"><div>
       <div class="item-address">${item.address}</div>
       <div class="item-details">${parts.join(' &middot; ')}</div>
     </div><div class="item-right">
       <div class="item-amount">$${item.total.toFixed(2)}</div>
-      <button class="item-remove" onclick="event.stopPropagation();removeItem(${i})">&times;</button>
+      <div class="item-actions">
+        <button class="item-action" onclick="event.stopPropagation();duplicateItem(${i})">Duplicate</button>
+        <button class="item-action remove" onclick="event.stopPropagation();removeItem(${i})">Remove</button>
+      </div>
     </div></div>`;
   }).join('');
+
+  // Drag to reorder
+  list.querySelectorAll('.item').forEach(el => {
+    el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', el.dataset.idx); el.classList.add('dragging'); });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault(); el.classList.remove('drag-over');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      const to = parseInt(el.dataset.idx);
+      if (from === to) return;
+      const [moved] = items.splice(from, 1);
+      items.splice(to, 0, moved);
+      renderItems();
+    });
+  });
 
   const subtotal = items.reduce((s,it) => s + it.total, 0);
   const discount = getClientDiscount(subtotal);
@@ -1092,6 +1291,8 @@ function renderItems() {
   const gst = Math.round(afterDiscount * config.taxes.gst/100 * 100)/100;
   const qst = Math.round(afterDiscount * config.taxes.qst/100 * 100)/100;
   const total = afterDiscount + gst + qst;
+
+  document.getElementById('runningTotal').textContent = `$${total.toFixed(2)}`;
 
   let h = `<div class="totals-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;
   if (discount.amount > 0) h += `<div class="totals-row discount"><span>${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;
@@ -1109,7 +1310,7 @@ function generateInvoice() {
   const client = clients.find(c => c.id === selectedClientId);
   const notes = document.getElementById('notes').value.trim();
   const monthVal = document.getElementById('invoiceMonth').value;
-  const invoiceNum = 'INV-' + monthVal.replace('-','') + '-' + String(Math.floor(Math.random()*900)+100);
+  const invoiceNum = document.getElementById('invoiceNumber').value.trim() || nextInvoiceNumber();
   const [year, month] = monthVal.split('-');
   const monthName = new Date(year, month-1).toLocaleDateString('en-CA', { year:'numeric', month:'long' });
   const issueDate = new Date().toLocaleDateString('en-CA', { year:'numeric', month:'long', day:'numeric' });
@@ -1198,11 +1399,7 @@ function saveDraft() {
   }
 
   saveDrafts();
-  const badge = currentDraftId ? ' (updated)' : ' (saved)';
-  const btn = document.querySelector('.btn-outline[onclick="saveDraft()"]');
-  const orig = btn.textContent;
-  btn.textContent = 'Saved!';
-  setTimeout(() => btn.textContent = orig, 1200);
+  showToast('Draft saved');
 }
 
 function loadDraft(id) {
@@ -1335,6 +1532,68 @@ function renderDataTab() {
     `<div>${cCount} client${cCount !== 1 ? 's' : ''} · ${dCount} draft${dCount !== 1 ? 's' : ''}</div>` +
     `<div>Storage used: ${kb} KB</div>`;
 }
+
+// ── Quick client create ──
+function openQuickClient() {
+  document.getElementById('qcName').value = '';
+  document.getElementById('qcCompany').value = '';
+  document.getElementById('qcEmail').value = '';
+  document.getElementById('quickClientModal').classList.add('open');
+  setTimeout(() => document.getElementById('qcName').focus(), 100);
+}
+
+function closeQuickClient() {
+  document.getElementById('quickClientModal').classList.remove('open');
+}
+
+function saveQuickClient() {
+  const name = document.getElementById('qcName').value.trim();
+  const company = document.getElementById('qcCompany').value.trim();
+  const email = document.getElementById('qcEmail').value.trim();
+  if (!name && !company) { document.getElementById('qcName').focus(); return; }
+  const c = { id: 'c' + Date.now(), name, company, email, phone: '', contact: '', address: '', taxNumbers: '', defaultNotes: '', discount: { type: '%', value: 0 }, overrides: { packages: {}, addons: {} } };
+  clients.push(c);
+  saveClients();
+  rebuildClientDropdown();
+  document.getElementById('clientSelect').value = c.id;
+  selectedClientId = c.id;
+  rebuildInvoiceTab();
+  closeQuickClient();
+  showToast('Client added');
+}
+
+// Enter to save in quick client modal
+document.getElementById('quickClientModal').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); saveQuickClient(); }
+  if (e.key === 'Escape') closeQuickClient();
+});
+
+// ── Auto-save drafts ──
+let autoSaveInterval = null;
+function startAutoSave() {
+  if (autoSaveInterval) return;
+  autoSaveInterval = setInterval(() => {
+    if (!items.length) return;
+    const clientId = document.getElementById('clientSelect').value;
+    const month = document.getElementById('invoiceMonth').value;
+    const notes = document.getElementById('notes').value;
+    const data = { clientId, month, notes, items: JSON.parse(JSON.stringify(items)) };
+
+    if (currentDraftId) {
+      const idx = drafts.findIndex(d => d.id === currentDraftId);
+      if (idx >= 0) drafts[idx] = { ...drafts[idx], ...data, updatedAt: Date.now() };
+    } else {
+      const draft = { id: 'd' + Date.now(), ...data, savedAt: Date.now(), updatedAt: Date.now() };
+      drafts.unshift(draft);
+      currentDraftId = draft.id;
+    }
+    saveDrafts();
+    const el = document.getElementById('autosaveStatus');
+    el.textContent = 'Auto-saved';
+    setTimeout(() => el.textContent = '', 2000);
+  }, 30000);
+}
+startAutoSave();
 </script>
 </body>
 </html>
