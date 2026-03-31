@@ -329,6 +329,7 @@
         <button class="tab" onclick="switchTab('drafts')">Drafts</button>
         <button class="tab" onclick="switchTab('settings')">Pricing</button>
         <button class="tab" onclick="switchTab('clients')">Clients</button>
+        <button class="tab" onclick="switchTab('data')">Data</button>
       </div>
 
       <!-- ── INVOICE TAB ── -->
@@ -428,6 +429,28 @@
         <div id="draftCards"><div class="empty-state">No saved drafts.</div></div>
       </div>
 
+      <!-- ── DATA TAB ── -->
+      <div class="tab-content" id="tab-data">
+        <div class="cfg-section">
+          <div class="section-title">Backup & Restore</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Your data is saved in this browser. Export a backup to keep it safe or move it to another device.</p>
+          <div class="btn-row" style="margin-bottom:16px;">
+            <button class="btn" onclick="exportData()">Export Backup</button>
+            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">Import Backup</button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+          </div>
+          <div id="dataStatus" style="font-size:12px;color:var(--muted);min-height:18px;"></div>
+        </div>
+        <div class="cfg-section">
+          <div class="section-title">Storage Info</div>
+          <div id="storageInfo" style="font-size:13px;color:var(--muted);line-height:1.8;"></div>
+        </div>
+        <div class="cfg-section">
+          <div class="section-title" style="color:#c0392b;">Danger Zone</div>
+          <button class="btn btn-outline" style="border-color:#c0392b;color:#c0392b;" onclick="clearAllData()">Clear All Data</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- RIGHT: Items list -->
@@ -501,7 +524,7 @@ let selectedClientId = null;
 // ── Tabs ──
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    const ids = ['invoice','drafts','settings','clients'];
+    const ids = ['invoice','drafts','settings','clients','data'];
     t.classList.toggle('active', ids[i] === name);
   });
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
@@ -509,6 +532,7 @@ function switchTab(name) {
   if (name === 'settings') renderSettingsTab();
   if (name === 'clients') renderClientsTab();
   if (name === 'drafts') renderDraftsTab();
+  if (name === 'data') renderDataTab();
 }
 
 // ── Pricing tab ──
@@ -1163,6 +1187,77 @@ function renderDraftsTab() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Data backup/restore ──
+function exportData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    config: JSON.parse(localStorage.getItem('inv_config') || 'null'),
+    clients: JSON.parse(localStorage.getItem('inv_clients') || '[]'),
+    drafts: JSON.parse(localStorage.getItem('inv_drafts') || '[]'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lumeria-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.getElementById('dataStatus').textContent = 'Backup exported.';
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data.version) throw new Error('Invalid backup');
+      if (data.config) { localStorage.setItem('inv_config', JSON.stringify(data.config)); config = data.config; }
+      if (data.clients) { localStorage.setItem('inv_clients', JSON.stringify(data.clients)); clients = data.clients; }
+      if (data.drafts) { localStorage.setItem('inv_drafts', JSON.stringify(data.drafts)); drafts = data.drafts; }
+      rebuildClientDropdown();
+      rebuildInvoiceTab();
+      document.getElementById('dataStatus').textContent = `Backup restored (${new Date(data.exportedAt).toLocaleDateString()}).`;
+      renderDataTab();
+    } catch { document.getElementById('dataStatus').textContent = 'Invalid backup file.'; }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAllData() {
+  if (!confirm('This will permanently delete all clients, drafts, and settings. Are you sure?')) return;
+  if (!confirm('Really? This cannot be undone.')) return;
+  localStorage.removeItem('inv_config');
+  localStorage.removeItem('inv_clients');
+  localStorage.removeItem('inv_drafts');
+  config = structuredClone(DEFAULTS);
+  clients = [];
+  drafts = [];
+  currentDraftId = null;
+  items.length = 0;
+  rebuildClientDropdown();
+  rebuildInvoiceTab();
+  renderItems();
+  renderDataTab();
+  document.getElementById('dataStatus').textContent = 'All data cleared.';
+}
+
+function renderDataTab() {
+  const cCount = clients.length;
+  const dCount = drafts.length;
+  let totalSize = 0;
+  ['inv_config', 'inv_clients', 'inv_drafts'].forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) totalSize += v.length * 2;
+  });
+  const kb = (totalSize / 1024).toFixed(1);
+  document.getElementById('storageInfo').innerHTML =
+    `<div>${cCount} client${cCount !== 1 ? 's' : ''} · ${dCount} draft${dCount !== 1 ? 's' : ''}</div>` +
+    `<div>Storage used: ${kb} KB</div>`;
 }
 </script>
 </body>
