@@ -1075,7 +1075,7 @@ function renderItems() {
   list.innerHTML = items.map((item, i) => {
     let parts = [item.pkg.name + (!item.pkg.isCustom ? ` $${item.pkgAmount}` : '')];
     if (item.extrasQty > 0) parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);
-    item.addons.forEach(a => parts.push(a.count>1 ? `${a.name} ×${a.count}` : a.name));
+    item.addons.forEach(a => parts.push((a.count>1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice}`));
     if (item.travel.fee > 0) parts.push(`Travel $${item.travel.fee.toFixed(2)}`);
     return `<div class="item${editingIndex===i?' editing':''}" onclick="editItem(${i})" style="cursor:pointer;"><div>
       <div class="item-address">${item.address}</div>
