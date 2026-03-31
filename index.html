@@ -196,6 +196,7 @@
     transition: box-shadow 0.15s;
   }
   .item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .item.editing { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,26,26,0.06); }
   .item-address { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
   .item-details { font-size: 12px; color: var(--muted); line-height: 1.7; }
   .item-right { display: flex; align-items: flex-start; gap: 10px; padding-left: 16px; flex-shrink: 0; }
@@ -379,7 +380,8 @@
           <div class="addons" id="addonsGrid"></div>
         </div>
 
-        <button class="btn" onclick="addItem()">Add Listing</button>
+        <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
+        <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;margin-top:8px;">Cancel Edit</button>
 
         <div class="field" style="margin-top:32px;">
           <div class="label">Notes (optional)</div>
@@ -520,6 +522,7 @@ let items = [];
 let currentTravel = { distance: 0, fee: 0, calculated: false };
 let debounceTimer = null;
 let selectedClientId = null;
+let editingIndex = null;
 
 // ── Tabs ──
 function switchTab(name) {
@@ -964,11 +967,20 @@ function addItem() {
   });
   const addonsTotal = selectedAddons.reduce((s,a) => s + a.totalPrice, 0);
 
-  items.push({
+  const newItem = {
     address, pkg: { ...pkg, isCustom }, pkgAmount, extrasQty: isCustom ? 0 : extrasQty,
     extrasAmount, addons: selectedAddons, addonsTotal, travel: { ...currentTravel },
     total: pkgAmount + extrasAmount + addonsTotal + currentTravel.fee,
-  });
+  };
+
+  if (editingIndex !== null) {
+    items[editingIndex] = newItem;
+    editingIndex = null;
+    document.getElementById('addItemBtn').textContent = 'Add Listing';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  } else {
+    items.push(newItem);
+  }
 
   // Reset
   addressInput.value = '';
@@ -984,7 +996,71 @@ function addItem() {
   addressInput.focus();
 }
 
-function removeItem(i) { items.splice(i,1); renderItems(); }
+function removeItem(i) {
+  items.splice(i, 1);
+  if (editingIndex === i) cancelEdit();
+  else if (editingIndex !== null && editingIndex > i) editingIndex--;
+  renderItems();
+}
+
+function editItem(i) {
+  const item = items[i];
+  editingIndex = i;
+
+  // Populate address & travel
+  addressInput.value = item.address;
+  currentTravel = { ...item.travel };
+  if (item.travel.calculated) {
+    travelResult.className = 'travel-result';
+    travelResult.textContent = `${item.travel.distance} km` + (item.travel.fee > 0 ? ` — $${item.travel.fee.toFixed(2)} travel fee` : ` — no travel fee`);
+  }
+
+  // Package
+  document.getElementById('packageSelect').value = item.pkg.id;
+  const field = document.getElementById('extrasField');
+  if (item.pkg.extraLabel) {
+    field.style.display = 'block';
+    document.getElementById('extrasLabel').textContent = item.pkg.extraLabel;
+    document.getElementById('extrasQty').value = item.pkg.isCustom ? item.pkgAmount : item.extrasQty;
+  } else {
+    field.style.display = 'none';
+  }
+
+  // Add-ons
+  const grid = document.getElementById('addonsGrid');
+  grid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    const addon = item.addons.find(a => a.id === cb.value);
+    cb.checked = !!addon;
+    const div = cb.closest('.addon');
+    div.classList.toggle('checked', !!addon);
+    const qtyInput = div.querySelector('.addon-qty');
+    if (qtyInput) {
+      qtyInput.style.display = addon ? 'block' : 'none';
+      if (addon) qtyInput.value = addon.count;
+    }
+  });
+
+  document.getElementById('addItemBtn').textContent = 'Update Listing';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  switchTab('invoice');
+  addressInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelEdit() {
+  editingIndex = null;
+  document.getElementById('addItemBtn').textContent = 'Add Listing';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  addressInput.value = '';
+  document.getElementById('packageSelect').selectedIndex = 0;
+  document.getElementById('extrasQty').value = '0';
+  document.getElementById('extrasField').style.display = 'none';
+  const grid = document.getElementById('addonsGrid');
+  grid.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  grid.querySelectorAll('.addon').forEach(el => el.classList.remove('checked'));
+  grid.querySelectorAll('.addon-qty').forEach(el => { el.value = '1'; el.style.display = 'none'; });
+  travelResult.textContent = '';
+  currentTravel = { distance: 0, fee: 0, calculated: false };
+}
 
 function renderItems() {
   const list = document.getElementById('itemsList');
@@ -1001,12 +1077,12 @@ function renderItems() {
     if (item.extrasQty > 0) parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);
     item.addons.forEach(a => parts.push(a.count>1 ? `${a.name} ×${a.count}` : a.name));
     if (item.travel.fee > 0) parts.push(`Travel $${item.travel.fee.toFixed(2)}`);
-    return `<div class="item"><div>
+    return `<div class="item${editingIndex===i?' editing':''}" onclick="editItem(${i})" style="cursor:pointer;"><div>
       <div class="item-address">${item.address}</div>
       <div class="item-details">${parts.join(' &middot; ')}</div>
     </div><div class="item-right">
       <div class="item-amount">$${item.total.toFixed(2)}</div>
-      <button class="item-remove" onclick="removeItem(${i})">&times;</button>
+      <button class="item-remove" onclick="event.stopPropagation();removeItem(${i})">&times;</button>
     </div></div>`;
   }).join('');
 
