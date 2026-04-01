@@ -872,9 +872,11 @@ function initAppWithSync() {
       if (!Array.isArray(val)) val = Object.values(val);
       // Normalize nested arrays that Firebase may convert to objects
       val.forEach(d => {
-        if (d.items && !Array.isArray(d.items)) d.items = Object.values(d.items);
-        if (d.items) d.items.forEach(it => {
-          if (it.addons && !Array.isArray(it.addons)) it.addons = Object.values(it.addons);
+        if (!d.items) d.items = [];
+        else if (!Array.isArray(d.items)) d.items = Object.values(d.items);
+        d.items.forEach(it => {
+          if (!it.addons) it.addons = [];
+          else if (!Array.isArray(it.addons)) it.addons = Object.values(it.addons);
         });
       });
       drafts = val;
@@ -1671,8 +1673,9 @@ function loadDraft(id) {
   let draftItems = draft.items || [];
   if (!Array.isArray(draftItems)) draftItems = Object.values(draftItems);
   draftItems.forEach(it => {
-    // Also normalize nested addons array
-    if (it.addons && !Array.isArray(it.addons)) it.addons = Object.values(it.addons);
+    // Firebase strips empty arrays and may convert arrays to objects
+    if (!it.addons) it.addons = [];
+    else if (!Array.isArray(it.addons)) it.addons = Object.values(it.addons);
     items.push(it);
   });
 
