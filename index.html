@@ -1255,12 +1255,19 @@ document.addEventListener('click', e => { if (!e.target.closest('.addr-wrap')) c
 
 async function fetchAddressSuggestions(q) {
   try {
+    // Extract leading street number from user's query (e.g. "123 Rue...")
+    const typedNumMatch = q.match(/^(\d+[\s-]?\w?)\s+/);
+    const typedNum = typedNumMatch ? typedNumMatch[1].trim() : null;
+
     const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=${ORIGIN.lat}&lon=${ORIGIN.lon}&lang=fr`);
     const data = await res.json();
     addrResults = (data.features || []).map(f => {
       const p = f.properties;
       const [lon, lat] = f.geometry.coordinates;
-      const main = [p.housenumber, p.street].filter(Boolean).join(' ') || p.name || '';
+      // If Photon didn't return a house number but user typed one, preserve it
+      const streetName = p.street || p.name || '';
+      const houseNum = p.housenumber || (typedNum && streetName ? typedNum : '');
+      const main = [houseNum, streetName].filter(Boolean).join(' ');
       const rest = [p.city || p.town || p.village, p.state].filter(Boolean).join(', ');
       return { main, rest, lat, lon, display: [main, p.city || p.town || p.village, p.state, p.postcode].filter(Boolean).join(', ') };
     }).filter(r => r.main);
