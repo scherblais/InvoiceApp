@@ -506,9 +506,9 @@
         </div>
 
         <div class="field">
-          <div class="label">Package</div>
+          <div class="label">Package (optional)</div>
           <select id="packageSelect">
-            <option value="" disabled selected>Select package</option>
+            <option value="">No package (à la carte)</option>
           </select>
         </div>
 
@@ -1138,7 +1138,7 @@ function rebuildInvoiceTab() {
   // Packages
   const pkgSel = document.getElementById('packageSelect');
   const prev = pkgSel.value;
-  pkgSel.innerHTML = '<option value="" disabled selected>Select package</option>';
+  pkgSel.innerHTML = '<option value="">No package (à la carte)</option>';
   config.packages.forEach(pkg => {
     const opt = document.createElement('option');
     opt.value = pkg.id;
@@ -1320,12 +1320,11 @@ function addItem() {
   const pkgId = document.getElementById('packageSelect').value;
   const extrasQty = parseInt(document.getElementById('extrasQty').value)||0;
   if (!address) { addressInput.focus(); return; }
-  if (!pkgId) { document.getElementById('packageSelect').focus(); return; }
-  const pkg = config.packages.find(p => p.id === pkgId);
-  const isCustom = pkg.price === 0 && pkg.extraPrice === 1;
-  const pkgPrice = getPrice('pkg', pkg.id);
-  const pkgAmount = isCustom ? extrasQty : pkgPrice;
-  const extrasAmount = isCustom ? 0 : extrasQty * pkg.extraPrice;
+  const pkg = pkgId ? config.packages.find(p => p.id === pkgId) : null;
+  const isCustom = pkg ? (pkg.price === 0 && pkg.extraPrice === 1) : false;
+  const pkgPrice = pkg ? getPrice('pkg', pkg.id) : 0;
+  const pkgAmount = pkg ? (isCustom ? extrasQty : pkgPrice) : 0;
+  const extrasAmount = pkg ? (isCustom ? 0 : extrasQty * pkg.extraPrice) : 0;
 
   const grid = document.getElementById('addonsGrid');
   const selectedAddons = [];
@@ -1343,8 +1342,11 @@ function addItem() {
   });
   const addonsTotal = selectedAddons.reduce((s,a) => s + a.totalPrice, 0);
 
+  // Must have at least a package or an add-on
+  if (!pkg && !selectedAddons.length) { document.getElementById('packageSelect').focus(); return; }
+
   const newItem = {
-    address, pkg: { ...pkg, isCustom }, pkgAmount, extrasQty: isCustom ? 0 : extrasQty,
+    address, pkg: pkg ? { ...pkg, isCustom } : null, pkgAmount, extrasQty: isCustom ? 0 : extrasQty,
     extrasAmount, addons: selectedAddons, addonsTotal, travel: { ...currentTravel },
     total: pkgAmount + extrasAmount + addonsTotal + currentTravel.fee,
   };
@@ -1426,13 +1428,18 @@ function editItem(i) {
   }
 
   // Package
-  document.getElementById('packageSelect').value = item.pkg.id;
   const field = document.getElementById('extrasField');
-  if (item.pkg.extraLabel) {
-    field.style.display = 'block';
-    document.getElementById('extrasLabel').textContent = item.pkg.extraLabel;
-    document.getElementById('extrasQty').value = item.pkg.isCustom ? item.pkgAmount : item.extrasQty;
+  if (item.pkg) {
+    document.getElementById('packageSelect').value = item.pkg.id;
+    if (item.pkg.extraLabel) {
+      field.style.display = 'block';
+      document.getElementById('extrasLabel').textContent = item.pkg.extraLabel;
+      document.getElementById('extrasQty').value = item.pkg.isCustom ? item.pkgAmount : item.extrasQty;
+    } else {
+      field.style.display = 'none';
+    }
   } else {
+    document.getElementById('packageSelect').selectedIndex = 0;
     field.style.display = 'none';
   }
 
@@ -1481,8 +1488,11 @@ function renderItems() {
   }
 
   list.innerHTML = items.map((item, i) => {
-    let parts = [item.pkg.name + (!item.pkg.isCustom ? ` $${item.pkgAmount}` : '')];
-    if (item.extrasQty > 0) parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);
+    let parts = [];
+    if (item.pkg) {
+      parts.push(item.pkg.name + (!item.pkg.isCustom ? ` $${item.pkgAmount}` : ''));
+      if (item.extrasQty > 0) parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);
+    }
     item.addons.forEach(a => parts.push((a.count>1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice}`));
     if (item.travel.fee > 0) parts.push(`Travel $${item.travel.fee.toFixed(2)}`);
     return `<div class="item${editingIndex===i?' editing':''}" draggable="true" data-idx="${i}" onclick="editItem(${i})" style="cursor:pointer;"><div>
@@ -1547,8 +1557,10 @@ function generateInvoice() {
   let rowsHtml = '', subtotal = 0;
   items.forEach(item => {
     const details = [];
-    details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);
-    if (item.extrasQty > 0) details.push(`${item.pkg.extraLabel} ×${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);
+    if (item.pkg) {
+      details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);
+      if (item.extrasQty > 0) details.push(`${item.pkg.extraLabel} ×${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);
+    }
     item.addons.forEach(a => details.push((a.count > 1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice.toFixed(0)}`));
     if (item.travel.fee > 0) details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);
     rowsHtml += `<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;
