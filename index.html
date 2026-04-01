@@ -1278,7 +1278,7 @@ async function fetchAddressSuggestions(q) {
       const houseNum = p.housenumber || (typedNum && streetName ? typedNum : '');
       const main = [houseNum, streetName].filter(Boolean).join(' ');
       const rest = [p.city || p.town || p.village, p.state].filter(Boolean).join(', ');
-      return { main, rest, lat, lon, display: [main, p.city || p.town || p.village, p.state, p.postcode].filter(Boolean).join(', ') };
+      return { main, rest, lat, lon, display: [main, p.city || p.town || p.village, p.state].filter(Boolean).join(', ') };
     }).filter(r => r.main);
     if (!addrResults.length) { closeAddrSuggestions(); return; }
     addrIndex = -1;
