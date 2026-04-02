@@ -504,6 +504,10 @@
           </div>
           <div id="travelResult" class="travel-result"></div>
         </div>
+        <div class="field">
+          <div class="label">Apt / Unit # (optional)</div>
+          <input type="text" id="unitNumber" placeholder="e.g. Apt 3, Suite 200">
+        </div>
 
         <div class="field">
           <div class="label">Package (optional)</div>
@@ -742,7 +746,8 @@ function onFirebaseValue(key, callback) {
   syncListeners.push(() => ref.off('value'));
 }
 
-const ORIGIN = { lat: 45.4500, lon: -73.2988 };
+const ORIGIN = { lat: 45.44694, lon: -73.33318 };
+const HERE_API_KEY = 'C1Z2lw2kJYt838jFC2WpA3B_omvn1JLyH3QY31ags3w';
 
 const DEFAULTS = {
   packages: [
@@ -1264,22 +1269,19 @@ document.addEventListener('click', e => { if (!e.target.closest('.addr-wrap')) c
 
 async function fetchAddressSuggestions(q) {
   try {
-    // Extract leading street number from user's query (e.g. "123 Rue...")
-    const typedNumMatch = q.match(/^(\d+[\s-]?\w?)\s+/);
-    const typedNum = typedNumMatch ? typedNumMatch[1].trim() : null;
-
-    const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=${ORIGIN.lat}&lon=${ORIGIN.lon}&lang=fr`);
+    const res = await fetch(`https://autosuggest.search.hereapi.com/v1/autosuggest?q=${encodeURIComponent(q)}&at=${ORIGIN.lat},${ORIGIN.lon}&in=countryCode:CAN&limit=5&lang=fr&apiKey=${HERE_API_KEY}`);
     const data = await res.json();
-    addrResults = (data.features || []).map(f => {
-      const p = f.properties;
-      const [lon, lat] = f.geometry.coordinates;
-      // If Photon didn't return a house number but user typed one, preserve it
-      const streetName = p.street || p.name || '';
-      const houseNum = p.housenumber || (typedNum && streetName ? typedNum : '');
-      const main = [houseNum, streetName].filter(Boolean).join(' ');
-      const rest = [p.city || p.town || p.village, p.state].filter(Boolean).join(', ');
-      return { main, rest, lat, lon, display: [main, p.city || p.town || p.village, p.state].filter(Boolean).join(', ') };
-    }).filter(r => r.main);
+    addrResults = (data.items || [])
+      .filter(item => item.position && item.address)
+      .map(item => {
+        const label = item.address.label || item.title || '';
+        // Label format: "Street, City, Province PostalCode, Country"
+        const parts = label.split(', ').filter(p => p !== 'Canada');
+        const main = parts[0] || '';
+        const rest = parts.slice(1).join(', ');
+        const display = parts.join(', ');
+        return { main, rest, lat: item.position.lat, lon: item.position.lng, display };
+      }).filter(r => r.main);
     if (!addrResults.length) { closeAddrSuggestions(); return; }
     addrIndex = -1;
     addrSuggestions.innerHTML = addrResults.map((r, i) => {
@@ -1333,6 +1335,7 @@ async function calculateTravel(address) {
 // ── Items ──
 function addItem() {
   const address = addressInput.value.trim();
+  const unit = document.getElementById('unitNumber').value.trim();
   const pkgId = document.getElementById('packageSelect').value;
   const extrasQty = parseInt(document.getElementById('extrasQty').value)||0;
   if (!address) { addressInput.focus(); return; }
@@ -1361,10 +1364,16 @@ function addItem() {
   // Must have at least a package or an add-on
   if (!pkg && !selectedAddons.length) { document.getElementById('packageSelect').focus(); return; }
 
+  const listingSubtotal = pkgAmount + extrasAmount + addonsTotal + currentTravel.fee;
+  const listingGst = Math.round(listingSubtotal * config.taxes.gst / 100 * 100) / 100;
+  const listingQst = Math.round(listingSubtotal * config.taxes.qst / 100 * 100) / 100;
+  const fullAddress = unit ? `${address}, ${unit}` : address;
+
   const newItem = {
-    address, pkg: pkg ? { ...pkg, isCustom } : null, pkgAmount, extrasQty: isCustom ? 0 : extrasQty,
+    address: fullAddress, unit, pkg: pkg ? { ...pkg, isCustom } : null, pkgAmount, extrasQty: isCustom ? 0 : extrasQty,
     extrasAmount, addons: selectedAddons, addonsTotal, travel: { ...currentTravel },
-    total: pkgAmount + extrasAmount + addonsTotal + currentTravel.fee,
+    subtotal: listingSubtotal, gst: listingGst, qst: listingQst,
+    total: listingSubtotal + listingGst + listingQst,
   };
 
   let highlightIdx;
@@ -1383,6 +1392,7 @@ function addItem() {
 
   // Reset
   addressInput.value = '';
+  document.getElementById('unitNumber').value = '';
   document.getElementById('packageSelect').selectedIndex = 0;
   document.getElementById('extrasQty').value = '0';
   document.getElementById('extrasField').style.display = 'none';
@@ -1435,8 +1445,9 @@ function editItem(i) {
   const item = items[i];
   editingIndex = i;
 
-  // Populate address & travel
-  addressInput.value = item.address;
+  // Populate address, unit & travel
+  addressInput.value = item.unit ? item.address.replace(`, ${item.unit}`, '') : item.address;
+  document.getElementById('unitNumber').value = item.unit || '';
   currentTravel = { ...item.travel };
   if (item.travel.calculated) {
     travelResult.className = 'travel-result';
@@ -1481,6 +1492,7 @@ function cancelEdit() {
   document.getElementById('addItemBtn').textContent = 'Add Listing';
   document.getElementById('cancelEditBtn').style.display = 'none';
   addressInput.value = '';
+  document.getElementById('unitNumber').value = '';
   document.getElementById('packageSelect').selectedIndex = 0;
   document.getElementById('extrasQty').value = '0';
   document.getElementById('extrasField').style.display = 'none';
@@ -1511,6 +1523,8 @@ function renderItems() {
     }
     item.addons.forEach(a => parts.push((a.count>1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice}`));
     if (item.travel.fee > 0) parts.push(`Travel $${item.travel.fee.toFixed(2)}`);
+    if (item.gst) parts.push(`GST $${item.gst.toFixed(2)}`);
+    if (item.qst) parts.push(`QST $${item.qst.toFixed(2)}`);
     return `<div class="item${editingIndex===i?' editing':''}" draggable="true" data-idx="${i}" onclick="editItem(${i})" style="cursor:pointer;"><div>
       <div class="item-address">${item.address}</div>
       <div class="item-details">${parts.join(' &middot; ')}</div>
@@ -1540,19 +1554,18 @@ function renderItems() {
     });
   });
 
-  const subtotal = items.reduce((s,it) => s + it.total, 0);
+  const subtotal = items.reduce((s,it) => s + (it.subtotal || it.total), 0);
+  const totalGst = items.reduce((s,it) => s + (it.gst || 0), 0);
+  const totalQst = items.reduce((s,it) => s + (it.qst || 0), 0);
   const discount = getClientDiscount(subtotal);
-  const afterDiscount = subtotal - discount.amount;
-  const gst = Math.round(afterDiscount * config.taxes.gst/100 * 100)/100;
-  const qst = Math.round(afterDiscount * config.taxes.qst/100 * 100)/100;
-  const total = afterDiscount + gst + qst;
+  const total = subtotal - discount.amount + totalGst + totalQst;
 
   document.getElementById('runningTotal').textContent = `$${total.toFixed(2)}`;
 
   let h = `<div class="totals-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;
   if (discount.amount > 0) h += `<div class="totals-row discount"><span>${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;
-  h += `<div class="totals-row"><span>GST (${config.taxes.gst}%)</span><span>$${gst.toFixed(2)}</span></div>`;
-  h += `<div class="totals-row"><span>QST (${config.taxes.qst}%)</span><span>$${qst.toFixed(2)}</span></div>`;
+  h += `<div class="totals-row"><span>GST (${config.taxes.gst}%)</span><span>$${totalGst.toFixed(2)}</span></div>`;
+  h += `<div class="totals-row"><span>QST (${config.taxes.qst}%)</span><span>$${totalQst.toFixed(2)}</span></div>`;
   h += `<div class="totals-row grand"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
 
   document.getElementById('totalsBlock').style.display = 'block';
@@ -1570,7 +1583,7 @@ function generateInvoice() {
   const monthName = new Date(year, month-1).toLocaleDateString('en-CA', { year:'numeric', month:'long' });
   const issueDate = new Date().toLocaleDateString('en-CA', { year:'numeric', month:'long', day:'numeric' });
 
-  let rowsHtml = '', subtotal = 0;
+  let rowsHtml = '', subtotal = 0, totalGst = 0, totalQst = 0;
   items.forEach(item => {
     const details = [];
     if (item.pkg) {
@@ -1579,32 +1592,38 @@ function generateInvoice() {
     }
     item.addons.forEach(a => details.push((a.count > 1 ? `${a.name} ×${a.count}` : a.name) + ` $${a.totalPrice.toFixed(0)}`));
     if (item.travel.fee > 0) details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);
+    const itemSub = item.subtotal || item.total;
+    const itemGst = item.gst || 0;
+    const itemQst = item.qst || 0;
+    if (itemGst) details.push(`GST $${itemGst.toFixed(2)}`);
+    if (itemQst) details.push(`QST $${itemQst.toFixed(2)}`);
     rowsHtml += `<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;
-    subtotal += item.total;
+    subtotal += itemSub;
+    totalGst += itemGst;
+    totalQst += itemQst;
   });
 
   const discount = getClientDiscount(subtotal);
-  const afterDiscount = subtotal - discount.amount;
-  const gst = Math.round(afterDiscount * config.taxes.gst/100 * 100)/100;
-  const qst = Math.round(afterDiscount * config.taxes.qst/100 * 100)/100;
-  const total = afterDiscount + gst + qst;
+  const total = subtotal - discount.amount + totalGst + totalQst;
 
   let totH = `<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;
   if (discount.amount > 0) totH += `<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;
-  totH += `<div class="inv-row"><span class="inv-lbl">GST (${config.taxes.gst}%)</span><span>$${gst.toFixed(2)}</span></div>`;
-  totH += `<div class="inv-row"><span class="inv-lbl">QST (${config.taxes.qst}%)</span><span>$${qst.toFixed(2)}</span></div>`;
+  totH += `<div class="inv-row"><span class="inv-lbl">GST (${config.taxes.gst}%)</span><span>$${totalGst.toFixed(2)}</span></div>`;
+  totH += `<div class="inv-row"><span class="inv-lbl">QST (${config.taxes.qst}%)</span><span>$${totalQst.toFixed(2)}</span></div>`;
   totH += `<div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;
 
   document.getElementById('invoiceContent').innerHTML = `
     <div class="inv-top">
-      <div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div><div class="inv-brand-sub">Carignan, QC</div></div>
+      <div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div>
       <div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div>${issueDate}</div><div style="margin-top:4px;">Period: ${monthName}</div></div>
     </div>
     <div class="inv-parties">
       <div class="inv-party">
         <div class="inv-label">From</div>
         <div style="font-weight:600;">Lumeria Media</div>
-        <div>Carignan, QC</div>
+        <div>1997 Rue Henriette</div>
+        <div>Carignan, QC J3L 4H4 Canada</div>
+        <div style="color:var(--muted)">581-989-4093 · billing@lumeriamedia.com</div>
       </div>
       <div class="inv-party">
         <div class="inv-label">Bill to</div>
