@@ -132,6 +132,44 @@
     letter-spacing: 0px;
   }
 
+  .dash-chart-card {
+    background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border);
+    padding: 24px 26px; margin-bottom: 28px;
+  }
+  .dash-chart-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+  }
+  .dash-chart-title {
+    font-size: 11px; color: var(--text-3); font-weight: 500; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .dash-chart-total {
+    font-size: 12px; color: var(--text-2); font-weight: 500;
+  }
+  .chart-bars {
+    display: flex; align-items: flex-end; gap: 8px; height: 120px;
+  }
+  .chart-col {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%;
+    justify-content: flex-end;
+  }
+  .chart-bar {
+    width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-light);
+    transition: all var(--t-smooth); min-height: 2px; position: relative;
+  }
+  .chart-bar:hover { background: var(--accent); }
+  .chart-bar-val {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; font-weight: 500; color: var(--text-2); white-space: nowrap;
+    opacity: 0; transition: opacity var(--t-fast); font-variant-numeric: tabular-nums;
+  }
+  .chart-bar:hover .chart-bar-val { opacity: 1; }
+  .chart-bar.current { background: var(--accent); }
+  .chart-label {
+    font-size: 10px; color: var(--text-3); font-weight: 400; letter-spacing: 0.2px;
+  }
+
+
   .dash-new-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; padding: 13px; background: var(--accent); border: none;
@@ -802,7 +840,20 @@
   <div class="no-print">
     <button class="btn" onclick="window.print()">Print / Save PDF</button>
     <button class="btn btn-outline" id="markPaidBtn" onclick="markViewedInvoicePaid()" style="display:none;">Mark as Paid</button>
+    <button class="btn btn-outline" onclick="openEditInvoice()">Edit Invoice</button>
     <button class="btn btn-outline" onclick="backToApp()">Back</button>
+  </div>
+</div>
+<div class="quick-modal-bg" id="editInvoiceModal" onclick="if(event.target===this)closeEditInvoice()">
+  <div class="quick-modal">
+    <h3>Edit Invoice</h3>
+    <div class="field"><div class="label">Invoice #</div><input type="text" id="editInvNumber"></div>
+    <div class="field"><div class="label">Billing Period</div><select id="editInvPeriod"></select></div>
+    <div class="field"><div class="label">Notes</div><textarea id="editInvNotes" style="min-height:80px;"></textarea></div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveEditInvoice()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditInvoice()">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -860,16 +911,21 @@ function renderDashboard(){
   const now=new Date();const thisMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const lastDate=new Date(now.getFullYear(),now.getMonth()-1,1);
   const lastMonth=`${lastDate.getFullYear()}-${String(lastDate.getMonth()+1).padStart(2,'0')}`;
-  let monthRevenue=0,lastMonthRevenue=0,pendingCount=0,paidCount=0,totalTaxGst=0,totalTaxQst=0,monthTaxGst=0,monthTaxQst=0;
+  let monthRevenue=0,lastMonthRevenue=0,pendingAmount=0,paidCount=0,totalTaxGst=0,totalTaxQst=0,monthTaxGst=0,monthTaxQst=0;
   invoices.forEach(inv=>{
     const isThisMonth=inv.month===thisMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===now.getMonth()&&new Date(inv.createdAt).getFullYear()===now.getFullYear());
     if(isThisMonth)monthRevenue+=inv.total||0;
     if(inv.month===lastMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===lastDate.getMonth()&&new Date(inv.createdAt).getFullYear()===lastDate.getFullYear()))lastMonthRevenue+=inv.total||0;
-    if(inv.status!=='paid')pendingCount++;
+    if(inv.status!=='paid')pendingAmount+=inv.total||0;
     if(inv.status==='paid')paidCount++;
     totalTaxGst+=(inv.totalGst||0);totalTaxQst+=(inv.totalQst||0);
     if(isThisMonth){monthTaxGst+=(inv.totalGst||0);monthTaxQst+=(inv.totalQst||0);}
   });
+  // Revenue trend: last 6 months
+  const trendMonths=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
+  invoices.forEach(inv=>{const m=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
+  const maxRev=Math.max(...trendMonths.map(t=>t.revenue),1);
+  const ytdRevenue=trendMonths.reduce((s,t)=>s+t.revenue,0);
 
   const allItems=[];
   drafts.forEach(d=>{const client=clients.find(c=>c.id===d.clientId);const clientName=client?(client.company||client.name||'(unnamed)'):'(no client)';const total=(d.items||[]).reduce((s,it)=>s+(it.total||0),0);allItems.push({type:'draft',id:d.id,status:'draft',clientName,total,itemCount:(d.items||[]).length,date:d.updatedAt||d.savedAt,month:d.month});});
@@ -910,10 +966,10 @@ function renderDashboard(){
       <div class="dash-stat-card">
         <div class="dash-stat-top">
           <div class="dash-stat-label">Unpaid</div>
-          <span class="dash-stat-badge neutral">${totalInvoices} total</span>
+          <span class="dash-stat-badge neutral">${invoices.filter(i=>i.status!=='paid').length} invoice${invoices.filter(i=>i.status!=='paid').length!==1?'s':''}</span>
         </div>
-        <div class="dash-stat-value">${pendingCount}</div>
-        <div class="dash-stat-sub">outstanding invoices</div>
+        <div class="dash-stat-value">$${pendingAmount.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        <div class="dash-stat-sub">outstanding balance</div>
       </div>
       <div class="dash-stat-card">
         <div class="dash-stat-top">
@@ -930,6 +986,15 @@ function renderDashboard(){
         </div>
         <div class="dash-stat-value">$${(monthTaxGst+monthTaxQst).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
         <div class="dash-stat-sub">GST $${monthTaxGst.toFixed(2)} · QST $${monthTaxQst.toFixed(2)}</div>
+      </div>
+    </div>
+    <div class="dash-chart-card">
+      <div class="dash-chart-header">
+        <div class="dash-chart-title">Revenue Trend</div>
+        <div class="dash-chart-total">$${ytdRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})} total</div>
+      </div>
+      <div class="chart-bars">
+        ${trendMonths.map((t,i)=>{const pct=maxRev>0?Math.round(t.revenue/maxRev*100):0;const isCurrent=i===trendMonths.length-1;return`<div class="chart-col"><div class="chart-bar${isCurrent?' current':''}" style="height:${Math.max(pct,2)}%;"><span class="chart-bar-val">$${t.revenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</span></div><span class="chart-label">${t.label}</span></div>`;}).join('')}
       </div>
     </div>
     <button class="dash-new-btn" onclick="newInvoice()">
@@ -1020,6 +1085,9 @@ function generateInvoice(){if(!items.length)return;const client=clients.find(c=>
 let viewingInvoiceId=null;
 function viewInvoice(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;viewingInvoiceId=id;const client=clients.find(c=>c.id===inv.clientId);document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(inv.number,inv.issueDate,inv.monthName,client,inv.items||[],inv.subtotal,inv.totalGst,inv.totalQst,inv.discount,inv.total,inv.notes);const paidBtn=document.getElementById('markPaidBtn');paidBtn.style.display=inv.status==='paid'?'none':'';paidBtn.textContent=inv.status==='sent'?'Mark as Paid':'Mark as Paid';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';document.getElementById('mobileNav').style.display='none';}
 function markViewedInvoicePaid(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;inv.status='paid';saveInvoices();document.getElementById('markPaidBtn').style.display='none';showToast('Invoice marked as paid');}
+function openEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;document.getElementById('editInvNumber').value=inv.number||'';document.getElementById('editInvNotes').value=inv.notes||'';const sel=document.getElementById('editInvPeriod');let opts='';for(let mi=0;mi<12;mi++){for(const yr of[new Date().getFullYear()-1,new Date().getFullYear(),new Date().getFullYear()+1]){const val=`${yr}-${String(mi+1).padStart(2,'0')}`;const label=new Date(yr,mi).toLocaleDateString('en-CA',{month:'long',year:'numeric'});const selected=val===inv.month?' selected':'';opts+=`<option value="${val}"${selected}>${label}</option>`;}}sel.innerHTML=opts;document.getElementById('editInvoiceModal').classList.add('open');}
+function saveEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;const newNumber=document.getElementById('editInvNumber').value.trim();const newMonth=document.getElementById('editInvPeriod').value;const newNotes=document.getElementById('editInvNotes').value.trim();if(newNumber)inv.number=newNumber;if(newMonth){const[y,m]=newMonth.split('-');inv.month=newMonth;inv.monthName=new Date(y,m-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});}inv.notes=newNotes;saveInvoices();viewInvoice(viewingInvoiceId);closeEditInvoice();showToast('Invoice updated');}
+function closeEditInvoice(){document.getElementById('editInvoiceModal').classList.remove('open');}
 function backToApp(){document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';document.getElementById('mobileNav').style.display='';viewingInvoiceId=null;}
 function deleteInvoice(id){invoices=invoices.filter(i=>i.id!==id);saveInvoices();renderDashboard();showToast('Invoice deleted');}
 
