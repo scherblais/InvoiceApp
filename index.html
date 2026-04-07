@@ -66,11 +66,20 @@
     position: sticky; top: 0; background: var(--bg-card); z-index: 40;
     border-bottom: 1px solid var(--border);
   }
+  .app-brand-nav { display: flex; align-items: center; gap: 0; }
   .app-brand {
     font-size: 15px; font-weight: 600; letter-spacing: -0.2px; cursor: pointer;
     transition: opacity var(--t-fast); color: var(--text);
   }
   .app-brand:hover { opacity: 0.5; }
+  .app-breadcrumb-sep {
+    margin: 0 10px; color: var(--text-3); font-size: 13px; font-weight: 300;
+  }
+  .app-breadcrumb {
+    font-size: 13px; font-weight: 400; color: var(--text-3);
+    letter-spacing: -0.1px;
+  }
+  .app-breadcrumb-sep.hidden, .app-breadcrumb.hidden { display: none; }
   .app-header-actions { display: flex; gap: 2px; align-items: center; }
   .icon-btn {
     background: none; border: none; border-radius: var(--radius-sm);
@@ -333,16 +342,6 @@
   }
 
   /* ── Editor ── */
-  .editor-top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 16px;
-  }
-  .editor-back {
-    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3);
-    cursor: pointer; background: none; border: none; font-family: inherit; padding: 4px 0;
-    transition: color var(--t-fast); font-weight: 400; letter-spacing: 0.1px;
-  }
-  .editor-back:hover { color: var(--text-2); }
   .editor-shell {
     display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
     min-height: calc(100vh - 200px);
@@ -373,16 +372,10 @@
     background: var(--bg-inset); border-bottom: 1px solid var(--border);
   }
 
-  /* Editor bottom bar */
-  .editor-bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
-    background: var(--bg-card); border-top: 1px solid var(--border);
-    padding: 12px 32px; display: flex; justify-content: flex-end;
-    align-items: center; gap: 10px;
-  }
-  .editor-bottom-bar .autosave-indicator {
-    margin-right: auto; font-size: 11px; color: var(--text-3); font-weight: 400;
-    opacity: 0; transition: opacity 0.3s ease;
+  /* Autosave indicator (inline) */
+  .autosave-inline {
+    font-size: 11px; color: var(--text-3); font-weight: 400;
+    opacity: 0; transition: opacity 0.3s ease; text-align: center; padding: 6px 0;
   }
 
   /* Items in left panel */
@@ -741,28 +734,11 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Mobile nav */
-  .mobile-nav {
-    display: none; position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: 50; padding: 4px 12px env(safe-area-inset-bottom, 8px);
-  }
-  .mobile-nav-inner {
-    display: flex; justify-content: space-around; align-items: center;
-    background: var(--bg-card); border-radius: 18px;
-    padding: 6px 0;
-    border: 1px solid var(--border);
-  }
-  .mobile-nav-btn {
-    background: none; border: none; color: var(--text-3); font-size: 10px;
-    font-family: inherit; cursor: pointer; display: flex; flex-direction: column;
-    align-items: center; gap: 2px; padding: 6px 20px; transition: color var(--t-fast); font-weight: 400;
-  }
-  .mobile-nav-btn.active { color: var(--accent); font-weight: 600; }
-  .mobile-nav-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
   /* Print */
   @media print {
     body { background: #fff; }
-    #app, .mobile-nav, .no-print, .editor-bottom-bar { display: none !important; }
+    #app, .no-print { display: none !important; }
     #view-invoice { display: block !important; }
     .invoice { border: none; padding: 0; box-shadow: none; border-radius: 0; }
     .invoice-shell { padding: 0; max-width: 100%; }
@@ -772,22 +748,20 @@
   /* Mobile */
   @media (max-width: 768px) {
     .app-header { padding: 0 16px; height: 56px; }
-    .view-container { padding: 16px 14px 100px; }
+    .view-container { padding: 16px 14px 36px; }
     .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .dash-stat-card { padding: 18px 20px; }
     .dash-stat-value { font-size: 26px; }
     .editor-shell { grid-template-columns: 1fr; }
     .editor-preview { position: static; max-height: none; }
-    .editor-bottom-bar { bottom: 64px; }
     .row { flex-direction: column; gap: 0; }
     .row > * + * { margin-top: 10px; }
     .invoice { padding: 28px; }
     .invoice-shell { padding: 16px 12px; }
     .inv-parties { flex-direction: column; gap: 16px; }
     .btn-row { flex-direction: column; }
-    .mobile-nav { display: block; }
-    .no-print { flex-direction: column; padding: 0 12px; padding-bottom: 100px; }
-    .toast { bottom: 90px; }
+    .no-print { flex-direction: column; padding: 0 12px; padding-bottom: 36px; }
+    .toast { bottom: 28px; }
     .app-header .logout-btn { display: none; }
     .app-header .header-sep { display: none; }
     .settings-tabs { width: 100%; }
@@ -805,9 +779,7 @@
     .inv-aging { font-size: 9px; padding: 1px 6px; }
     .dash-filter-tab { padding: 8px 10px; font-size: 11px; }
     .dash-filter-count { font-size: 9px; padding: 1px 5px; }
-  }
-  @media (min-width: 769px) {
-    .mobile-nav { display: none !important; }
+    .app-breadcrumb-sep, .app-breadcrumb { font-size: 12px; }
   }
 </style>
 </head>
@@ -842,7 +814,11 @@
 
 <div id="app" style="display:none;">
   <header class="app-header">
-    <div class="app-brand" onclick="navigateTo('dashboard')">Lumeria Media</div>
+    <div class="app-brand-nav">
+      <div class="app-brand" onclick="navigateTo('dashboard')">Lumeria Media</div>
+      <span class="app-breadcrumb-sep hidden" id="breadcrumbSep">/</span>
+      <span class="app-breadcrumb hidden" id="breadcrumbLabel"></span>
+    </div>
     <div class="app-header-actions">
       <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -863,9 +839,6 @@
 
   <div id="view-editor" class="view">
     <div class="view-container" style="max-width:1100px;">
-      <div class="editor-top-bar">
-        <button class="editor-back" onclick="navigateTo('dashboard')">&larr; Back to Home</button>
-      </div>
       <div class="editor-shell">
         <div class="editor-panel editor-form">
           <div class="form-section-label">Invoice Details</div>
@@ -901,6 +874,10 @@
           <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
           <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;margin-top:8px;">Cancel Edit</button>
           <div class="field" style="margin-top:20px;"><div class="label">Notes (optional)</div><textarea id="notes" placeholder="Payment terms, special instructions..."></textarea></div>
+          <div style="margin-top:24px;">
+            <button class="btn" onclick="confirmSendInvoice()">Send Invoice</button>
+            <div class="autosave-inline" id="autosaveStatus"></div>
+          </div>
         </div>
         <div class="editor-panel editor-preview">
           <div class="preview-label">Invoice Preview</div>
@@ -910,15 +887,10 @@
         </div>
       </div>
     </div>
-    <div class="editor-bottom-bar" id="editorBottomBar">
-      <div class="autosave-indicator" id="autosaveStatus"></div>
-      <button class="btn btn-sm" onclick="confirmSendInvoice()">Send Invoice</button>
-    </div>
   </div>
 
   <div id="view-settings" class="view">
     <div class="view-container">
-      <button class="editor-back" onclick="navigateTo('dashboard')">&larr; Back to Home</button>
       <div class="settings-tabs">
         <button class="settings-tab active" onclick="settingsSubTab('pricing')">Pricing</button>
         <button class="settings-tab" onclick="settingsSubTab('clients')">Clients</button>
@@ -982,13 +954,6 @@
   </div>
 </div>
 
-<div class="mobile-nav" id="mobileNav">
-  <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn active" onclick="navigateTo('dashboard')" data-view="dashboard"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
-    <button class="mobile-nav-btn" onclick="navigateTo('editor')" data-view="editor"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editor</button>
-    <button class="mobile-nav-btn" onclick="navigateTo('settings')" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
-  </div>
-</div>
 
 <script>
 const FIREBASE_CONFIG={apiKey:"AIzaSyCWG9eoXnEkhN5srPvi4vtNzNkaonebjP8",authDomain:"lumeria-invoicing.firebaseapp.com",databaseURL:"https://lumeria-invoicing-default-rtdb.firebaseio.com",projectId:"lumeria-invoicing",storageBucket:"lumeria-invoicing.firebasestorage.app",messagingSenderId:"399679393435",appId:"1:399679393435:web:61ed75acf74203b512803e"};
@@ -996,8 +961,8 @@ firebase.initializeApp(FIREBASE_CONFIG);const auth=firebase.auth();const db=fire
 const ORIGIN={lat:45.44694,lon:-73.33318};const HERE_API_KEY='C1Z2lw2kJYt838jFC2WpA3B_omvn1JLyH3QY31ags3w';
 const DEFAULTS={packages:[{id:'p1',name:'Interior + Exterior',price:150,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5},{id:'p2',name:'Exterior Only',price:85,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5}],addons:[{id:'a1',name:'Front Only (1 to 3 Photos)',price:65,qty:false},{id:'a2',name:'Exterior Only (3 to 7 photos)',price:85,qty:false},{id:'a3',name:'Additional Unit',price:15,qty:true},{id:'a4',name:'Virtual Staging/Room Clearing',price:10,qty:true},{id:'a5',name:'Social Media Video (AI)',price:65,qty:false},{id:'a6',name:'Drone',price:35,qty:false}],travel:{freeKm:25,ratePerKm:0.65},taxes:{gst:5,qst:9.975}};
 
-function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='none';document.getElementById('mobileNav').style.display='none';}
-function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('mobileNav').style.display='';navigateTo('dashboard');}
+function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='none';}
+function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';navigateTo('dashboard');}
 function toggleAuthMode(){isSignUp=!isSignUp;document.getElementById('loginBtn').textContent=isSignUp?'Create Account':'Sign In';document.getElementById('loginToggle').innerHTML=isSignUp?'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>':'No account? <a onclick="toggleAuthMode()">Create one</a>';document.getElementById('loginError').textContent='';}
 async function handleLogin(){const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const errEl=document.getElementById('loginError');errEl.textContent='';if(!email||!password){errEl.textContent='Please enter email and password.';return;}if(password.length<6){errEl.textContent='Password must be at least 6 characters.';return;}const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent=isSignUp?'Creating account...':'Signing in...';try{if(isSignUp)await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password);}catch(e){errEl.textContent=e.message.replace('Firebase: ','').replace(/ \(auth\/.*\)/,'');btn.disabled=false;btn.textContent=isSignUp?'Create Account':'Sign In';}}
 function handleLogout(){syncListeners.forEach(fn=>fn());syncListeners=[];dbRef=null;auth.signOut();}
@@ -1020,7 +985,7 @@ let invoiceSeq=0;
 function nextInvoiceNumber(){invoiceSeq++;localStorage.setItem('inv_seq',invoiceSeq);firebaseSave('seq',invoiceSeq);return`INV-${new Date().getFullYear()}-${String(invoiceSeq).padStart(3,'0')}`;}
 
 let currentView='dashboard';
-function navigateTo(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');currentView=view;document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='dashboard')renderDashboard();if(view==='settings')renderSettingsView();if(view==='editor'){rebuildInvoiceTab();renderItems();}window.scrollTo(0,0);}
+function navigateTo(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');currentView=view;const sep=document.getElementById('breadcrumbSep'),lbl=document.getElementById('breadcrumbLabel');if(view==='dashboard'){sep.classList.add('hidden');lbl.classList.add('hidden');}else{const labels={editor:'Invoice Editor',settings:'Settings'};sep.classList.remove('hidden');lbl.classList.remove('hidden');lbl.textContent=labels[view]||view;}if(view==='dashboard')renderDashboard();if(view==='settings')renderSettingsView();if(view==='editor'){rebuildInvoiceTab();renderItems();}window.scrollTo(0,0);}
 function settingsSubTab(name){document.querySelectorAll('.settings-tab').forEach(t=>t.classList.toggle('active',t.textContent.toLowerCase()===name));document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));document.getElementById('settings-'+name).classList.add('active');if(name==='pricing')renderSettingsTab();if(name==='clients')renderClientsTab();if(name==='account')renderDataTab();}
 
 function initAppWithSync(){loadLocalState();try{const d=JSON.parse(localStorage.getItem('inv_drafts'));if(d)drafts=d;}catch{}invoiceSeq=parseInt(localStorage.getItem('inv_seq')||'0');rebuildClientDropdown();rebuildInvoiceTab();document.getElementById('invoiceNumber').value=`INV-${new Date().getFullYear()}-${String(invoiceSeq+1).padStart(3,'0')}`;renderItems();
@@ -1244,14 +1209,14 @@ function renderLivePreview(){
 function buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes){let rowsHtml='';items.forEach(item=>{const details=[];if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}(item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);rowsHtml+=`<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;});let totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;return`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div>${issueDate}</div><div style="margin-top:4px;">Period: ${monthName}</div></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div>${client?.company?`<div style="font-weight:600">${client.company}</div>`:''}${client?.name?`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`:'<div>—</div>'}${client?.address?`<div>${client.address}</div>`:''}${client?.email||client?.phone?`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`:''}${client?.taxNumbers?`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`:''}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><div class="inv-totals">${totH}</div>${notes?`<div class="inv-notes"><div class="inv-notes-label">Notes</div>${notes}</div>`:''}<div class="inv-footer"><span>Thank you for your business.</span><span>${invoiceNum}</span></div>`;}
 
 function confirmSendInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId);const total=items.reduce((s,it)=>s+(it.total||0),0);const clientName=client?.company||client?.name||'No client selected';showConfirm('Send this invoice?',`${clientName} — ${items.length} listing${items.length!==1?'s':''} · $${total.toFixed(2)}. This will finalize the invoice.`,'Send Invoice',()=>generateInvoice(),'btn-send');}
-function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=document.getElementById('notes').value.trim();const monthVal=document.getElementById('invoiceMonth').value,invoiceNum=document.getElementById('invoiceNumber').value.trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';document.getElementById('mobileNav').style.display='none';}
+function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=document.getElementById('notes').value.trim();const monthVal=document.getElementById('invoiceMonth').value,invoiceNum=document.getElementById('invoiceNumber').value.trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
 let viewingInvoiceId=null;
-function viewInvoice(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;viewingInvoiceId=id;const client=clients.find(c=>c.id===inv.clientId);document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(inv.number,inv.issueDate,inv.monthName,client,inv.items||[],inv.subtotal,inv.totalGst,inv.totalQst,inv.discount,inv.total,inv.notes);const paidBtn=document.getElementById('markPaidBtn');paidBtn.style.display=inv.status==='paid'?'none':'';paidBtn.textContent=inv.status==='sent'?'Mark as Paid':'Mark as Paid';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';document.getElementById('mobileNav').style.display='none';}
+function viewInvoice(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;viewingInvoiceId=id;const client=clients.find(c=>c.id===inv.clientId);document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(inv.number,inv.issueDate,inv.monthName,client,inv.items||[],inv.subtotal,inv.totalGst,inv.totalQst,inv.discount,inv.total,inv.notes);const paidBtn=document.getElementById('markPaidBtn');paidBtn.style.display=inv.status==='paid'?'none':'';paidBtn.textContent=inv.status==='sent'?'Mark as Paid':'Mark as Paid';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
 function markViewedInvoicePaid(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;inv.status='paid';saveInvoices();document.getElementById('markPaidBtn').style.display='none';showToast('Invoice marked as paid');}
 function openEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;document.getElementById('editInvNumber').value=inv.number||'';document.getElementById('editInvNotes').value=inv.notes||'';const sel=document.getElementById('editInvPeriod');let opts='';for(let mi=0;mi<12;mi++){for(const yr of[new Date().getFullYear()-1,new Date().getFullYear(),new Date().getFullYear()+1]){const val=`${yr}-${String(mi+1).padStart(2,'0')}`;const label=new Date(yr,mi).toLocaleDateString('en-CA',{month:'long',year:'numeric'});const selected=val===inv.month?' selected':'';opts+=`<option value="${val}"${selected}>${label}</option>`;}}sel.innerHTML=opts;document.getElementById('editInvoiceModal').classList.add('open');}
 function saveEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;const newNumber=document.getElementById('editInvNumber').value.trim();const newMonth=document.getElementById('editInvPeriod').value;const newNotes=document.getElementById('editInvNotes').value.trim();if(newNumber)inv.number=newNumber;if(newMonth){const[y,m]=newMonth.split('-');inv.month=newMonth;inv.monthName=new Date(y,m-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});}inv.notes=newNotes;saveInvoices();viewInvoice(viewingInvoiceId);closeEditInvoice();showToast('Invoice updated');}
 function closeEditInvoice(){document.getElementById('editInvoiceModal').classList.remove('open');}
-function backToApp(){document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';document.getElementById('mobileNav').style.display='';viewingInvoiceId=null;}
+function backToApp(){document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';viewingInvoiceId=null;}
 function deleteInvoice(id){const inv=invoices.find(i=>i.id===id);showConfirm('Delete invoice?',`${inv?.clientName||'This invoice'} — $${(inv?.total||0).toFixed(2)}. This cannot be undone.`,'Delete',()=>{invoices=invoices.filter(i=>i.id!==id);saveInvoices();renderDashboard();showToast('Invoice deleted');});}
 
 let drafts=JSON.parse(localStorage.getItem('inv_drafts')||'[]');let currentDraftId=null;
