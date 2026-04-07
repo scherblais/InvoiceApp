@@ -724,12 +724,14 @@
   .quick-modal-bg.open .quick-modal { transform: scale(1) translateY(0); }
   .quick-modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.2px; }
   .quick-modal .field { margin-bottom: 14px; }
-  .confirm-modal { width: 340px; text-align: center; }
+  .confirm-modal { width: 360px; text-align: center; }
   .confirm-modal h3 { margin-bottom: 8px; }
   .confirm-modal p { font-size: 13px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5; }
   .confirm-modal .btn-row { justify-content: center; }
   .btn-danger { background: #ef4444; }
   .btn-danger:hover { background: #dc2626; }
+  .btn-send { background: var(--accent); }
+  .btn-send:hover { background: var(--accent-hover); }
 
   .loading::after {
     content: ''; display: inline-block; width: 10px; height: 10px;
@@ -910,7 +912,7 @@
     </div>
     <div class="editor-bottom-bar" id="editorBottomBar">
       <div class="autosave-indicator" id="autosaveStatus"></div>
-      <button class="btn btn-sm" onclick="generateInvoice()">Complete</button>
+      <button class="btn btn-sm" onclick="confirmSendInvoice()">Send Invoice</button>
     </div>
   </div>
 
@@ -1241,6 +1243,7 @@ function renderLivePreview(){
 
 function buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes){let rowsHtml='';items.forEach(item=>{const details=[];if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}(item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);rowsHtml+=`<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;});let totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;return`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div>${issueDate}</div><div style="margin-top:4px;">Period: ${monthName}</div></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div>${client?.company?`<div style="font-weight:600">${client.company}</div>`:''}${client?.name?`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`:'<div>—</div>'}${client?.address?`<div>${client.address}</div>`:''}${client?.email||client?.phone?`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`:''}${client?.taxNumbers?`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`:''}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><div class="inv-totals">${totH}</div>${notes?`<div class="inv-notes"><div class="inv-notes-label">Notes</div>${notes}</div>`:''}<div class="inv-footer"><span>Thank you for your business.</span><span>${invoiceNum}</span></div>`;}
 
+function confirmSendInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId);const total=items.reduce((s,it)=>s+(it.total||0),0);const clientName=client?.company||client?.name||'No client selected';showConfirm('Send this invoice?',`${clientName} — ${items.length} listing${items.length!==1?'s':''} · $${total.toFixed(2)}. This will finalize the invoice.`,'Send Invoice',()=>generateInvoice(),'btn-send');}
 function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=document.getElementById('notes').value.trim();const monthVal=document.getElementById('invoiceMonth').value,invoiceNum=document.getElementById('invoiceNumber').value.trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';document.getElementById('mobileNav').style.display='none';}
 let viewingInvoiceId=null;
 function viewInvoice(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;viewingInvoiceId=id;const client=clients.find(c=>c.id===inv.clientId);document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(inv.number,inv.issueDate,inv.monthName,client,inv.items||[],inv.subtotal,inv.totalGst,inv.totalQst,inv.discount,inv.total,inv.notes);const paidBtn=document.getElementById('markPaidBtn');paidBtn.style.display=inv.status==='paid'?'none':'';paidBtn.textContent=inv.status==='sent'?'Mark as Paid':'Mark as Paid';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';document.getElementById('mobileNav').style.display='none';}
@@ -1270,7 +1273,7 @@ document.getElementById('quickClientModal').addEventListener('keydown',e=>{if(e.
 
 // ── Confirm modal ──
 let confirmCallback=null;
-function showConfirm(title,msg,btnText,onConfirm){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;const btn=document.getElementById('confirmYes');btn.textContent=btnText||'Delete';confirmCallback=onConfirm;document.getElementById('confirmModal').classList.add('open');}
+function showConfirm(title,msg,btnText,onConfirm,btnClass){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;const btn=document.getElementById('confirmYes');btn.textContent=btnText||'Delete';btn.className='btn btn-sm '+(btnClass||'btn-danger');confirmCallback=onConfirm;document.getElementById('confirmModal').classList.add('open');}
 function closeConfirm(){document.getElementById('confirmModal').classList.remove('open');confirmCallback=null;}
 document.getElementById('confirmYes').addEventListener('click',()=>{if(confirmCallback)confirmCallback();closeConfirm();});
 
