@@ -350,6 +350,21 @@
     background: var(--bg-card); border-radius: var(--radius);
     border: 1px solid var(--border); padding: 32px;
   }
+  .editor-top-actions {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .editor-top-actions .btn { flex-shrink: 0; }
+  .editor-bottom-scroll {
+    margin-top: 32px; text-align: center;
+  }
+  .btn-subtle {
+    background: transparent; color: var(--text-3); border: 1px solid var(--border);
+    font-size: 13px; padding: 8px 20px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-subtle:hover { color: var(--text); border-color: var(--text-3); }
   .editor-preview {
     position: sticky; top: 72px; align-self: start;
     max-height: calc(100vh - 100px); overflow-y: auto;
@@ -841,6 +856,10 @@
     <div class="view-container" style="max-width:1100px;">
       <div class="editor-shell">
         <div class="editor-panel editor-form">
+          <div class="editor-top-actions">
+            <button class="btn" onclick="confirmSendInvoice()">Send Invoice</button>
+            <div class="autosave-inline" id="autosaveStatus"></div>
+          </div>
           <div class="form-section-label">Invoice Details</div>
           <div class="row">
             <div class="field"><div class="label">Client</div><div class="client-row"><select id="clientSelect"><option value="" disabled selected>Select client</option></select><button class="client-add-btn" onclick="openQuickClient()" title="New client">+</button></div></div>
@@ -874,9 +893,8 @@
           <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
           <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;margin-top:8px;">Cancel Edit</button>
           <div class="field" style="margin-top:20px;"><div class="label">Notes (optional)</div><textarea id="notes" placeholder="Payment terms, special instructions..."></textarea></div>
-          <div style="margin-top:24px;">
-            <button class="btn" onclick="confirmSendInvoice()">Send Invoice</button>
-            <div class="autosave-inline" id="autosaveStatus"></div>
+          <div class="editor-bottom-scroll">
+            <button class="btn-subtle" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Back to top</button>
           </div>
         </div>
         <div class="editor-panel editor-preview">
