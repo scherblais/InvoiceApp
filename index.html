@@ -1525,10 +1525,9 @@ function renderHub(){
   let monthRevenue=0,lastMonthRevenue=0;
   const ytdStart=`${now.getFullYear()}-01`;let ytdRevenue=0;
   invoices.forEach(inv=>{
-    const isThisMonth=inv.month===thisMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===now.getMonth()&&new Date(inv.createdAt).getFullYear()===now.getFullYear());
-    if(isThisMonth)monthRevenue+=inv.total||0;
-    if(inv.month===lastMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===lastDate.getMonth()&&new Date(inv.createdAt).getFullYear()===lastDate.getFullYear()))lastMonthRevenue+=inv.total||0;
     const invMonth=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');
+    if(invMonth===thisMonth)monthRevenue+=inv.total||0;
+    if(invMonth===lastMonth)lastMonthRevenue+=inv.total||0;
     if(invMonth>=ytdStart&&invMonth<=thisMonth)ytdRevenue+=inv.total||0;
   });
   const draftCount=drafts.length;
@@ -1630,20 +1629,20 @@ function renderDashboard(){
   // YTD calculation
   const ytdStart=`${now.getFullYear()}-01`;let ytdRevenue=0,ytdTaxGst=0,ytdTaxQst=0;
   invoices.forEach(inv=>{
-    const isThisMonth=inv.month===thisMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===now.getMonth()&&new Date(inv.createdAt).getFullYear()===now.getFullYear());
+    const invMonth=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');
+    const isThisMonth=invMonth===thisMonth;
     if(isThisMonth)monthRevenue+=inv.total||0;
-    if(inv.month===lastMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===lastDate.getMonth()&&new Date(inv.createdAt).getFullYear()===lastDate.getFullYear()))lastMonthRevenue+=inv.total||0;
+    if(invMonth===lastMonth)lastMonthRevenue+=inv.total||0;
     if(inv.status!=='paid')pendingAmount+=inv.total||0;
     if(inv.status==='paid')paidCount++;
     totalTaxGst+=(inv.totalGst||0);totalTaxQst+=(inv.totalQst||0);
     if(isThisMonth){monthTaxGst+=(inv.totalGst||0);monthTaxQst+=(inv.totalQst||0);}
     // YTD
-    const invMonth=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');
     if(invMonth>=ytdStart&&invMonth<=thisMonth){ytdRevenue+=inv.total||0;ytdTaxGst+=(inv.totalGst||0);ytdTaxQst+=(inv.totalQst||0);}
   });
   // Revenue trend: last 6 months
   const trendMonths=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
-  invoices.forEach(inv=>{const createdKey=inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'';const m=createdKey||inv.month||'';const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
+  invoices.forEach(inv=>{const m=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
   const maxRev=Math.max(...trendMonths.map(t=>t.revenue),1);
   const trendTotal=trendMonths.reduce((s,t)=>s+t.revenue,0);
 
