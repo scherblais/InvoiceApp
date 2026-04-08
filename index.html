@@ -1538,18 +1538,20 @@ function renderHub(){
   const thisMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const lastDate=new Date(now.getFullYear(),now.getMonth()-1,1);
   const lastMonth=`${lastDate.getFullYear()}-${String(lastDate.getMonth()+1).padStart(2,'0')}`;
-  let monthRevenue=0,lastMonthRevenue=0;
-  const ytdStart=`${now.getFullYear()}-01`;let ytdRevenue=0;
+  let monthRevenue=0,lastMonthRevenue=0,monthTaxGst=0,monthTaxQst=0;
+  const ytdStart=`${now.getFullYear()}-01`;let ytdRevenue=0,ytdTaxGst=0,ytdTaxQst=0;
   invoices.forEach(inv=>{
     const invMonth=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');
-    if(invMonth===thisMonth)monthRevenue+=inv.total||0;
+    if(invMonth===thisMonth){monthRevenue+=inv.total||0;monthTaxGst+=inv.totalGst||0;monthTaxQst+=inv.totalQst||0;}
     if(invMonth===lastMonth)lastMonthRevenue+=inv.total||0;
-    if(invMonth>=ytdStart&&invMonth<=thisMonth)ytdRevenue+=inv.total||0;
+    if(invMonth>=ytdStart&&invMonth<=thisMonth){ytdRevenue+=inv.total||0;ytdTaxGst+=inv.totalGst||0;ytdTaxQst+=inv.totalQst||0;}
   });
   drafts.forEach(d=>{
     const dMonth=d.month||'';
     const dTotal=(d.items||[]).reduce((s,it)=>s+(it.total||0),0);
-    if(dMonth===thisMonth)monthRevenue+=dTotal;
+    const dGst=(d.items||[]).reduce((s,it)=>s+(it.gst||0),0);
+    const dQst=(d.items||[]).reduce((s,it)=>s+(it.qst||0),0);
+    if(dMonth===thisMonth){monthRevenue+=dTotal;monthTaxGst+=dGst;monthTaxQst+=dQst;}
     if(dMonth===lastMonth)lastMonthRevenue+=dTotal;
   });
   const draftCount=drafts.length;
@@ -1593,8 +1595,9 @@ function renderHub(){
       </div>
       <div class="hub-overview-divider"></div>
       <div class="hub-overview-stat">
-        <div class="hub-overview-label">Clients</div>
-        <div class="hub-overview-value">${clients.length}</div>
+        <div class="hub-overview-label">Taxes Owed</div>
+        <div class="hub-overview-value">$${(monthTaxGst+monthTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px;">YTD $${(ytdTaxGst+ytdTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
       </div>
     </div>
     <div class="hub-section-label dash-animate">Platforms</div>
@@ -1665,7 +1668,9 @@ function renderDashboard(){
   drafts.forEach(d=>{
     const dMonth=d.month||'';
     const dTotal=(d.items||[]).reduce((s,it)=>s+(it.total||0),0);
-    if(dMonth===thisMonth)monthRevenue+=dTotal;
+    const dGst=(d.items||[]).reduce((s,it)=>s+(it.gst||0),0);
+    const dQst=(d.items||[]).reduce((s,it)=>s+(it.qst||0),0);
+    if(dMonth===thisMonth){monthRevenue+=dTotal;monthTaxGst+=dGst;monthTaxQst+=dQst;}
     if(dMonth===lastMonth)lastMonthRevenue+=dTotal;
   });
   // Revenue trend: last 6 months
