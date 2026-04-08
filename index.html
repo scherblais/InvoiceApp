@@ -11,17 +11,18 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
   :root {
-    --text: #1e293b;
-    --text-2: #64748b;
-    --text-3: #94a3b8;
-    --border: #e2e8f0;
-    --border-subtle: #f1f5f9;
-    --accent: #f4845f;
-    --accent-hover: #e8734e;
-    --accent-light: #fef2ee;
-    --bg: #f1f5f9;
+    --text: #09090b;
+    --text-2: #52525b;
+    --text-3: #a1a1aa;
+    --border: #e4e4e7;
+    --border-subtle: #f4f4f5;
+    --accent: #18181b;
+    --accent-hover: #27272a;
+    --accent-light: #f4f4f5;
+    --accent-text: #ffffff;
+    --bg: #fafafa;
     --bg-card: #ffffff;
-    --bg-inset: #f8fafc;
+    --bg-inset: #f4f4f5;
     --input-bg: #ffffff;
     --radius: 12px;
     --radius-sm: 8px;
@@ -33,18 +34,19 @@
     --t-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   [data-theme="dark"] {
-    --text: #f1f0ee;
-    --text-2: #a8a29e;
-    --text-3: #78716c;
-    --border: #2e2a27;
-    --border-subtle: #1f1c1a;
-    --accent: #f4845f;
-    --accent-hover: #f69d80;
-    --accent-light: rgba(244,132,95,0.12);
-    --bg: #171412;
-    --bg-card: #1f1c1a;
-    --bg-inset: #151210;
-    --input-bg: #292524;
+    --text: #fafafa;
+    --text-2: #a1a1aa;
+    --text-3: #71717a;
+    --border: #27272a;
+    --border-subtle: #1a1a1e;
+    --accent: #fafafa;
+    --accent-hover: #d4d4d8;
+    --accent-light: rgba(250,250,250,0.08);
+    --accent-text: #09090b;
+    --bg: #09090b;
+    --bg-card: #18181b;
+    --bg-inset: #0f0f12;
+    --input-bg: #27272a;
     --shadow-card: none;
     --shadow-hover: none;
     --shadow-float: none;
@@ -101,7 +103,91 @@
   .view.active { display: block; }
   .view-container { max-width: 860px; margin: 0 auto; padding: 36px 32px 48px; }
 
-  /* ── Dashboard ── */
+  /* ── Hub ── */
+  .hub-header { margin-bottom: 36px; }
+  .hub-greeting { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); }
+  .hub-greeting-sub { font-size: 13px; color: var(--text-3); font-weight: 400; margin-top: 4px; }
+  .hub-platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .hub-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px 24px; cursor: pointer; transition: all var(--t-smooth);
+    position: relative; overflow: hidden;
+  }
+  .hub-card:hover { border-color: var(--text-3); background: var(--bg-inset); }
+  .hub-card.coming-soon { opacity: 0.6; cursor: default; }
+  .hub-card.coming-soon:hover { border-color: var(--border); transform: none; }
+  .hub-card-icon {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .hub-card-icon svg { width: 22px; height: 22px; stroke-width: 1.5; fill: none; }
+  .hub-card-icon.invoicing { background: rgba(244,132,95,0.12); color: var(--accent); }
+  .hub-card-icon.invoicing svg { stroke: var(--accent); }
+  .hub-card-icon.calendar { background: rgba(99,102,241,0.12); color: #6366f1; }
+  .hub-card-icon.calendar svg { stroke: #6366f1; }
+  [data-theme="dark"] .hub-card-icon.calendar { background: rgba(99,102,241,0.15); }
+  .hub-card-icon.booking { background: rgba(16,185,129,0.12); color: #10b981; }
+  .hub-card-icon.booking svg { stroke: #10b981; }
+  [data-theme="dark"] .hub-card-icon.booking { background: rgba(16,185,129,0.15); }
+  .hub-card-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.2px; }
+  .hub-card-desc { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+  .hub-card-badge {
+    position: absolute; top: 16px; right: 16px;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px;
+    background: var(--border); color: var(--text-3);
+  }
+  .hub-card-stats {
+    display: flex; gap: 16px; margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .hub-card-stat { font-size: 11px; color: var(--text-3); }
+  .hub-card-stat strong { font-weight: 600; color: var(--text-2); }
+  .hub-overview {
+    display: flex; align-items: flex-start; gap: 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 0; margin-bottom: 32px;
+  }
+  .hub-overview-stat {
+    flex: 1; text-align: center; padding: 0 20px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .hub-overview-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 6px;
+  }
+  .hub-overview-value {
+    font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px;
+  }
+  .hub-overview-warn { color: var(--accent); }
+  .hub-overview-divider {
+    width: 1px; background: var(--border); align-self: stretch;
+  }
+  .hub-activity-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .hub-activity-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; cursor: pointer; transition: background 0.15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .hub-activity-row:last-child { border-bottom: none; }
+  .hub-activity-row:hover { background: var(--bg-inset); }
+  .hub-activity-left { display: flex; align-items: center; gap: 12px; }
+  .hub-activity-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .hub-activity-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .hub-activity-amount { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .hub-section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 14px;
+  }
+
+  /* ── Dashboard (Invoicing) ── */
+  .inv-fullscreen {
+    height: calc(100vh - 56px); overflow-y: auto;
+    padding: 28px 32px 48px;
+  }
   .dash-header {
     display: flex; justify-content: space-between; align-items: flex-start;
     margin-bottom: 32px;
@@ -210,13 +296,13 @@
   }
   .dash-stat-badge {
     font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 100px;
-    background: #ecfdf5; color: #059669; letter-spacing: 0px;
+    background: var(--accent-light); color: var(--text-2); letter-spacing: 0px;
   }
-  .dash-stat-badge.down { background: #fef2f2; color: #dc2626; }
+  .dash-stat-badge.down { background: var(--accent-light); color: var(--text-2); }
   .dash-stat-badge.neutral { background: var(--border-subtle); color: var(--text-3); }
-  [data-theme="dark"] .dash-stat-badge { background: rgba(5,150,105,0.12); color: #6ee7b7; }
-  [data-theme="dark"] .dash-stat-badge.down { background: rgba(220,38,38,0.12); color: #fca5a5; }
-  [data-theme="dark"] .dash-stat-badge.neutral { background: #292524; color: var(--text-3); }
+  [data-theme="dark"] .dash-stat-badge { background: rgba(255,255,255,0.06); color: var(--text-2); }
+  [data-theme="dark"] .dash-stat-badge.down { background: rgba(255,255,255,0.06); color: var(--text-2); }
+  [data-theme="dark"] .dash-stat-badge.neutral { background: rgba(255,255,255,0.04); color: var(--text-3); }
   .dash-stat-value {
     font-size: 28px; font-weight: 600; letter-spacing: -0.8px; line-height: 1;
     font-variant-numeric: tabular-nums;
@@ -240,40 +326,54 @@
   .dash-chart-total {
     font-size: 12px; color: var(--text-2); font-weight: 500;
   }
-  .chart-bars {
-    display: flex; align-items: flex-end; gap: 8px; height: 120px;
+  .chart-wrap {
+    position: relative; height: 160px; margin-top: 8px;
   }
-  .chart-col {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%;
-    justify-content: flex-end;
+  .chart-svg {
+    width: 100%; height: 100%; overflow: visible;
   }
-  .chart-bar {
-    width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-light);
-    transition: all var(--t-smooth); min-height: 2px; position: relative;
+  .chart-grid-line {
+    stroke: var(--border-subtle); stroke-width: 0.5; stroke-dasharray: 3 3;
   }
-  .chart-bar:hover { background: var(--accent); }
-  .chart-bar-val {
-    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; font-weight: 500; color: var(--text-2); white-space: nowrap;
-    opacity: 0; transition: opacity var(--t-fast); font-variant-numeric: tabular-nums;
+  .chart-area {
+    fill: url(#chartGradient); opacity: 0.3;
   }
-  .chart-bar:hover .chart-bar-val { opacity: 1; }
-  .chart-bar.current { background: var(--accent); }
+  .chart-line {
+    fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .chart-dot {
+    fill: var(--bg-card); stroke: var(--accent); stroke-width: 2; r: 4;
+    transition: all var(--t-fast); cursor: pointer;
+  }
+  .chart-dot:hover { r: 6; fill: var(--accent); }
+  .chart-dot-group:hover .chart-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .chart-tooltip {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%) translateY(4px);
+    background: var(--text); color: var(--bg); font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+    opacity: 0; transition: all var(--t-fast); pointer-events: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-labels {
+    display: flex; justify-content: space-between; padding: 8px 0 0;
+  }
   .chart-label {
     font-size: 10px; color: var(--text-3); font-weight: 400; letter-spacing: 0.2px;
+    text-align: center; flex: 1;
   }
+  .chart-label.current { color: var(--accent); font-weight: 600; }
 
 
   .dash-new-btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 13px; background: var(--accent); border: none;
-    border-radius: var(--radius); cursor: pointer; font-family: inherit;
-    font-size: 13px; font-weight: 600; color: #fff; transition: all var(--t-fast);
-    margin-bottom: 28px; letter-spacing: 0px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; background: var(--accent); border: none;
+    border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
+    font-size: 12px; font-weight: 600; color: var(--accent-text); transition: all var(--t-fast);
+    letter-spacing: 0px; flex-shrink: 0;
   }
   .dash-new-btn:hover { background: var(--accent-hover); }
-  .dash-new-btn:active { transform: scale(0.99); }
-  .dash-new-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .dash-new-btn:active { transform: scale(0.98); }
+  .dash-new-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
 
   .dash-list-card {
     background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border);
@@ -295,9 +395,9 @@
   .inv-row-item:hover { background: var(--bg-inset); }
   .inv-row-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .inv-row-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot-draft { background: #eab308; }
-  .dot-sent { background: #3b82f6; }
-  .dot-paid { background: #22c55e; }
+  .dot-draft { background: var(--text-3); }
+  .dot-sent { background: var(--text-2); }
+  .dot-paid { background: var(--accent); }
   .inv-row-info { min-width: 0; }
   .inv-row-name { font-size: 13px; font-weight: 500; letter-spacing: -0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .inv-row-meta { font-size: 11px; color: var(--text-3); margin-top: 3px; font-weight: 400; display: flex; gap: 10px; letter-spacing: 0.1px; }
@@ -329,12 +429,12 @@
     padding: 3px 10px; border-radius: 100px; cursor: pointer; border: none;
     font-family: inherit; transition: all var(--t-fast);
   }
-  .pill-draft { background: #fef9c3; color: #a16207; }
-  .pill-sent { background: #dbeafe; color: #2563eb; }
-  .pill-paid { background: #dcfce7; color: #16a34a; }
-  [data-theme="dark"] .pill-draft { background: rgba(234,179,8,0.1); color: #fde68a; }
-  [data-theme="dark"] .pill-sent { background: rgba(59,130,246,0.1); color: #93c5fd; }
-  [data-theme="dark"] .pill-paid { background: rgba(34,197,94,0.1); color: #86efac; }
+  .pill-draft { background: var(--border-subtle); color: var(--text-3); }
+  .pill-sent { background: var(--accent-light); color: var(--text-2); }
+  .pill-paid { background: var(--accent); color: var(--accent-text); }
+  [data-theme="dark"] .pill-draft { background: rgba(255,255,255,0.05); color: var(--text-3); }
+  [data-theme="dark"] .pill-sent { background: rgba(255,255,255,0.08); color: var(--text-2); }
+  [data-theme="dark"] .pill-paid { background: var(--accent); color: var(--accent-text); }
 
   .empty-state {
     text-align: center; padding: 40px 24px; color: var(--text-3);
@@ -342,50 +442,91 @@
   }
 
   /* ── Editor ── */
-  .editor-shell {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    min-height: calc(100vh - 200px);
+  .editor-actions {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 20px; padding-top: 20px;
   }
-  .editor-panel {
-    background: var(--bg-card); border-radius: var(--radius);
-    border: 1px solid var(--border); padding: 32px;
+  .invoice-editor-wrap {
+    max-width: 820px; margin: 0 auto;
   }
-  .editor-top-actions {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 24px; padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
+  .invoice-editor-wrap .invoice {
+    position: relative;
   }
-  .editor-top-actions .btn { flex-shrink: 0; }
-  .editor-bottom-scroll {
-    margin-top: 32px; text-align: center;
+
+  /* Inline editable fields within the invoice */
+  .inv-edit-input {
+    background: transparent; border: 1px solid transparent; border-radius: 4px;
+    font: inherit; color: inherit; padding: 2px 6px; margin: -2px -6px;
+    transition: all var(--t-fast); width: 100%; box-sizing: border-box;
   }
-  .btn-subtle {
-    background: transparent; color: var(--text-3); border: 1px solid var(--border);
-    font-size: 13px; padding: 8px 20px; border-radius: var(--radius-sm);
-    cursor: pointer; transition: all 0.2s;
+  .inv-edit-input:hover { border-color: var(--border); }
+  .inv-edit-input:focus { border-color: var(--accent); outline: none; background: var(--bg-inset); }
+  .inv-edit-input::placeholder { color: var(--text-3); font-style: italic; }
+
+  .inv-number-edit {
+    font-weight: 600; font-size: 12px; text-align: right;
   }
-  .btn-subtle:hover { color: var(--text); border-color: var(--text-3); }
-  .editor-preview {
-    position: sticky; top: 72px; align-self: start;
-    max-height: calc(100vh - 100px); overflow-y: auto;
-    padding: 0; background: var(--bg-inset); border-color: var(--border);
+  .inv-period-inline {
+    display: inline-flex; align-items: center; gap: 6px;
   }
-  .live-preview-doc {
-    background: var(--bg-card); margin: 24px; border-radius: var(--radius-sm);
-    padding: 36px 40px; border: 1px solid var(--border);
-    min-height: 400px;
+  .inv-period-inline .month-nav {
+    background: none; border: 1px solid transparent; border-radius: 4px;
+    font-size: 14px; cursor: pointer; color: var(--text-3); padding: 0 4px;
+    transition: all var(--t-fast); line-height: 1;
   }
-  .preview-empty {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 400px; color: var(--text-3); font-size: 12px; font-weight: 400;
-    text-align: center; padding: 40px;
+  .inv-period-inline .month-nav:hover { border-color: var(--border); color: var(--accent); }
+
+  /* Client selector in Bill To */
+  .inv-client-select {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
   }
-  .preview-label {
-    position: sticky; top: 0; z-index: 2;
-    padding: 12px 24px; font-size: 10px; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3);
-    background: var(--bg-inset); border-bottom: 1px solid var(--border);
+  .inv-client-select select {
+    flex: 1; font-size: 12px; padding: 4px 8px; border-radius: 4px;
+    border: 1px solid transparent; background: transparent; color: inherit;
+    font-weight: 600; cursor: pointer; transition: border-color var(--t-fast);
+    font-family: inherit;
   }
+  .inv-client-select select:hover { border-color: var(--border); }
+  .inv-client-select select:focus { border-color: var(--accent); outline: none; background: var(--bg-inset); }
+  .inv-client-add {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 14px; cursor: pointer; color: var(--text-3); padding: 2px 8px;
+    transition: all var(--t-fast); line-height: 1; font-family: inherit;
+  }
+  .inv-client-add:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Editable items table */
+  .inv-table .inv-item-row { transition: background var(--t-fast); cursor: pointer; }
+  .inv-table .inv-item-row:hover { background: var(--bg-inset); }
+
+  /* Add listing button in invoice */
+  .inv-add-listing {
+    width: 100%; padding: 14px; border: 1px dashed var(--border); border-radius: var(--radius-sm);
+    background: transparent; color: var(--text-3); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all var(--t-fast); margin-bottom: 28px;
+    font-family: inherit; letter-spacing: 0.2px;
+  }
+  .inv-add-listing:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-inset); }
+
+  /* Editable notes in invoice */
+  .inv-notes-edit {
+    width: 100%; min-height: 48px; border: 1px solid transparent; border-radius: 4px;
+    background: transparent; font: inherit; color: inherit; padding: 6px 8px;
+    margin: -6px -8px; resize: vertical; font-size: 12px; line-height: 1.8;
+    transition: border-color var(--t-fast); font-family: inherit;
+  }
+  .inv-notes-edit:hover { border-color: var(--border); }
+  .inv-notes-edit:focus { border-color: var(--accent); outline: none; background: var(--bg-inset); }
+  .inv-notes-edit::placeholder { color: var(--text-3); font-style: italic; }
+
+  /* Listing modal */
+  .btn-remove-listing {
+    margin-left: auto; background: none; border: none; color: var(--text-3);
+    font-size: 12px; font-family: inherit; cursor: pointer; padding: 6px 12px;
+    border-radius: var(--radius-sm); transition: all var(--t-fast); font-weight: 500;
+  }
+  .btn-remove-listing:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
+  .listing-modal-form .field { margin-bottom: 14px; }
 
   /* Autosave indicator (inline) */
   .autosave-inline {
@@ -463,10 +604,10 @@
   /* Buttons */
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 10px 20px; background: var(--accent); color: #fff;
+    padding: 10px 20px; background: var(--accent); color: var(--accent-text);
     border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all var(--t-fast); width: 100%;
-    letter-spacing: 0px;
+    cursor: pointer; transition: all var(--t-fast); width: auto;
+    letter-spacing: 0px; font-family: inherit;
   }
   .btn:hover { background: var(--accent-hover); }
   .btn:active { transform: scale(0.98); }
@@ -594,7 +735,7 @@
     font-size: 13px;
   }
   .totals-row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--text-3); font-weight: 400; font-variant-numeric: tabular-nums; }
-  .totals-row.discount { color: #16a34a; font-weight: 500; }
+  .totals-row.discount { color: var(--text-2); font-weight: 500; }
   .totals-row.grand {
     color: var(--text); font-weight: 600; font-size: 15px;
     margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
@@ -649,31 +790,31 @@
   .invoice-shell { max-width: 720px; margin: 0 auto; padding: 40px 24px; }
   .invoice {
     background: var(--bg-card); border-radius: var(--radius);
-    padding: 52px 56px; border: 1px solid var(--border);
+    padding: 56px 64px; border: 1px solid var(--border);
   }
   .inv-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-  .inv-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
-  .inv-brand-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; font-weight: 400; letter-spacing: 0.2px; }
-  .inv-meta { text-align: right; font-size: 11px; color: var(--text-3); font-weight: 400; }
-  .inv-number { font-weight: 600; color: var(--text); font-size: 12px; letter-spacing: 0px; }
-  .inv-parties { display: flex; gap: 40px; margin-bottom: 32px; }
-  .inv-party { flex: 1; font-size: 11px; line-height: 1.8; font-weight: 400; }
-  .inv-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); margin-bottom: 6px; font-weight: 500; }
-  .inv-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 24px; }
-  .inv-table th { text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); padding: 10px 0; border-bottom: 1px solid var(--border); font-weight: 500; }
+  .inv-brand { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .inv-brand-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; font-weight: 400; letter-spacing: 0.2px; }
+  .inv-meta { text-align: right; font-size: 12px; color: var(--text-3); font-weight: 400; }
+  .inv-number { font-weight: 600; color: var(--text); font-size: 13px; letter-spacing: 0px; }
+  .inv-parties { display: flex; gap: 48px; margin-bottom: 36px; }
+  .inv-party { flex: 1; font-size: 13px; line-height: 1.8; font-weight: 400; }
+  .inv-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); margin-bottom: 6px; font-weight: 500; }
+  .inv-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 28px; }
+  .inv-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); padding: 12px 0; border-bottom: 1px solid var(--border); font-weight: 500; }
   .inv-table th:last-child, .inv-table td:last-child { text-align: right; }
-  .inv-table td { padding: 12px 0; vertical-align: top; border-bottom: 1px solid var(--border-subtle); }
+  .inv-table td { padding: 14px 0; vertical-align: top; border-bottom: 1px solid var(--border-subtle); }
   .inv-table .listing-addr { font-weight: 500; }
-  .inv-table .listing-detail { font-size: 10px; color: var(--text-3); margin-top: 3px; font-weight: 400; }
+  .inv-table .listing-detail { font-size: 11px; color: var(--text-3); margin-top: 3px; font-weight: 400; }
   .inv-table .listing-amount { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .inv-totals { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; gap: 4px; font-weight: 400; }
-  .inv-totals .inv-row { display: flex; gap: 40px; font-variant-numeric: tabular-nums; }
-  .inv-totals .inv-lbl { color: var(--text-3); min-width: 80px; }
-  .inv-totals .discount { color: #16a34a; }
-  .inv-totals .grand { font-weight: 600; font-size: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); letter-spacing: -0.2px; }
-  .inv-footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); display: flex; justify-content: space-between; font-weight: 400; letter-spacing: 0.1px; }
-  .inv-notes { margin-top: 20px; font-size: 11px; white-space: pre-wrap; line-height: 1.8; color: var(--text-2); }
-  .inv-notes-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); margin-bottom: 6px; font-weight: 500; }
+  .inv-totals { display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; gap: 6px; font-weight: 400; }
+  .inv-totals .inv-row { display: flex; gap: 48px; font-variant-numeric: tabular-nums; }
+  .inv-totals .inv-lbl { color: var(--text-3); min-width: 90px; }
+  .inv-totals .discount { color: var(--text-2); }
+  .inv-totals .grand { font-weight: 600; font-size: 17px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); letter-spacing: -0.2px; }
+  .inv-footer { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); display: flex; justify-content: space-between; font-weight: 400; letter-spacing: 0.1px; }
+  .inv-notes { margin-top: 24px; font-size: 12px; white-space: pre-wrap; line-height: 1.8; color: var(--text-2); }
+  .inv-notes-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); margin-bottom: 6px; font-weight: 500; }
   .no-print { margin-top: 20px; display: flex; gap: 10px; max-width: 720px; margin-left: auto; margin-right: auto; padding: 0 24px; }
   .no-print .btn { width: auto; }
 
@@ -704,12 +845,12 @@
   .login-logo {
     width: 48px; height: 48px; background: var(--accent); border-radius: var(--radius);
     margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -1px;
+    font-size: 20px; font-weight: 700; color: var(--accent-text); letter-spacing: -1px;
   }
   .login-box h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; text-align: center; letter-spacing: -0.3px; }
   .login-box .login-sub { font-size: 13px; color: var(--text-3); text-align: center; margin-bottom: 32px; font-weight: 400; }
   .login-box .field { margin-bottom: 14px; }
-  .login-box .btn { margin-top: 8px; padding: 11px 20px; }
+  .login-box .btn { margin-top: 8px; padding: 11px 20px; width: 100%; }
   .login-error { font-size: 12px; color: #ef4444; text-align: center; min-height: 18px; margin-bottom: 6px; font-weight: 400; }
   .login-toggle { font-size: 13px; color: var(--text-3); text-align: center; margin-top: 20px; font-weight: 400; }
   .login-toggle a { color: var(--accent); font-weight: 500; cursor: pointer; text-decoration: none; }
@@ -760,15 +901,314 @@
     @page { margin: 1cm 1.2cm; }
   }
 
+  /* ── Calendar ── */
+  .cal-fullscreen {
+    display: flex; flex-direction: column;
+    height: calc(100vh - 56px); overflow: hidden;
+  }
+  .cal-fullscreen > div {
+    display: flex; flex-direction: column; flex: 1; min-height: 0;
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: center;
+    padding: 10px 20px; flex-shrink: 0;
+  }
+  .cal-nav { display: flex; align-items: center; gap: 6px; }
+  .cal-nav-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-2); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 18px; transition: all var(--t-fast);
+  }
+  .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .cal-nav-btn:active { transform: scale(0.92); }
+  .cal-month-label {
+    font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px;
+    min-width: 170px; text-align: center; user-select: none;
+  }
+  .cal-grid {
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--bg-card); border-top: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .cal-weekday {
+    text-align: center; padding: 10px 0; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--text-3);
+  }
+  .cal-weekday:first-child, .cal-weekday:last-child { color: var(--accent); opacity: 0.7; }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; }
+  .cal-day {
+    padding: 6px 6px 4px; border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background var(--t-fast);
+    position: relative; overflow: hidden; min-height: 0;
+  }
+  .cal-day:nth-child(7n) { border-right: none; }
+  .cal-days > .cal-day:nth-last-child(-n+7) { border-bottom: none; }
+  .cal-day:hover { background: var(--accent-light); }
+  .cal-day.outside { opacity: 0.35; }
+  .cal-day.outside:hover { opacity: 0.55; }
+  .cal-day.weekend:not(.today):not(.outside) { background: rgba(0,0,0,0.015); }
+  [data-theme="dark"] .cal-day.weekend:not(.today):not(.outside) { background: rgba(255,255,255,0.015); }
+  .cal-day.today { background: var(--accent-light); }
+  .cal-day.today .cal-day-num {
+    background: var(--accent); color: var(--accent-text); border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(244,132,95,0.3);
+  }
+  .cal-day-num {
+    font-size: 12px; font-weight: 600; color: var(--text-2);
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2px; border-radius: 50%; transition: all var(--t-fast);
+  }
+  .cal-day:hover .cal-day-num { color: var(--text); }
+  .cal-day.today:hover .cal-day-num { background: var(--accent); color: var(--accent-text); }
+  .cal-event {
+    font-size: 11px; font-weight: 400; padding: 1px 4px; border-radius: 3px;
+    margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; transition: background var(--t-fast); line-height: 1.6;
+    color: var(--text); display: flex; align-items: center; gap: 4px;
+  }
+  .cal-event:hover { background: var(--bg-inset); }
+  .cal-ev-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .cal-ev-dot.coral { background: #71717a; }
+  .cal-ev-dot.blue { background: #3b82f6; }
+  .cal-ev-dot.purple { background: #8b5cf6; }
+  .cal-ev-dot.green { background: #10b981; }
+  .cal-ev-dot.amber { background: #f59e0b; }
+  .cal-ev-dot.pink { background: #ec4899; }
+  .cal-ev-dot.teal { background: #14b8a6; }
+  .cal-ev-dot.red { background: #ef4444; }
+  .cal-more {
+    font-size: 10px; color: var(--text-3); padding: 1px 4px; font-weight: 500;
+    cursor: pointer;
+  }
+  .cal-more:hover { color: var(--accent); }
+  .cal-ev-time { color: var(--text-2); font-weight: 500; flex-shrink: 0; font-size: 11px; }
+  .cal-ev-label { overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+  /* Event colors for popup/week/agenda (left-border style) */
+  .cal-ev-coral { background: rgba(113,113,122,0.1); border-color: #71717a; }
+  .cal-ev-blue { background: rgba(59,130,246,0.1); border-color: #3b82f6; }
+  .cal-ev-purple { background: rgba(139,92,246,0.1); border-color: #8b5cf6; }
+  .cal-ev-green { background: rgba(16,185,129,0.1); border-color: #10b981; }
+  .cal-ev-amber { background: rgba(245,158,11,0.1); border-color: #f59e0b; }
+  .cal-ev-pink { background: rgba(236,72,153,0.1); border-color: #ec4899; }
+  .cal-ev-teal { background: rgba(20,184,166,0.1); border-color: #14b8a6; }
+  .cal-ev-red { background: rgba(239,68,68,0.1); border-color: #ef4444; }
+  [data-theme="dark"] .cal-ev-coral { background: rgba(113,113,122,0.12); border-color: #71717a; }
+  [data-theme="dark"] .cal-ev-blue { background: rgba(59,130,246,0.12); border-color: #3b82f6; }
+  [data-theme="dark"] .cal-ev-purple { background: rgba(139,92,246,0.12); border-color: #8b5cf6; }
+  [data-theme="dark"] .cal-ev-green { background: rgba(16,185,129,0.12); border-color: #10b981; }
+  [data-theme="dark"] .cal-ev-amber { background: rgba(245,158,11,0.12); border-color: #f59e0b; }
+  [data-theme="dark"] .cal-ev-pink { background: rgba(236,72,153,0.12); border-color: #ec4899; }
+  [data-theme="dark"] .cal-ev-teal { background: rgba(20,184,166,0.12); border-color: #14b8a6; }
+  [data-theme="dark"] .cal-ev-red { background: rgba(239,68,68,0.12); border-color: #ef4444; }
+  /* Day detail popup */
+  .cal-day-popup {
+    position: absolute; z-index: 100; top: -4px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    padding: 14px; width: 250px;
+    animation: calPopIn 0.15s ease-out;
+  }
+  @keyframes calPopIn { from { opacity: 0; transform: translateX(-50%) scale(0.95); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+  .cal-day.has-popup { overflow: visible; z-index: 101; }
+  [data-theme="dark"] .cal-day-popup { box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3); }
+  .cal-day-popup-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .cal-day-popup-date { font-size: 13px; font-weight: 700; color: var(--text); }
+  .cal-day-popup-close {
+    width: 24px; height: 24px; border: none; background: none; color: var(--text-3);
+    cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: all var(--t-fast);
+  }
+  .cal-day-popup-close:hover { background: var(--bg-inset); color: var(--text); }
+  .cal-day-popup-event {
+    padding: 8px 10px; border-radius: var(--radius-sm); margin-bottom: 4px;
+    cursor: pointer; transition: all var(--t-fast); border-left: 3px solid;
+  }
+  .cal-day-popup-event:hover { transform: translateX(2px); }
+  .cal-day-popup-ev-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .cal-day-popup-ev-time { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+  .cal-day-popup-add {
+    width: 100%; padding: 8px; border-radius: var(--radius-sm);
+    border: 1px dashed var(--border); background: transparent; color: var(--text-3);
+    font-size: 11px; font-weight: 500; cursor: pointer; transition: all var(--t-fast);
+    margin-top: 6px;
+  }
+  .cal-day-popup-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .cal-popup-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99; }
+  /* Event modal */
+  .cal-event-form .field { margin-bottom: 14px; }
+  .cal-color-picker { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 2px; }
+  .cal-color-dot {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent;
+    transition: all var(--t-fast); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .cal-color-dot:hover { transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .cal-color-dot.active { border-color: var(--text); transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .cal-color-dot.active::after { content: '✓'; font-size: 12px; font-weight: 700; }
+  .cal-dot-coral { background: #71717a; color: #fff; }
+  .cal-dot-blue { background: #3b82f6; color: #fff; }
+  .cal-dot-purple { background: #8b5cf6; color: #fff; }
+  .cal-dot-green { background: #10b981; color: #fff; }
+  .cal-dot-amber { background: #f59e0b; color: #fff; }
+  .cal-dot-pink { background: #ec4899; color: #fff; }
+  .cal-dot-teal { background: #14b8a6; color: #fff; }
+  .cal-dot-red { background: #ef4444; color: #fff; }
+  .cal-time-row { display: flex; gap: 8px; }
+  .cal-time-row input, .cal-time-row select { flex: 1; }
+  /* View toggle */
+  .cal-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 20px; flex-shrink: 0; gap: 12px;
+  }
+  .cal-view-toggle {
+    display: flex; background: var(--bg-inset); border-radius: var(--radius-sm);
+    padding: 3px; gap: 2px; border: 1px solid var(--border);
+  }
+  .cal-view-btn {
+    padding: 5px 14px; border-radius: 6px; border: none; background: none;
+    font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer;
+    transition: all var(--t-fast); letter-spacing: 0.3px;
+  }
+  .cal-view-btn:hover { color: var(--text-2); }
+  .cal-view-btn.active { background: var(--bg-card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  [data-theme="dark"] .cal-view-btn.active { box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .cal-today-link {
+    font-size: 11px; font-weight: 600; color: var(--accent); cursor: pointer;
+    padding: 5px 12px; border-radius: 6px; border: 1px solid transparent;
+    background: none; transition: all var(--t-fast);
+  }
+  .cal-today-link:hover { background: var(--accent-light); border-color: var(--accent); }
+  .cal-shortcuts-hint {
+    font-size: 10px; color: var(--text-3); opacity: 0.6; letter-spacing: 0.3px;
+  }
+  /* Week view */
+  .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); border-top: 1px solid var(--border); }
+  .cal-week-header {
+    display: grid; grid-template-columns: 48px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .cal-week-header-cell {
+    text-align: center; padding: 8px 2px; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3);
+  }
+  .cal-week-header-cell.today { color: var(--accent); }
+  .cal-week-header-date {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.5px;
+    color: var(--text); display: block; margin-top: 2px; text-transform: none;
+  }
+  .cal-week-header-cell.today .cal-week-header-date {
+    background: var(--accent); color: var(--accent-text); width: 30px; height: 30px;
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .cal-week-body { flex: 1; display: flex; overflow-y: auto; }
+  .cal-week-gutter-col { width: 48px; flex-shrink: 0; }
+  .cal-week-gutter {
+    font-size: 9px; color: var(--text-3); text-align: right; padding-right: 8px;
+    position: relative; height: 60px; border-right: 1px solid var(--border);
+  }
+  .cal-week-gutter span { position: absolute; top: -6px; right: 8px; }
+  .cal-week-cols { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-week-col { position: relative; border-right: 1px solid var(--border); }
+  .cal-week-col:last-child { border-right: none; }
+  .cal-week-hour {
+    height: 60px; border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer; transition: background var(--t-fast);
+  }
+  .cal-week-hour:hover { background: var(--accent-light); }
+  .cal-week-event {
+    position: absolute; left: 2px; right: 2px; border-radius: 4px;
+    padding: 3px 6px; font-size: 10px; font-weight: 500; cursor: pointer;
+    overflow: hidden; border-left: 3px solid; z-index: 2;
+    transition: all var(--t-fast); line-height: 1.3;
+  }
+  .cal-week-event:hover { filter: brightness(1.08); z-index: 3; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .cal-week-ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-week-ev-time { opacity: 0.7; font-size: 9px; }
+  .cal-week-now {
+    position: absolute; left: 0; right: 0; height: 2px; background: var(--accent);
+    z-index: 5; pointer-events: none;
+  }
+  .cal-week-now::before {
+    content: ''; position: absolute; left: -4px; top: -3px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  }
+  .cal-week-allday {
+    display: grid; grid-template-columns: 48px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border); min-height: 0;
+  }
+  .cal-week-allday-label { font-size: 9px; color: var(--text-3); padding: 4px 6px; text-align: right; border-right: 1px solid var(--border); }
+  .cal-week-allday-cell { padding: 2px; border-right: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 2px; }
+  .cal-week-allday-cell:last-child { border-right: none; }
+  /* Agenda view */
+  .cal-agenda { flex: 1; overflow-y: auto; background: var(--bg-card); border-top: 1px solid var(--border); }
+  .cal-agenda-empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
+  .cal-agenda-empty-icon { font-size: 48px; opacity: 0.3; margin-bottom: 12px; }
+  .cal-agenda-empty-text { font-size: 14px; font-weight: 500; }
+  .cal-agenda-day { border-bottom: 1px solid var(--border); }
+  .cal-agenda-day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; font-size: 12px; font-weight: 700; color: var(--text-2);
+    background: var(--bg-inset); position: sticky; top: 0; z-index: 2;
+  }
+  .cal-agenda-day-header.today { color: var(--accent); }
+  .cal-agenda-day-add {
+    width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border);
+    background: none; color: var(--text-3); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: all var(--t-fast);
+  }
+  .cal-agenda-day-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .cal-agenda-event {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px;
+    cursor: pointer; transition: background var(--t-fast); border-bottom: 1px solid var(--border-subtle);
+  }
+  .cal-agenda-event:last-child { border-bottom: none; }
+  .cal-agenda-event:hover { background: var(--accent-light); }
+  .cal-agenda-ev-color {
+    width: 4px; border-radius: 2px; min-height: 36px; flex-shrink: 0; margin-top: 2px;
+  }
+  .cal-agenda-ev-body { flex: 1; min-width: 0; }
+  .cal-agenda-ev-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .cal-agenda-ev-time { font-size: 11px; color: var(--text-3); }
+  .cal-agenda-ev-loc { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .cal-agenda-ev-type {
+    font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    background: var(--bg-inset); color: var(--text-3); text-transform: uppercase;
+    letter-spacing: 0.5px; white-space: nowrap; margin-top: 4px; display: inline-block;
+  }
+  /* Event type selector */
+  .cal-type-picker { display: flex; gap: 6px; flex-wrap: wrap; padding: 2px 0; }
+  .cal-type-btn {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; font-size: 11px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; transition: all var(--t-fast); display: flex; align-items: center; gap: 4px;
+  }
+  .cal-type-btn:hover { border-color: var(--text-3); color: var(--text); }
+  .cal-type-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .cal-type-icon { font-size: 12px; }
+
   /* Mobile */
   @media (max-width: 768px) {
     .app-header { padding: 0 16px; height: 56px; }
     .view-container { padding: 16px 14px 36px; }
+    .inv-fullscreen { padding: 16px 14px 36px; }
     .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .dash-stat-card { padding: 18px 20px; }
     .dash-stat-value { font-size: 26px; }
-    .editor-shell { grid-template-columns: 1fr; }
-    .editor-preview { position: static; max-height: none; }
+    .invoice-editor-wrap { padding: 0; }
+    .inv-item-row { cursor: pointer; }
+    .dash-list-header { flex-wrap: wrap; gap: 10px; }
+    .dash-filter-bar { flex: 1; min-width: 0; }
+    .dash-new-btn { order: -1; width: 100%; justify-content: center; }
     .row { flex-direction: column; gap: 0; }
     .row > * + * { margin-top: 10px; }
     .invoice { padding: 28px; }
@@ -792,6 +1232,42 @@
     .inv-row-left { gap: 10px; }
     .status-pill { font-size: 9px; padding: 2px 7px; }
     .inv-aging { font-size: 9px; padding: 1px 6px; }
+    .cal-fullscreen { height: calc(100vh - 56px); }
+    .cal-header { padding: 6px 12px; }
+    .cal-day { padding: 3px 2px 2px; }
+    .cal-day-num { font-size: 11px; width: 22px; height: 22px; }
+    .cal-day.today .cal-day-num { box-shadow: 0 1px 4px rgba(244,132,95,0.25); }
+    .cal-event { font-size: 9px; padding: 0 2px; gap: 2px; line-height: 1.4; }
+    .cal-ev-dot { width: 5px; height: 5px; }
+    .cal-ev-time { font-size: 9px; }
+    .cal-ev-label { font-size: 9px; }
+    .cal-month-label { font-size: 15px; min-width: 130px; }
+    .cal-nav-btn { width: 32px; height: 32px; font-size: 16px; }
+    .cal-weekday { font-size: 9px; padding: 6px 0; letter-spacing: 0.5px; }
+    .cal-day-popup { width: 220px; padding: 12px; left: 50%; }
+    .cal-more { font-size: 8px; padding: 0 4px; }
+    .cal-toolbar { padding: 4px 12px; gap: 8px; }
+    .cal-view-btn { padding: 4px 10px; font-size: 10px; }
+    .cal-today-link { font-size: 10px; padding: 4px 8px; }
+    .cal-shortcuts-hint { display: none; }
+    .cal-week-gutter-col { width: 36px; }
+    .cal-week-gutter { font-size: 8px; }
+    .cal-week-gutter span { right: 3px; }
+    .cal-week-header { grid-template-columns: 36px repeat(7, 1fr); }
+    .cal-week-allday { grid-template-columns: 36px repeat(7, 1fr); }
+    .cal-week-header-cell { font-size: 9px; padding: 6px 1px; }
+    .cal-week-header-date { font-size: 14px; }
+    .cal-week-event { font-size: 9px; padding: 2px 4px; }
+    .cal-agenda-event { padding: 10px 14px; gap: 10px; }
+    .cal-agenda-day-header { padding: 10px 14px; }
+    .hub-overview { flex-wrap: wrap; padding: 16px 0; gap: 12px 0; }
+    .hub-overview-stat { min-width: 45%; padding: 4px 16px; }
+    .hub-overview-value { font-size: 20px; }
+    .hub-overview-divider { display: none; }
+    .hub-platforms { grid-template-columns: 1fr; gap: 12px; }
+    .hub-card { padding: 22px 20px; }
+    .hub-card-stats { gap: 12px; }
+    .hub-greeting { font-size: 22px; }
     .dash-filter-tab { padding: 8px 10px; font-size: 11px; }
     .dash-filter-count { font-size: 9px; padding: 1px 5px; }
     .app-breadcrumb-sep, .app-breadcrumb { font-size: 12px; }
@@ -848,60 +1324,50 @@
 
   <div id="view-dashboard" class="view active">
     <div class="view-container">
+      <div id="hubGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-calendar" class="view">
+    <div class="cal-fullscreen">
+      <div id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-invoicing" class="view">
+    <div class="inv-fullscreen">
       <div id="dashboardGrid"></div>
     </div>
   </div>
 
   <div id="view-editor" class="view">
-    <div class="view-container" style="max-width:1100px;">
-      <div class="editor-shell">
-        <div class="editor-panel editor-form">
-          <div class="editor-top-actions">
-            <button class="btn" onclick="confirmSendInvoice()">Send Invoice</button>
-            <div class="autosave-inline" id="autosaveStatus"></div>
-          </div>
-          <div class="form-section-label">Invoice Details</div>
-          <div class="row">
-            <div class="field"><div class="label">Client</div><div class="client-row"><select id="clientSelect"><option value="" disabled selected>Select client</option></select><button class="client-add-btn" onclick="openQuickClient()" title="New client">+</button></div></div>
-            <div class="field"><div class="label">Invoice #</div><input type="text" id="invoiceNumber" placeholder="INV-2026-001"></div>
-          </div>
-          <div class="field">
-            <div class="label">Invoice Period</div>
-            <div class="month-picker"><button class="month-picker-nav" onclick="shiftMonth(-1)">&lsaquo;</button><div class="month-picker-label" id="monthLabel"></div><button class="month-picker-nav" onclick="shiftMonth(1)">&rsaquo;</button></div>
-            <input type="hidden" id="invoiceMonth">
-          </div>
-
-          <!-- Items section (in left panel) -->
-          <div class="items-section">
-            <div class="items-section-header">
-              <div><h3 style="display:inline;">Listings</h3> <span class="count" id="itemCount">0 items</span></div>
-              <span class="panel-total" id="runningTotal"></span>
-            </div>
-            <div id="itemsList"><div class="empty-state" style="padding:20px;">Add listings to build your invoice.</div></div>
-            <div id="totalsBlock" style="display:none;">
-              <div class="totals" id="totalsContent"></div>
-            </div>
-          </div>
-
-          <hr class="hr">
-          <div class="form-section-label">Add Listing</div>
-          <div class="field"><div class="label">Address</div><div class="addr-wrap"><input type="text" id="address" placeholder="e.g. 1000 Lumeria Ave, Montreal, QC" autocomplete="off"><div class="addr-suggestions" id="addrSuggestions"></div></div><div id="travelResult" class="travel-result"></div></div>
-          <div class="field"><div class="label">Apt / Unit # (optional)</div><input type="text" id="unitNumber" placeholder="e.g. Apt 3, Suite 200"></div>
-          <div class="field"><div class="label">Package (optional)</div><select id="packageSelect"><option value="">No package (a la carte)</option></select></div>
-          <div class="field" id="extrasField" style="display:none;"><div class="label" id="extrasLabel">Additional</div><input type="number" id="extrasQty" min="0" value="0"></div>
-          <div class="field"><div class="label">Add-ons</div><div class="addon-list" id="addonsGrid"></div></div>
-          <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
-          <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;margin-top:8px;">Cancel Edit</button>
-          <div class="field" style="margin-top:20px;"><div class="label">Notes (optional)</div><textarea id="notes" placeholder="Payment terms, special instructions..."></textarea></div>
-          <div class="editor-bottom-scroll">
-            <button class="btn-subtle" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Back to top</button>
-          </div>
+    <div class="inv-fullscreen">
+      <div class="invoice-editor-wrap">
+        <div class="invoice" id="editableInvoice"></div>
+        <div class="editor-actions">
+          <button class="btn" id="editorSendBtn" onclick="confirmSendInvoice()">Send Invoice</button>
+          <button class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
+          <div class="autosave-inline" id="autosaveStatus"></div>
         </div>
-        <div class="editor-panel editor-preview">
-          <div class="preview-label">Invoice Preview</div>
-          <div id="livePreview" class="live-preview-doc">
-            <div class="preview-empty">Your invoice preview will appear here as you add listings.</div>
-          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Listing Modal -->
+  <div class="quick-modal-bg" id="addListingModal" onclick="if(event.target===this)closeListingModal()">
+    <div class="quick-modal" style="max-width:480px;">
+      <h3 id="listingModalTitle">Add Listing</h3>
+      <div class="listing-modal-form">
+        <div class="field"><div class="label">Address</div><div class="addr-wrap"><input type="text" id="address" placeholder="e.g. 1000 Lumeria Ave, Montreal, QC" autocomplete="off"><div class="addr-suggestions" id="addrSuggestions"></div></div><div id="travelResult" class="travel-result"></div></div>
+        <div class="field"><div class="label">Apt / Unit # (optional)</div><input type="text" id="unitNumber" placeholder="e.g. Apt 3, Suite 200"></div>
+        <div class="field"><div class="label">Package (optional)</div><select id="packageSelect"><option value="">No package (a la carte)</option></select></div>
+        <div class="field" id="extrasField" style="display:none;"><div class="label" id="extrasLabel">Additional</div><input type="number" id="extrasQty" min="0" value="0"></div>
+        <div class="field"><div class="label">Add-ons</div><div class="addon-list" id="addonsGrid"></div></div>
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
+          <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit();closeListingModal();" style="display:none;">Cancel Edit</button>
+          <button class="btn btn-outline" onclick="closeListingModal()">Close</button>
+          <button class="btn-remove-listing" id="removeListingBtn" onclick="removeItem(editingIndex);closeListingModal();" style="display:none;">Remove Listing</button>
         </div>
       </div>
     </div>
@@ -920,7 +1386,7 @@
           <div class="cfg-section"><div class="section-title">Add-ons <button class="cfg-add" style="width:auto;margin:0;padding:4px 10px;" onclick="cfgAddAddon()">+ Add</button></div><div id="cfgAddons"></div></div>
           <div class="cfg-section"><div class="section-title">Travel</div><div class="cfg-row"><input type="number" id="cfgFreeKm" style="flex:1;" placeholder="25"><span style="font-size:12px;color:var(--text-3);white-space:nowrap;">free km</span><input type="number" id="cfgRatePerKm" step="0.01" style="flex:1;" placeholder="0.65"><span style="font-size:12px;color:var(--text-3);white-space:nowrap;">$/km</span></div></div>
           <div class="cfg-section"><div class="section-title">Taxes</div><div class="cfg-row"><input type="number" id="cfgGst" step="0.01" style="flex:1;"><span style="font-size:12px;color:var(--text-3);">% GST</span><input type="number" id="cfgQst" step="0.01" style="flex:1;"><span style="font-size:12px;color:var(--text-3);">% QST</span></div></div>
-          <button class="btn" onclick="saveSettings()">Save Pricing</button>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button class="btn" onclick="saveSettings()">Save Pricing</button></div>
         </div>
       </div>
       <div id="settings-clients" class="settings-panel">
@@ -948,19 +1414,47 @@
     <button class="btn btn-outline" onclick="backToApp()">Back</button>
   </div>
 </div>
-<div class="quick-modal-bg" id="editInvoiceModal" onclick="if(event.target===this)closeEditInvoice()">
-  <div class="quick-modal">
-    <h3>Edit Invoice</h3>
-    <div class="field"><div class="label">Invoice #</div><input type="text" id="editInvNumber"></div>
-    <div class="field"><div class="label">Billing Period</div><select id="editInvPeriod"></select></div>
-    <div class="field"><div class="label">Notes</div><textarea id="editInvNotes" style="min-height:80px;"></textarea></div>
+<div class="quick-modal-bg" id="calEventModal" onclick="if(event.target===this)closeCalEvent()">
+  <div class="quick-modal" style="max-width:420px;">
+    <h3 id="calEventTitle">New Event</h3>
+    <div class="cal-event-form">
+      <div class="field"><div class="label">Type</div>
+        <div class="cal-type-picker" id="calTypePicker">
+          <button class="cal-type-btn active" data-type="shoot" onclick="pickCalType('shoot')"><span class="cal-type-icon">&#x1f4f7;</span> Shoot</button>
+          <button class="cal-type-btn" data-type="editing" onclick="pickCalType('editing')"><span class="cal-type-icon">&#x1f3a8;</span> Editing</button>
+          <button class="cal-type-btn" data-type="meeting" onclick="pickCalType('meeting')"><span class="cal-type-icon">&#x1f91d;</span> Meeting</button>
+          <button class="cal-type-btn" data-type="delivery" onclick="pickCalType('delivery')"><span class="cal-type-icon">&#x1f4e6;</span> Delivery</button>
+          <button class="cal-type-btn" data-type="personal" onclick="pickCalType('personal')"><span class="cal-type-icon">&#x1f3e0;</span> Personal</button>
+        </div>
+      </div>
+      <div class="field"><div class="label">Title</div><input type="text" id="calEvTitle" placeholder="e.g. Shoot at 123 Main St"></div>
+      <div class="field"><div class="label">Date</div><input type="date" id="calEvDate"></div>
+      <div class="cal-time-row">
+        <div class="field"><div class="label">Start</div><input type="time" id="calEvStart"></div>
+        <div class="field"><div class="label">End</div><input type="time" id="calEvEnd"></div>
+      </div>
+      <div class="field" id="calLocField"><div class="label">Location</div><input type="text" id="calEvLocation" placeholder="e.g. 450 Rue St-Denis"></div>
+      <div class="field"><div class="label">Color</div>
+        <div class="cal-color-picker" id="calColorPicker">
+          <div class="cal-color-dot cal-dot-blue active" data-color="blue" onclick="pickCalColor('blue')"></div>
+          <div class="cal-color-dot cal-dot-blue" data-color="blue" onclick="pickCalColor('blue')"></div>
+          <div class="cal-color-dot cal-dot-purple" data-color="purple" onclick="pickCalColor('purple')"></div>
+          <div class="cal-color-dot cal-dot-green" data-color="green" onclick="pickCalColor('green')"></div>
+          <div class="cal-color-dot cal-dot-amber" data-color="amber" onclick="pickCalColor('amber')"></div>
+          <div class="cal-color-dot cal-dot-pink" data-color="pink" onclick="pickCalColor('pink')"></div>
+          <div class="cal-color-dot cal-dot-teal" data-color="teal" onclick="pickCalColor('teal')"></div>
+          <div class="cal-color-dot cal-dot-red" data-color="red" onclick="pickCalColor('red')"></div>
+        </div>
+      </div>
+      <div class="field"><div class="label">Notes (optional)</div><textarea id="calEvNotes" placeholder="Additional details..." style="min-height:60px;"></textarea></div>
+    </div>
     <div class="btn-row">
-      <button class="btn" onclick="saveEditInvoice()">Save Changes</button>
-      <button class="btn btn-outline" onclick="closeEditInvoice()">Cancel</button>
+      <button class="btn" id="calEvSaveBtn" onclick="saveCalEvent()">Add Event</button>
+      <button class="btn btn-outline" onclick="closeCalEvent()">Cancel</button>
+      <button class="btn btn-outline" id="calEvDeleteBtn" style="display:none;border-color:#ef4444;color:#ef4444;" onclick="deleteCalEvent()">Delete</button>
     </div>
   </div>
 </div>
-
 <div class="quick-modal-bg" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
   <div class="quick-modal confirm-modal">
     <h3 id="confirmTitle">Delete?</h3>
@@ -994,7 +1488,7 @@ function saveClients(){localStorage.setItem('inv_clients',JSON.stringify(clients
 function saveInvoices(){localStorage.setItem('inv_invoices',JSON.stringify(invoices));firebaseSave('invoices',invoices);}
 function loadLocalState(){try{const c=JSON.parse(localStorage.getItem('inv_config'));if(c)config=c;}catch{}try{const c=JSON.parse(localStorage.getItem('inv_clients'));if(c)clients=c;}catch{}try{const i=JSON.parse(localStorage.getItem('inv_invoices'));if(i)invoices=i;}catch{}}
 
-let items=[];let currentTravel={distance:0,fee:0,calculated:false};let debounceTimer=null;let selectedClientId=null;let editingIndex=null;
+let items=[];let currentTravel={distance:0,fee:0,calculated:false};let debounceTimer=null;let selectedClientId=null;let editingIndex=null;let currentInvoiceNum='';let currentNotesVal='';
 let toastTimer=null;
 function showToast(msg){const el=document.getElementById('toast');el.innerHTML=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);}
 function showToastUndo(msg,undoFn){const el=document.getElementById('toast');el.innerHTML=`${msg} <button class="toast-undo" onclick="event.stopPropagation()">Undo</button>`;el.querySelector('.toast-undo').addEventListener('click',()=>{el.classList.remove('show');clearTimeout(toastTimer);undoFn();});el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),4000);}
@@ -1003,18 +1497,123 @@ let invoiceSeq=0;
 function nextInvoiceNumber(){invoiceSeq++;localStorage.setItem('inv_seq',invoiceSeq);firebaseSave('seq',invoiceSeq);return`INV-${new Date().getFullYear()}-${String(invoiceSeq).padStart(3,'0')}`;}
 
 let currentView='dashboard';
-function navigateTo(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');currentView=view;const sep=document.getElementById('breadcrumbSep'),lbl=document.getElementById('breadcrumbLabel');if(view==='dashboard'){sep.classList.add('hidden');lbl.classList.add('hidden');}else{const labels={editor:'Invoice Editor',settings:'Settings'};sep.classList.remove('hidden');lbl.classList.remove('hidden');lbl.textContent=labels[view]||view;}if(view==='dashboard')renderDashboard();if(view==='settings')renderSettingsView();if(view==='editor'){rebuildInvoiceTab();renderItems();}window.scrollTo(0,0);}
+function navigateTo(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');currentView=view;const sep=document.getElementById('breadcrumbSep'),lbl=document.getElementById('breadcrumbLabel');if(view==='dashboard'){sep.classList.add('hidden');lbl.classList.add('hidden');}else{const labels={invoicing:'Invoicing',calendar:'Calendar',editor:editingInvoiceId?'Edit Invoice':'Invoice Editor',settings:'Settings'};sep.classList.remove('hidden');lbl.classList.remove('hidden');lbl.textContent=labels[view]||view;}if(view==='dashboard')renderHub();if(view==='invoicing')renderDashboard();if(view==='calendar')renderCalendar();if(view==='settings')renderSettingsView();if(view==='editor'){rebuildInvoiceTab();renderItems();const sb=document.getElementById('editorSendBtn');if(sb)sb.textContent=editingInvoiceId?'Update Invoice':'Send Invoice';}window.scrollTo(0,0);}
 function settingsSubTab(name){document.querySelectorAll('.settings-tab').forEach(t=>t.classList.toggle('active',t.textContent.toLowerCase()===name));document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));document.getElementById('settings-'+name).classList.add('active');if(name==='pricing')renderSettingsTab();if(name==='clients')renderClientsTab();if(name==='account')renderDataTab();}
 
-function initAppWithSync(){loadLocalState();try{const d=JSON.parse(localStorage.getItem('inv_drafts'));if(d)drafts=d;}catch{}invoiceSeq=parseInt(localStorage.getItem('inv_seq')||'0');rebuildClientDropdown();rebuildInvoiceTab();document.getElementById('invoiceNumber').value=`INV-${new Date().getFullYear()}-${String(invoiceSeq+1).padStart(3,'0')}`;renderItems();
+function initAppWithSync(){loadLocalState();try{const d=JSON.parse(localStorage.getItem('inv_drafts'));if(d)drafts=d;}catch{}invoiceSeq=parseInt(localStorage.getItem('inv_seq')||'0');rebuildClientDropdown();rebuildInvoiceTab();currentInvoiceNum=`INV-${new Date().getFullYear()}-${String(invoiceSeq+1).padStart(3,'0')}`;renderEditableInvoice();
 dbRef.once('value').then(snap=>{const data=snap.val();if(!data){dbRef.set({config:JSON.parse(localStorage.getItem('inv_config')||'null')||config,clients:JSON.parse(localStorage.getItem('inv_clients')||'[]'),drafts:JSON.parse(localStorage.getItem('inv_drafts')||'[]'),invoices:JSON.parse(localStorage.getItem('inv_invoices')||'[]'),seq:parseInt(localStorage.getItem('inv_seq')||'0')});}
 onFirebaseValue('config',val=>{if(!val)return;config=val;localStorage.setItem('inv_config',JSON.stringify(config));rebuildInvoiceTab();});
 onFirebaseValue('clients',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);clients=val;localStorage.setItem('inv_clients',JSON.stringify(clients));rebuildClientDropdown();});
-onFirebaseValue('drafts',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(d=>{if(!d.items)d.items=[];else if(!Array.isArray(d.items))d.items=Object.values(d.items);d.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});drafts=val;localStorage.setItem('inv_drafts',JSON.stringify(drafts));if(currentView==='dashboard')renderDashboard();});
-onFirebaseValue('invoices',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(inv=>{if(!inv.items)inv.items=[];else if(!Array.isArray(inv.items))inv.items=Object.values(inv.items);inv.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});val.forEach(inv=>{if(!inv.status)inv.status='sent';});invoices=val;localStorage.setItem('inv_invoices',JSON.stringify(invoices));if(currentView==='dashboard')renderDashboard();});
-onFirebaseValue('seq',val=>{if(val!=null&&val>invoiceSeq){invoiceSeq=val;localStorage.setItem('inv_seq',invoiceSeq);}});});renderDashboard();}
+onFirebaseValue('drafts',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(d=>{if(!d.items)d.items=[];else if(!Array.isArray(d.items))d.items=Object.values(d.items);d.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});drafts=val;localStorage.setItem('inv_drafts',JSON.stringify(drafts));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
+onFirebaseValue('invoices',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(inv=>{if(!inv.items)inv.items=[];else if(!Array.isArray(inv.items))inv.items=Object.values(inv.items);inv.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});val.forEach(inv=>{if(!inv.status)inv.status='sent';});invoices=val;localStorage.setItem('inv_invoices',JSON.stringify(invoices));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
+onFirebaseValue('calEvents',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);calEvents=val;localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));if(currentView==='calendar')renderCalendar();if(currentView==='dashboard')renderHub();});
+onFirebaseValue('seq',val=>{if(val!=null&&val>invoiceSeq){invoiceSeq=val;localStorage.setItem('inv_seq',invoiceSeq);}});});renderHub();}
 
-// ── Dashboard ──
+// ── Hub ──
+function renderHub(){
+  const now=new Date();
+  const todayStr=now.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});
+  const pendingCount=invoices.filter(i=>i.status!=='paid').length;
+  const pendingAmount=invoices.filter(i=>i.status!=='paid').reduce((s,i)=>s+(i.total||0),0);
+  const thisMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const lastDate=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const lastMonth=`${lastDate.getFullYear()}-${String(lastDate.getMonth()+1).padStart(2,'0')}`;
+  let monthRevenue=0,lastMonthRevenue=0;
+  const ytdStart=`${now.getFullYear()}-01`;let ytdRevenue=0;
+  invoices.forEach(inv=>{
+    const isThisMonth=inv.month===thisMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===now.getMonth()&&new Date(inv.createdAt).getFullYear()===now.getFullYear());
+    if(isThisMonth)monthRevenue+=inv.total||0;
+    if(inv.month===lastMonth||(inv.createdAt&&new Date(inv.createdAt).getMonth()===lastDate.getMonth()&&new Date(inv.createdAt).getFullYear()===lastDate.getFullYear()))lastMonthRevenue+=inv.total||0;
+    const invMonth=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');
+    if(invMonth>=ytdStart&&invMonth<=thisMonth)ytdRevenue+=inv.total||0;
+  });
+  const draftCount=drafts.length;
+  const todayISO=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const revChange=lastMonthRevenue>0?((monthRevenue-lastMonthRevenue)/lastMonthRevenue*100):0;
+  const revBadgeClass=revChange>0?'':revChange<0?'down':'neutral';
+  const revBadgeText=lastMonthRevenue===0&&monthRevenue===0?'—':revChange>0?`+${revChange.toFixed(1)}%`:revChange<0?`${revChange.toFixed(1)}%`:'—';
+
+  // Recent activity: last 5 invoices/drafts
+  const recentItems=[];
+  drafts.slice(0,3).forEach(d=>{const client=clients.find(c=>c.id===d.clientId);recentItems.push({type:'draft',clientName:client?(client.company||client.name):'(no client)',total:(d.items||[]).reduce((s,it)=>s+(it.total||0),0),date:d.updatedAt||d.savedAt,onclick:`loadDraft('${d.id}')`});});
+  invoices.slice(0,5-recentItems.length).forEach(inv=>{recentItems.push({type:inv.status,clientName:inv.clientName,number:inv.number,total:inv.total,date:inv.createdAt,onclick:`viewInvoice('${inv.id}')`});});
+  recentItems.sort((a,b)=>(b.date||0)-(a.date||0));
+  const recentHtml=recentItems.slice(0,5).map(item=>{
+    const statusLabel=item.type==='draft'?'Draft':item.type==='paid'?'Paid':'Sent';
+    const dateStr=item.date?new Date(item.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'}):'';
+    return`<div class="hub-activity-row" onclick="${item.onclick}"><div class="hub-activity-left"><div class="inv-row-dot dot-${item.type}"></div><div><div class="hub-activity-name">${item.clientName}${item.number?` <span style="color:var(--text-3);font-size:11px;">${item.number}</span>`:''}</div><div class="hub-activity-meta">${statusLabel} · ${dateStr}</div></div></div><div class="hub-activity-amount">$${(item.total||0).toFixed(2)}</div></div>`;
+  }).join('');
+
+  document.getElementById('hubGrid').innerHTML=`
+    <div class="hub-header dash-animate">
+      <div class="hub-greeting">${getGreeting()}</div>
+      <div class="hub-greeting-sub">${todayStr}</div>
+    </div>
+    <div class="hub-overview dash-animate">
+      <div class="hub-overview-stat">
+        <div class="hub-overview-label">This Month</div>
+        <div class="hub-overview-value">$${monthRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        <span class="dash-stat-badge ${revBadgeClass}" style="margin-top:6px;">${revBadgeText}</span>
+      </div>
+      <div class="hub-overview-divider"></div>
+      <div class="hub-overview-stat">
+        <div class="hub-overview-label">YTD Revenue</div>
+        <div class="hub-overview-value">$${ytdRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+      </div>
+      <div class="hub-overview-divider"></div>
+      <div class="hub-overview-stat">
+        <div class="hub-overview-label">Unpaid</div>
+        <div class="hub-overview-value ${pendingAmount>0?'hub-overview-warn':''}">$${pendingAmount.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        ${pendingCount>0?`<div style="font-size:11px;color:var(--text-3);margin-top:2px;">${pendingCount} invoice${pendingCount!==1?'s':''}</div>`:''}
+      </div>
+      <div class="hub-overview-divider"></div>
+      <div class="hub-overview-stat">
+        <div class="hub-overview-label">Clients</div>
+        <div class="hub-overview-value">${clients.length}</div>
+      </div>
+    </div>
+    <div class="hub-section-label dash-animate">Platforms</div>
+    <div class="hub-platforms dash-animate">
+      <div class="hub-card" onclick="navigateTo('invoicing')">
+        <div class="hub-card-icon invoicing">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="hub-card-title">Invoicing</div>
+        <div class="hub-card-desc">Create, send, and track invoices for your photography services.</div>
+        <div class="hub-card-stats">
+          <div class="hub-card-stat"><strong>${invoices.length}</strong> invoice${invoices.length!==1?'s':''}</div>
+          <div class="hub-card-stat"><strong>${pendingCount}</strong> unpaid</div>
+          ${draftCount?`<div class="hub-card-stat"><strong>${draftCount}</strong> draft${draftCount!==1?'s':''}</div>`:''}
+        </div>
+      </div>
+      <div class="hub-card" onclick="navigateTo('calendar')">
+        <div class="hub-card-icon calendar">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="hub-card-title">Calendar</div>
+        <div class="hub-card-desc">Manage your schedule, shoots, and availability in one place.</div>
+        <div class="hub-card-stats">
+          <div class="hub-card-stat"><strong>${calEvents.filter(e=>e.date>=todayISO).length}</strong> upcoming</div>
+          <div class="hub-card-stat"><strong>${calEvents.filter(e=>e.date===todayISO).length}</strong> today</div>
+        </div>
+      </div>
+      <div class="hub-card coming-soon">
+        <span class="hub-card-badge">Coming Soon</span>
+        <div class="hub-card-icon booking">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <div class="hub-card-title">Booking</div>
+        <div class="hub-card-desc">Let clients book sessions directly through your personalized portal.</div>
+      </div>
+    </div>
+    ${recentItems.length?`
+    <div class="hub-section-label dash-animate">Recent Activity</div>
+    <div class="hub-activity-card dash-animate">
+      ${recentHtml}
+    </div>`:''}`;
+}
+
+// ── Invoicing Dashboard ──
 let dashFilterStatus='all';let dashSearchQuery='';
 function getGreeting(){const h=new Date().getHours();if(h<12)return'Good morning';if(h<17)return'Good afternoon';return'Good evening';}
 function getAgingBadge(item,now){if(item.status!=='sent'||!item.date)return'';const days=Math.floor((now-item.date)/(1000*60*60*24));if(days<1)return'<span class="inv-aging age-ok">today</span>';const cls=days<=7?'age-ok':days<=30?'age-warn':'age-late';const label=days===1?'1 day ago':`${days} days ago`;return`<span class="inv-aging ${cls}">${label}</span>`;}
@@ -1040,9 +1639,36 @@ function renderDashboard(){
   });
   // Revenue trend: last 6 months
   const trendMonths=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
-  invoices.forEach(inv=>{const m=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
+  invoices.forEach(inv=>{const createdKey=inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'';const m=createdKey||inv.month||'';const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
   const maxRev=Math.max(...trendMonths.map(t=>t.revenue),1);
   const trendTotal=trendMonths.reduce((s,t)=>s+t.revenue,0);
+
+  // Build chart points for SVG area chart
+  const chartPts = trendMonths.map((t, i) => {
+    const x = 30 + i * (440 / (trendMonths.length - 1));
+    const y = maxRev > 0 ? 150 - (t.revenue / maxRev) * 120 : 145;
+    return { x, y, val: t.revenue };
+  });
+  function smoothPath(pts) {
+    if (pts.length < 2) return '';
+    const clamp = v => Math.min(150, Math.max(10, v));
+    let d = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = clamp(p1.y + (p2.y - p0.y) / 6);
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = clamp(p2.y - (p3.y - p1.y) / 6);
+      d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }
+  const linePath = smoothPath(chartPts);
+  const areaPath = linePath + ` L${chartPts[chartPts.length-1].x},150 L${chartPts[0].x},150 Z`;
+  const chartDots = chartPts.map((p, i) => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" data-val="${p.val}"/>`).join('');
 
   // Build items list
   const allItems=[];
@@ -1124,14 +1750,26 @@ function renderDashboard(){
         <div class="dash-chart-title">Revenue Trend</div>
         <div class="dash-chart-total">$${trendTotal.toLocaleString('en-CA',{minimumFractionDigits:0})} total</div>
       </div>
-      <div class="chart-bars">
-        ${trendMonths.map((t,i)=>{const pct=maxRev>0?Math.round(t.revenue/maxRev*100):0;const isCurrent=i===trendMonths.length-1;return`<div class="chart-col"><div class="chart-bar${isCurrent?' current':''}" style="height:${Math.max(pct,2)}%;"><span class="chart-bar-val">$${t.revenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</span></div><span class="chart-label">${t.label}</span></div>`;}).join('')}
+      <div class="chart-wrap">
+        <svg class="chart-svg" viewBox="0 0 500 160" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <line class="chart-grid-line" x1="30" y1="30" x2="470" y2="30"/>
+          <line class="chart-grid-line" x1="30" y1="80" x2="470" y2="80"/>
+          <line class="chart-grid-line" x1="30" y1="130" x2="470" y2="130"/>
+          <path class="chart-area" d="${areaPath}"/>
+          <path class="chart-line" d="${linePath}"/>
+          ${chartDots}
+        </svg>
+      </div>
+      <div class="chart-labels">
+        ${trendMonths.map((t,i)=>`<span class="chart-label${i===trendMonths.length-1?' current':''}">${t.label}</span>`).join('')}
       </div>
     </div>
-    <button class="dash-new-btn dash-animate" onclick="newInvoice()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      New Invoice
-    </button>
     <div class="dash-list-card dash-animate">
       <div class="dash-list-header">
         <div class="dash-filter-bar">
@@ -1140,6 +1778,10 @@ function renderDashboard(){
           <button class="dash-filter-tab${dashFilterStatus==='sent'?' active':''}" onclick="dashFilter('sent')">Sent <span class="dash-filter-count">${counts.sent}</span></button>
           <button class="dash-filter-tab${dashFilterStatus==='paid'?' active':''}" onclick="dashFilter('paid')">Paid <span class="dash-filter-count">${counts.paid}</span></button>
         </div>
+        <button class="dash-new-btn" onclick="newInvoice()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Invoice
+        </button>
       </div>
       <div class="dash-search-wrap dash-list-search">
         <svg class="dash-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1153,6 +1795,371 @@ function dashFilter(status){dashFilterStatus=status;renderDashboard();}
 function dashSearch(q){dashSearchQuery=q;renderDashboard();}
 
 function cycleStatus(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;const order=['sent','paid'];inv.status=order[(order.indexOf(inv.status||'sent')+1)%order.length];saveInvoices();renderDashboard();showToast(`Marked as ${inv.status}`);}
+
+// ── Calendar ──
+let calEvents=JSON.parse(localStorage.getItem('inv_cal_events')||'[]');
+let calYear,calMonth,calEditingId=null,calSelectedColor='blue',calSelectedDate=null;
+let calViewMode=localStorage.getItem('inv_cal_view')||'month';
+let calSelectedType='shoot';
+let calWeekStart=null; // Date object for start of week view
+const CAL_TYPES={shoot:{icon:'\u{1f4f7}',label:'Shoot'},editing:{icon:'\u{1f3a8}',label:'Editing'},meeting:{icon:'\u{1f91d}',label:'Meeting'},delivery:{icon:'\u{1f4e6}',label:'Delivery'},personal:{icon:'\u{1f3e0}',label:'Personal'}};
+const CAL_HOURS_START=7,CAL_HOURS_END=21;
+(function(){const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();calSelectedDate=toISO(n);calWeekStart=getWeekStart(n);})();
+function saveCalEvents(){localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));firebaseSave('calEvents',calEvents);}
+function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function formatTime12(t){if(!t)return'';const[h,m]=t.split(':');const hr=parseInt(h);const ampm=hr>=12?'pm':'am';const hr12=hr%12||12;return m==='00'?`${hr12}${ampm}`:`${hr12}:${m}${ampm}`;}
+function formatTimeRange(s,e){if(!s)return'All day';let r=formatTime12(s);if(e)r+=` \u2013 ${formatTime12(e)}`;return r;}
+function getWeekStart(d){const dt=new Date(d);dt.setDate(dt.getDate()-dt.getDay());dt.setHours(0,0,0,0);return dt;}
+function getWeekDates(start){const dates=[];for(let i=0;i<7;i++){const d=new Date(start);d.setDate(d.getDate()+i);dates.push(d);}return dates;}
+function timeToMinutes(t){if(!t)return 0;const[h,m]=t.split(':');return parseInt(h)*60+parseInt(m);}
+
+function calSetView(mode){
+  calViewMode=mode;localStorage.setItem('inv_cal_view',mode);
+  closeCalDayPopup();renderCalendar();
+}
+function calToday(){
+  closeCalDayPopup();
+  const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();
+  calSelectedDate=toISO(n);calWeekStart=getWeekStart(n);
+  renderCalendar();
+}
+
+// ── Render router ──
+function renderCalendar(){
+  const grid=document.getElementById('calendarGrid');
+  const today=new Date();const todayISO=toISO(today);
+  if(!calSelectedDate)calSelectedDate=todayISO;
+
+  // Header + toolbar (shared across all views)
+  let headerLabel='';
+  if(calViewMode==='week'){
+    const dates=getWeekDates(calWeekStart);
+    const s=dates[0],e=dates[6];
+    if(s.getMonth()===e.getMonth())headerLabel=`${s.toLocaleDateString('en-CA',{month:'long'})} ${s.getDate()}\u2013${e.getDate()}, ${s.getFullYear()}`;
+    else headerLabel=`${s.toLocaleDateString('en-CA',{month:'short'})} ${s.getDate()} \u2013 ${e.toLocaleDateString('en-CA',{month:'short'})} ${e.getDate()}, ${e.getFullYear()}`;
+  }else{
+    headerLabel=new Date(calYear,calMonth,1).toLocaleDateString('en-CA',{month:'long',year:'numeric'});
+  }
+
+  const toolbar=`<div class="cal-toolbar">
+    <div class="cal-view-toggle">
+      <button class="cal-view-btn ${calViewMode==='month'?'active':''}" onclick="calSetView('month')">Month</button>
+      <button class="cal-view-btn ${calViewMode==='week'?'active':''}" onclick="calSetView('week')">Week</button>
+      <button class="cal-view-btn ${calViewMode==='agenda'?'active':''}" onclick="calSetView('agenda')">Agenda</button>
+    </div>
+    <button class="cal-today-link" onclick="calToday()">Today</button>
+    <div class="cal-shortcuts-hint">T today \u00b7 N new \u00b7 M/W/A views</div>
+  </div>`;
+
+  const header=`<div class="cal-header">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calNav(-1)">&lsaquo;</button>
+      <div class="cal-month-label">${headerLabel}</div>
+      <button class="cal-nav-btn" onclick="calNav(1)">&rsaquo;</button>
+    </div>
+  </div>`;
+
+  if(calViewMode==='month')renderCalMonth(grid,header,toolbar,todayISO);
+  else if(calViewMode==='week')renderCalWeek(grid,header,toolbar,todayISO);
+  else renderCalAgenda(grid,header,toolbar,todayISO);
+}
+
+// ── Month View ──
+function renderCalMonth(grid,header,toolbar,todayISO){
+  const firstDay=new Date(calYear,calMonth,1);
+  const lastDay=new Date(calYear,calMonth+1,0);
+  const startDow=firstDay.getDay();
+  const daysInMonth=lastDay.getDate();
+  const prevLast=new Date(calYear,calMonth,0).getDate();
+
+  let cells='';
+  for(let i=startDow-1;i>=0;i--){const d=prevLast-i;const dt=new Date(calYear,calMonth-1,d);cells+=buildCalDay(d,toISO(dt),true,todayISO,dt.getDay());}
+  for(let d=1;d<=daysInMonth;d++){const iso=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dow=new Date(calYear,calMonth,d).getDay();cells+=buildCalDay(d,iso,false,todayISO,dow);}
+  const totalCells=startDow+daysInMonth;const rows=Math.ceil(totalCells/7);const remaining=rows*7-totalCells;
+  for(let d=1;d<=remaining;d++){const dt=new Date(calYear,calMonth+1,d);cells+=buildCalDay(d,toISO(dt),true,todayISO,dt.getDay());}
+
+  const dayNames=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const weekdayHeaders=dayNames.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
+
+  grid.innerHTML=`${header}${toolbar}
+    <div class="cal-grid">
+      <div class="cal-weekdays">${weekdayHeaders}</div>
+      <div class="cal-days" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div>
+    </div>`;
+}
+
+function buildCalDay(day,iso,outside,todayISO,dow){
+  const isToday=iso===todayISO;
+  const isWeekend=(dow===0||dow===6)&&!outside;
+  const dayEvents=calEvents.filter(e=>e.date===iso).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  const isMobile=window.innerWidth<=768;
+  const maxShow=isMobile?2:4;
+  let evHtml=dayEvents.slice(0,maxShow).map(ev=>{
+    const timeStr=ev.start?`<span class="cal-ev-time">${formatTime12(ev.start)}</span>`:'';
+    return`<div class="cal-event" onclick="event.stopPropagation();openCalEvent('${ev.id}')" title="${esc(ev.title)}"><span class="cal-ev-dot ${ev.color||'blue'}"></span>${timeStr}<span class="cal-ev-label">${esc(ev.title)}</span></div>`;
+  }).join('');
+  if(dayEvents.length>maxShow)evHtml+=`<div class="cal-more" onclick="event.stopPropagation();calSelectDay('${iso}',event)">+${dayEvents.length-maxShow} more</div>`;
+  const cls=['cal-day'];
+  if(outside)cls.push('outside');
+  if(isToday)cls.push('today');
+  if(isWeekend&&!isToday)cls.push('weekend');
+  return`<div class="${cls.join(' ')}" onclick="calSelectDay('${iso}',event)"><div class="cal-day-num">${day}</div>${evHtml}</div>`;
+}
+
+// ── Week View ──
+function renderCalWeek(grid,header,toolbar,todayISO){
+  const dates=getWeekDates(calWeekStart);
+  const dayNames=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+  // Header cells with day name + date
+  let headerCells='<div class="cal-week-header-cell"></div>';
+  dates.forEach((d,i)=>{
+    const iso=toISO(d);const isToday=iso===todayISO;
+    headerCells+=`<div class="cal-week-header-cell ${isToday?'today':''}">
+      ${dayNames[i]}<span class="cal-week-header-date">${d.getDate()}</span>
+    </div>`;
+  });
+
+  // All-day events row
+  let alldayCells='<div class="cal-week-allday-label">all-day</div>';
+  dates.forEach(d=>{
+    const iso=toISO(d);
+    const allday=calEvents.filter(e=>e.date===iso&&!e.start);
+    alldayCells+=`<div class="cal-week-allday-cell">${allday.map(ev=>`<div class="cal-event" style="font-size:10px;padding:1px 4px;" onclick="openCalEvent('${ev.id}')"><span class="cal-ev-dot ${ev.color||'blue'}"></span><span class="cal-ev-label">${esc(ev.title)}</span></div>`).join('')}</div>`;
+  });
+
+  // Time grid
+  let gutter='';let cols='';
+  for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
+    const label=h===0?'12am':h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
+    gutter+=`<div class="cal-week-gutter"><span>${label}</span></div>`;
+  }
+
+  dates.forEach(d=>{
+    const iso=toISO(d);const isToday=iso===todayISO;
+    let hours='';
+    for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
+      const ts=`${String(h).padStart(2,'0')}:00`;
+      hours+=`<div class="cal-week-hour" onclick="openCalEvent(null,'${iso}','${ts}')"></div>`;
+    }
+    // Position events
+    const timed=calEvents.filter(e=>e.date===iso&&e.start).sort((a,b)=>a.start.localeCompare(b.start));
+    let eventsHtml=timed.map(ev=>{
+      const startMin=timeToMinutes(ev.start)-CAL_HOURS_START*60;
+      const endMin=(ev.end?timeToMinutes(ev.end):timeToMinutes(ev.start)+60)-CAL_HOURS_START*60;
+      const top=Math.max(0,startMin);
+      const height=Math.max(15,endMin-startMin);
+      return`<div class="cal-week-event cal-ev-${ev.color||'blue'}" style="top:${top}px;height:${height}px;" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)}">
+        <div class="cal-week-ev-title">${esc(ev.title)}</div>
+        <div class="cal-week-ev-time">${formatTime12(ev.start)}${ev.end?' \u2013 '+formatTime12(ev.end):''}</div>
+      </div>`;
+    }).join('');
+    // Now line
+    if(isToday){
+      const now=new Date();
+      const nowMin=now.getHours()*60+now.getMinutes()-CAL_HOURS_START*60;
+      if(nowMin>=0&&nowMin<(CAL_HOURS_END-CAL_HOURS_START)*60){
+        eventsHtml+=`<div class="cal-week-now" style="top:${nowMin}px"></div>`;
+      }
+    }
+    cols+=`<div class="cal-week-col">${hours}${eventsHtml}</div>`;
+  });
+
+  grid.innerHTML=`${header}${toolbar}
+    <div class="cal-week">
+      <div class="cal-week-header">${headerCells}</div>
+      <div class="cal-week-allday">${alldayCells}</div>
+      <div class="cal-week-body">
+        <div class="cal-week-gutter-col">${gutter}</div>
+        <div class="cal-week-cols">${cols}</div>
+      </div>
+    </div>`;
+
+  // Scroll to 8am
+  const body=grid.querySelector('.cal-week-body');
+  if(body)body.scrollTop=(8-CAL_HOURS_START)*60;
+}
+
+// ── Agenda View ──
+function renderCalAgenda(grid,header,toolbar,todayISO){
+  const today=new Date();
+  const daysToShow=30;
+  let html='';let hasEvents=false;
+
+  for(let i=0;i<daysToShow;i++){
+    const d=new Date(today);d.setDate(d.getDate()+i);
+    const iso=toISO(d);
+    const dayEvents=calEvents.filter(e=>e.date===iso).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+    if(!dayEvents.length)continue;
+    hasEvents=true;
+    const isToday=i===0;
+    const dateLabel=d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});
+    const relLabel=isToday?' \u2014 Today':i===1?' \u2014 Tomorrow':'';
+    html+=`<div class="cal-agenda-day">
+      <div class="cal-agenda-day-header ${isToday?'today':''}">
+        <span>${dateLabel}${relLabel}</span>
+        <button class="cal-agenda-day-add" onclick="openCalEvent(null,'${iso}')" title="Add event">+</button>
+      </div>`;
+    dayEvents.forEach(ev=>{
+      const timeStr=formatTimeRange(ev.start,ev.end);
+      const typeInfo=CAL_TYPES[ev.eventType]||null;
+      const dotColor={'coral':'#71717a','blue':'#3b82f6','purple':'#8b5cf6','green':'#10b981','amber':'#f59e0b','pink':'#ec4899','teal':'#14b8a6','red':'#ef4444'}[ev.color||'blue']||'#3b82f6';
+      html+=`<div class="cal-agenda-event" onclick="openCalEvent('${ev.id}')">
+        <div class="cal-agenda-ev-color" style="background:${dotColor}"></div>
+        <div class="cal-agenda-ev-body">
+          <div class="cal-agenda-ev-title">${esc(ev.title)}</div>
+          <div class="cal-agenda-ev-time">${timeStr}</div>
+          ${ev.location?`<div class="cal-agenda-ev-loc">\u{1f4cd} ${esc(ev.location)}</div>`:''}
+          ${typeInfo?`<span class="cal-agenda-ev-type">${typeInfo.icon} ${typeInfo.label}</span>`:''}
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(!hasEvents){
+    html=`<div class="cal-agenda-empty">
+      <div class="cal-agenda-empty-icon">\u{1f4c5}</div>
+      <div class="cal-agenda-empty-text">No upcoming events</div>
+    </div>`;
+  }
+
+  grid.innerHTML=`${header}${toolbar}<div class="cal-agenda">${html}</div>`;
+}
+
+// ── Day popup (month view) ──
+function calSelectDay(iso,evt){
+  closeCalDayPopup();calSelectedDate=iso;
+  const dayEvents=calEvents.filter(e=>e.date===iso).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  if(!dayEvents.length){openCalEvent(null,iso);return;}
+  const dt=new Date(iso+'T12:00:00');
+  const dateLabel=dt.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+  const evHtml=dayEvents.map(ev=>{
+    const timeStr=formatTimeRange(ev.start,ev.end);
+    return`<div class="cal-day-popup-event cal-ev-${ev.color||'blue'}" onclick="event.stopPropagation();closeCalDayPopup();openCalEvent('${ev.id}')">
+      <div class="cal-day-popup-ev-title">${esc(ev.title)}</div>
+      <div class="cal-day-popup-ev-time">${timeStr}</div>
+    </div>`;
+  }).join('');
+  let dayEl=evt?.target;
+  while(dayEl&&!dayEl.classList.contains('cal-day'))dayEl=dayEl.parentElement;
+  if(!dayEl)return;
+  const popup=document.createElement('div');popup.className='cal-day-popup';popup.id='calDayPopup';
+  popup.onclick=e=>e.stopPropagation();
+  popup.innerHTML=`<div class="cal-day-popup-header"><div class="cal-day-popup-date">${dateLabel}</div><button class="cal-day-popup-close" onclick="closeCalDayPopup()">&times;</button></div>${evHtml}<button class="cal-day-popup-add" onclick="closeCalDayPopup();openCalEvent(null,'${iso}')">+ Add event</button>`;
+  const overlay=document.createElement('div');overlay.className='cal-popup-overlay';overlay.id='calPopupOverlay';overlay.onclick=()=>closeCalDayPopup();
+  document.body.appendChild(overlay);dayEl.classList.add('has-popup');dayEl.appendChild(popup);
+}
+function closeCalDayPopup(){
+  const p=document.getElementById('calDayPopup');if(p){p.parentElement.classList.remove('has-popup');p.remove();}
+  const o=document.getElementById('calPopupOverlay');if(o)o.remove();
+}
+
+// ── Navigation ──
+function calNav(dir){
+  closeCalDayPopup();
+  if(calViewMode==='week'){
+    calWeekStart=new Date(calWeekStart);calWeekStart.setDate(calWeekStart.getDate()+dir*7);
+    calYear=calWeekStart.getFullYear();calMonth=calWeekStart.getMonth();
+  }else{
+    calMonth+=dir;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}
+  }
+  renderCalendar();
+}
+
+// Swipe gestures
+let calTouchX=0;
+document.addEventListener('touchstart',e=>{if(currentView==='calendar')calTouchX=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{if(currentView!=='calendar'||!calTouchX)return;const dx=e.changedTouches[0].clientX-calTouchX;if(Math.abs(dx)>60){calNav(dx<0?1:-1);}calTouchX=0;},{passive:true});
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(currentView!=='calendar')return;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  if(document.querySelector('.quick-modal-bg.open'))return;
+  switch(e.key){
+    case'ArrowLeft':calNav(-1);e.preventDefault();break;
+    case'ArrowRight':calNav(1);e.preventDefault();break;
+    case't':case'T':calToday();break;
+    case'n':case'N':openCalEvent(null,calSelectedDate||toISO(new Date()));break;
+    case'm':case'M':calSetView('month');break;
+    case'w':case'W':calSetView('week');break;
+    case'a':case'A':calSetView('agenda');break;
+  }
+});
+
+// ── Event type & color pickers ──
+function pickCalColor(c){calSelectedColor=c;document.querySelectorAll('#calColorPicker .cal-color-dot').forEach(d=>d.classList.toggle('active',d.dataset.color===c));}
+function pickCalType(t){calSelectedType=t;document.querySelectorAll('#calTypePicker .cal-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===t));}
+
+// ── Event CRUD ──
+function openCalEvent(id,date,time){
+  calEditingId=id||null;
+  const modal=document.getElementById('calEventModal');
+  const titleEl=document.getElementById('calEventTitle');
+  const saveBtn=document.getElementById('calEvSaveBtn');
+  const deleteBtn=document.getElementById('calEvDeleteBtn');
+  if(id){
+    const ev=calEvents.find(e=>e.id===id);if(!ev)return;
+    titleEl.textContent='Edit Event';
+    saveBtn.textContent='Save Changes';
+    deleteBtn.style.display='';
+    document.getElementById('calEvTitle').value=ev.title||'';
+    document.getElementById('calEvDate').value=ev.date||'';
+    document.getElementById('calEvStart').value=ev.start||'';
+    document.getElementById('calEvEnd').value=ev.end||'';
+    document.getElementById('calEvNotes').value=ev.notes||'';
+    document.getElementById('calEvLocation').value=ev.location||'';
+    pickCalColor(ev.color||'blue');
+    pickCalType(ev.eventType||'shoot');
+  }else{
+    titleEl.textContent='New Event';
+    saveBtn.textContent='Add Event';
+    deleteBtn.style.display='none';
+    document.getElementById('calEvTitle').value='';
+    document.getElementById('calEvDate').value=date||toISO(new Date());
+    document.getElementById('calEvStart').value=time||'';
+    document.getElementById('calEvEnd').value='';
+    document.getElementById('calEvNotes').value='';
+    document.getElementById('calEvLocation').value='';
+    pickCalColor('blue');
+    pickCalType('shoot');
+  }
+  modal.classList.add('open');
+  setTimeout(()=>document.getElementById('calEvTitle').focus(),100);
+}
+function closeCalEvent(){document.getElementById('calEventModal').classList.remove('open');calEditingId=null;}
+function saveCalEvent(){
+  const title=document.getElementById('calEvTitle').value.trim();
+  if(!title)return;
+  const data={
+    title,
+    date:document.getElementById('calEvDate').value,
+    start:document.getElementById('calEvStart').value,
+    end:document.getElementById('calEvEnd').value,
+    color:calSelectedColor,
+    notes:document.getElementById('calEvNotes').value.trim(),
+    location:document.getElementById('calEvLocation').value.trim(),
+    eventType:calSelectedType
+  };
+  if(calEditingId){
+    const idx=calEvents.findIndex(e=>e.id===calEditingId);
+    if(idx>=0)calEvents[idx]={...calEvents[idx],...data};
+  }else{
+    calEvents.push({id:'ev_'+Date.now(),...data,createdAt:Date.now()});
+  }
+  saveCalEvents();closeCalEvent();renderCalendar();
+  showToast(calEditingId?'Event updated':'Event added');
+}
+function deleteCalEvent(){
+  if(!calEditingId)return;
+  const ev=calEvents.find(e=>e.id===calEditingId);
+  closeCalEvent();
+  showConfirm('Delete event?',`"${ev?.title||'This event'}" will be permanently removed.`,'Delete',()=>{
+    calEvents=calEvents.filter(e=>e.id!==calEditingId);
+    saveCalEvents();renderCalendar();showToast('Event deleted');
+  });
+}
 
 function renderSettingsView(){renderSettingsTab();}
 function renderSettingsTab(){renderCfgPackages();renderCfgAddons();document.getElementById('cfgFreeKm').value=config.travel.freeKm;document.getElementById('cfgRatePerKm').value=config.travel.ratePerKm;document.getElementById('cfgGst').value=config.taxes.gst;document.getElementById('cfgQst').value=config.taxes.qst;}
@@ -1171,19 +2178,26 @@ function saveClient(ci){const card=document.getElementById('cc-'+ci),c=clients[c
 function getPrice(type,id){const client=clients.find(c=>c.id===selectedClientId);if(client?.overrides){const ov=type==='pkg'?client.overrides.packages?.[id]:client.overrides.addons?.[id];if(ov!=null)return ov;}if(type==='pkg')return config.packages.find(p=>p.id===id)?.price||0;return config.addons.find(a=>a.id===id)?.price||0;}
 function getClientDiscount(subtotal){const client=clients.find(c=>c.id===selectedClientId);if(!client?.discount||!client.discount.value)return{amount:0,label:''};const{type,value}=client.discount;if(type==='%')return{amount:Math.round(subtotal*(value/100)*100)/100,label:`Discount (${value}%)`};return{amount:Math.min(value,subtotal),label:'Discount'};}
 
-function rebuildClientDropdown(){const sel=document.getElementById('clientSelect'),prev=sel.value;sel.innerHTML='<option value="" disabled selected>Select client</option>';clients.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.company?`${c.company}${c.name?' — '+c.name:''}`:(c.name||'(unnamed)');sel.appendChild(opt);});if(prev)sel.value=prev;}
+function rebuildClientDropdown(){const sel=document.getElementById('clientSelect');if(!sel)return;const prev=sel.value;sel.innerHTML='<option value="" disabled>Select client</option>';clients.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.company?`${c.company}${c.name?' — '+c.name:''}`:(c.name||'(unnamed)');sel.appendChild(opt);});if(prev)sel.value=prev;}
 function rebuildInvoiceTab(){const pkgSel=document.getElementById('packageSelect'),prev=pkgSel.value;pkgSel.innerHTML='<option value="">No package (a la carte)</option>';config.packages.forEach(pkg=>{const opt=document.createElement('option');opt.value=pkg.id;const price=getPrice('pkg',pkg.id);opt.textContent=price>0?`${pkg.name} — $${price}`:(pkg.name||'(unnamed)');pkgSel.appendChild(opt);});if(prev)pkgSel.value=prev;const grid=document.getElementById('addonsGrid');grid.innerHTML='';config.addons.forEach(a=>{const price=getPrice('addon',a.id),row=document.createElement('div');row.className='addon-row';row.dataset.addonId=a.id;const qtyHtml=a.qty?`<input type="hidden" class="addon-qty chip-qty" data-addon="${a.id}" value="1"><div class="addon-stepper" onclick="event.stopPropagation()"><button type="button" class="addon-stepper-btn" data-dir="-1" data-addon="${a.id}">−</button><span class="addon-stepper-val" data-addon="${a.id}">1</span><button type="button" class="addon-stepper-btn" data-dir="1" data-addon="${a.id}">+</button></div>`:'';row.innerHTML=`<input type="checkbox" value="${a.id}" style="display:none;"><div class="addon-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></div><span class="addon-name">${a.name||'(unnamed)'}</span>${qtyHtml}<span class="addon-price">$${price}${a.qty?'/ea':''}</span>`;const cb=row.querySelector('input[type="checkbox"]');row.addEventListener('click',e=>{if(e.target.closest('.addon-stepper'))return;cb.checked=!cb.checked;row.classList.toggle('selected',cb.checked);});row.querySelectorAll('.addon-stepper-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();const aid=btn.dataset.addon,dir=parseInt(btn.dataset.dir);const hi=row.querySelector(`.addon-qty[data-addon="${aid}"]`);const valEl=row.querySelector(`.addon-stepper-val[data-addon="${aid}"]`);let v=Math.max(1,parseInt(hi.value)||1)+dir;v=Math.max(1,v);hi.value=v;valEl.textContent=v;});});grid.appendChild(row);});}
 
 let pickerYear,pickerMonth;
 (function(){const now=new Date();pickerYear=now.getFullYear();pickerMonth=now.getMonth();updateMonthPicker();})();
-function updateMonthPicker(){document.getElementById('monthLabel').textContent=new Date(pickerYear,pickerMonth).toLocaleDateString('en-CA',{year:'numeric',month:'long'});document.getElementById('invoiceMonth').value=`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`;}
-function shiftMonth(delta){pickerMonth+=delta;if(pickerMonth>11){pickerMonth=0;pickerYear++;}if(pickerMonth<0){pickerMonth=11;pickerYear--;}updateMonthPicker();renderLivePreview();}
+function updateMonthPicker(){const ml=document.getElementById('monthLabel'),im=document.getElementById('invoiceMonth');if(ml)ml.textContent=new Date(pickerYear,pickerMonth).toLocaleDateString('en-CA',{year:'numeric',month:'long'});if(im)im.value=`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`;}
+function shiftMonth(delta){pickerMonth+=delta;if(pickerMonth>11){pickerMonth=0;pickerYear++;}if(pickerMonth<0){pickerMonth=11;pickerYear--;}updateMonthPicker();renderEditableInvoice();}
 
-document.getElementById('clientSelect').addEventListener('change',()=>{selectedClientId=document.getElementById('clientSelect').value;const client=clients.find(c=>c.id===selectedClientId);if(client?.defaultNotes)document.getElementById('notes').value=client.defaultNotes;rebuildInvoiceTab();renderLivePreview();});
+// Client select change is handled inline in renderEditableInvoice
 document.getElementById('packageSelect').addEventListener('change',()=>{const pkg=config.packages.find(p=>p.id===document.getElementById('packageSelect').value);const field=document.getElementById('extrasField');if(pkg?.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=pkg.extraLabel;document.getElementById('extrasQty').value=pkg.price===0?'':'0';document.getElementById('extrasQty').placeholder=pkg.price===0?'Enter amount':'0';}else field.style.display='none';});
-document.querySelector('.editor-form').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.tagName!=='TEXTAREA'){if(document.getElementById('addrSuggestions').classList.contains('open'))return;e.preventDefault();addItem();}});
-document.getElementById('notes').addEventListener('input',renderLivePreview);
-document.getElementById('invoiceNumber').addEventListener('input',renderLivePreview);
+document.querySelector('.listing-modal-form').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.tagName!=='TEXTAREA'){if(document.getElementById('addrSuggestions').classList.contains('open'))return;e.preventDefault();addItem();}});
+function openListingModal(idx){
+  document.getElementById('listingModalTitle').textContent=idx!=null?'Edit Listing':'Add Listing';
+  document.getElementById('removeListingBtn').style.display=idx!=null?'':'none';
+  document.getElementById('addListingModal').classList.add('open');
+  if(idx!=null)editItem(idx);
+  else setTimeout(()=>document.getElementById('address').focus(),100);
+}
+function closeListingModal(){document.getElementById('addListingModal').classList.remove('open');}
+document.getElementById('addListingModal').addEventListener('keydown',e=>{if(e.key==='Escape')closeListingModal();});
 
 const addressInput=document.getElementById('address');const travelResult=document.getElementById('travelResult');const addrSuggestions=document.getElementById('addrSuggestions');let addrDebounce=null,addrResults=[],addrIndex=-1;
 addressInput.addEventListener('input',()=>{clearTimeout(debounceTimer);clearTimeout(addrDebounce);currentTravel={distance:0,fee:0,calculated:false};travelResult.textContent='';const q=addressInput.value.trim();if(q.length<3){closeAddrSuggestions();return;}addrDebounce=setTimeout(()=>fetchAddressSuggestions(q),120);});
@@ -1195,54 +2209,92 @@ function selectAddr(i){const r=addrResults[i];if(!r)return;addressInput.value=r.
 function closeAddrSuggestions(){addrSuggestions.classList.remove('open');addrResults=[];addrIndex=-1;}
 async function calcTravelFromCoords(lat,lon){travelResult.className='travel-result loading';travelResult.textContent='Calculating distance';try{const routeRes=await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN.lon},${ORIGIN.lat};${lon},${lat}?overview=false`);const rd=await routeRes.json();if(rd.code!=='Ok'||!rd.routes.length){travelResult.className='travel-result error';travelResult.textContent='Could not calculate route.';return;}const km=Math.round(rd.routes[0].distance/1000);const{freeKm,ratePerKm}=config.travel;const fee=km>freeKm?Math.round((km-freeKm)*ratePerKm*100)/100:0;currentTravel={distance:km,fee,calculated:true};travelResult.className='travel-result';travelResult.textContent=`${km} km`+(fee>0?` — $${fee.toFixed(2)} travel fee`:` — no travel fee`);}catch{travelResult.className='travel-result error';travelResult.textContent='Network error.';}}
 
-function addItem(){const address=addressInput.value.trim(),unit=document.getElementById('unitNumber').value.trim();const pkgId=document.getElementById('packageSelect').value,extrasQty=parseInt(document.getElementById('extrasQty').value)||0;if(!address){addressInput.focus();return;}const pkg=pkgId?config.packages.find(p=>p.id===pkgId):null;const isCustom=pkg?(pkg.price===0&&pkg.extraPrice===1):false;const pkgPrice=pkg?getPrice('pkg',pkg.id):0;const pkgAmount=pkg?(isCustom?extrasQty:pkgPrice):0;const extrasAmount=pkg?(isCustom?0:extrasQty*pkg.extraPrice):0;const grid=document.getElementById('addonsGrid'),selectedAddons=[];grid.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const addon=config.addons.find(a=>a.id===cb.value);if(!addon)return;const price=getPrice('addon',addon.id),entry={...addon,price};if(addon.qty){const qi=grid.querySelector(`.addon-qty[data-addon="${addon.id}"]`);entry.count=Math.max(1,parseInt(qi?.value)||1);entry.totalPrice=price*entry.count;}else{entry.count=1;entry.totalPrice=price;}selectedAddons.push(entry);});const addonsTotal=selectedAddons.reduce((s,a)=>s+a.totalPrice,0);if(!pkg&&!selectedAddons.length)return;const listingSubtotal=pkgAmount+extrasAmount+addonsTotal+currentTravel.fee;const listingGst=Math.round(listingSubtotal*config.taxes.gst/100*100)/100;const listingQst=Math.round(listingSubtotal*config.taxes.qst/100*100)/100;const fullAddress=unit?`${address}, ${unit}`:address;const newItem={address:fullAddress,unit,pkg:pkg?{...pkg,isCustom}:null,pkgAmount,extrasQty:isCustom?0:extrasQty,extrasAmount,addons:selectedAddons,addonsTotal,travel:{...currentTravel},subtotal:listingSubtotal,gst:listingGst,qst:listingQst,total:listingSubtotal+listingGst+listingQst};let highlightIdx;if(editingIndex!==null){items[editingIndex]=newItem;highlightIdx=editingIndex;editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';showToast('Listing updated');}else{items.push(newItem);highlightIdx=items.length-1;showToast('Listing added');}addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').selectedIndex=0;document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};renderItems();const allItems=document.querySelectorAll('.item');if(allItems[highlightIdx]){allItems[highlightIdx].classList.add('just-added');allItems[highlightIdx].scrollIntoView({behavior:'smooth',block:'nearest'});}addressInput.focus();}
+function addItem(){const address=addressInput.value.trim(),unit=document.getElementById('unitNumber').value.trim();const pkgId=document.getElementById('packageSelect').value,extrasQty=parseInt(document.getElementById('extrasQty').value)||0;if(!address){addressInput.focus();return;}const pkg=pkgId?config.packages.find(p=>p.id===pkgId):null;const isCustom=pkg?(pkg.price===0&&pkg.extraPrice===1):false;const pkgPrice=pkg?getPrice('pkg',pkg.id):0;const pkgAmount=pkg?(isCustom?extrasQty:pkgPrice):0;const extrasAmount=pkg?(isCustom?0:extrasQty*pkg.extraPrice):0;const grid=document.getElementById('addonsGrid'),selectedAddons=[];grid.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const addon=config.addons.find(a=>a.id===cb.value);if(!addon)return;const price=getPrice('addon',addon.id),entry={...addon,price};if(addon.qty){const qi=grid.querySelector(`.addon-qty[data-addon="${addon.id}"]`);entry.count=Math.max(1,parseInt(qi?.value)||1);entry.totalPrice=price*entry.count;}else{entry.count=1;entry.totalPrice=price;}selectedAddons.push(entry);});const addonsTotal=selectedAddons.reduce((s,a)=>s+a.totalPrice,0);if(!pkg&&!selectedAddons.length)return;const listingSubtotal=pkgAmount+extrasAmount+addonsTotal+currentTravel.fee;const listingGst=Math.round(listingSubtotal*config.taxes.gst/100*100)/100;const listingQst=Math.round(listingSubtotal*config.taxes.qst/100*100)/100;const fullAddress=unit?`${address}, ${unit}`:address;const newItem={address:fullAddress,unit,pkg:pkg?{...pkg,isCustom}:null,pkgAmount,extrasQty:isCustom?0:extrasQty,extrasAmount,addons:selectedAddons,addonsTotal,travel:{...currentTravel},subtotal:listingSubtotal,gst:listingGst,qst:listingQst,total:listingSubtotal+listingGst+listingQst};let highlightIdx;if(editingIndex!==null){items[editingIndex]=newItem;highlightIdx=editingIndex;editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';showToast('Listing updated');}else{items.push(newItem);highlightIdx=items.length-1;showToast('Listing added');}addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').selectedIndex=0;document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};renderItems();closeListingModal();}
 
 let undoItem=null,undoIdx=null;
 function removeItem(i){undoItem=items[i];undoIdx=i;items.splice(i,1);if(editingIndex===i)cancelEdit();else if(editingIndex!==null&&editingIndex>i)editingIndex--;renderItems();showToastUndo('Listing removed',()=>{items.splice(undoIdx,0,undoItem);undoItem=null;renderItems();showToast('Listing restored');});}
 function duplicateItem(i){const copy=JSON.parse(JSON.stringify(items[i]));copy.address+=' (copy)';items.splice(i+1,0,copy);renderItems();showToast('Listing duplicated');const allItems=document.querySelectorAll('.item');if(allItems[i+1]){allItems[i+1].classList.add('just-added');allItems[i+1].scrollIntoView({behavior:'smooth',block:'nearest'});}}
-function editItem(i){const item=items[i];editingIndex=i;addressInput.value=item.unit?item.address.replace(`, ${item.unit}`,''):item.address;document.getElementById('unitNumber').value=item.unit||'';currentTravel={...item.travel};if(item.travel.calculated){travelResult.className='travel-result';travelResult.textContent=`${item.travel.distance} km`+(item.travel.fee>0?` — $${item.travel.fee.toFixed(2)} travel fee`:` — no travel fee`);}const field=document.getElementById('extrasField');if(item.pkg){document.getElementById('packageSelect').value=item.pkg.id;if(item.pkg.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=item.pkg.extraLabel;document.getElementById('extrasQty').value=item.pkg.isCustom?item.pkgAmount:item.extrasQty;}else field.style.display='none';}else{document.getElementById('packageSelect').selectedIndex=0;field.style.display='none';}const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>{const addon=item.addons.find(a=>a.id===cb.value);cb.checked=!!addon;const row=cb.closest('.addon-row');if(row){row.classList.toggle('selected',!!addon);if(addon){const qtyInput=row.querySelector('.addon-qty');if(qtyInput)qtyInput.value=addon.count;const valEl=row.querySelector('.addon-stepper-val');if(valEl)valEl.textContent=addon.count;}}});document.getElementById('addItemBtn').textContent='Update Listing';document.getElementById('cancelEditBtn').style.display='block';navigateTo('editor');addressInput.scrollIntoView({behavior:'smooth',block:'center'});}
+function editItem(i){const item=items[i];editingIndex=i;addressInput.value=item.unit?item.address.replace(`, ${item.unit}`,''):item.address;document.getElementById('unitNumber').value=item.unit||'';currentTravel={...item.travel};if(item.travel.calculated){travelResult.className='travel-result';travelResult.textContent=`${item.travel.distance} km`+(item.travel.fee>0?` — $${item.travel.fee.toFixed(2)} travel fee`:` — no travel fee`);}const field=document.getElementById('extrasField');if(item.pkg){document.getElementById('packageSelect').value=item.pkg.id;if(item.pkg.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=item.pkg.extraLabel;document.getElementById('extrasQty').value=item.pkg.isCustom?item.pkgAmount:item.extrasQty;}else field.style.display='none';}else{document.getElementById('packageSelect').selectedIndex=0;field.style.display='none';}const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>{const addon=item.addons.find(a=>a.id===cb.value);cb.checked=!!addon;const row=cb.closest('.addon-row');if(row){row.classList.toggle('selected',!!addon);if(addon){const qtyInput=row.querySelector('.addon-qty');if(qtyInput)qtyInput.value=addon.count;const valEl=row.querySelector('.addon-stepper-val');if(valEl)valEl.textContent=addon.count;}}});document.getElementById('addItemBtn').textContent='Update Listing';document.getElementById('cancelEditBtn').style.display='block';document.getElementById('listingModalTitle').textContent='Edit Listing';}
 function cancelEdit(){editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').selectedIndex=0;document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};}
 
-function renderItems(){const list=document.getElementById('itemsList');document.getElementById('itemCount').textContent=`${items.length} item${items.length!==1?'s':''}`;if(!items.length){list.innerHTML='<div class="empty-state" style="padding:20px;">Add listings to build your invoice.</div>';document.getElementById('totalsBlock').style.display='none';document.getElementById('runningTotal').textContent='';renderLivePreview();return;}list.innerHTML=items.map((item,i)=>{let parts=[];if(item.pkg){parts.push(item.pkg.name+(!item.pkg.isCustom?` $${item.pkgAmount}`:''));if(item.extrasQty>0)parts.push(`+${item.extrasQty} ${item.pkg.extraUnit}`);}item.addons.forEach(a=>parts.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice}`));if(item.travel.fee>0)parts.push(`Travel $${item.travel.fee.toFixed(2)}`);if(item.gst)parts.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)parts.push(`QST $${item.qst.toFixed(2)}`);return`<div class="item${editingIndex===i?' editing':''}" draggable="true" data-idx="${i}" onclick="editItem(${i})" style="cursor:pointer;"><div><div class="item-address">${item.address}</div><div class="item-details">${parts.join(' &middot; ')}</div></div><div class="item-right"><div class="item-amount">$${item.total.toFixed(2)}</div><div class="item-actions"><button class="item-action" onclick="event.stopPropagation();duplicateItem(${i})">Duplicate</button><button class="item-action remove" onclick="event.stopPropagation();removeItem(${i})">Remove</button></div></div></div>`;}).join('');list.querySelectorAll('.item').forEach(el=>{el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',el.dataset.idx);el.classList.add('dragging');});el.addEventListener('dragend',()=>el.classList.remove('dragging'));el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('drag-over');const from=parseInt(e.dataTransfer.getData('text/plain')),to=parseInt(el.dataset.idx);if(from===to)return;const[moved]=items.splice(from,1);items.splice(to,0,moved);renderItems();});});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;document.getElementById('runningTotal').textContent=`$${total.toFixed(2)}`;let h=`<div class="totals-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount.amount>0)h+=`<div class="totals-row discount"><span>${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;h+=`<div class="totals-row"><span>GST (${config.taxes.gst}%)</span><span>$${totalGst.toFixed(2)}</span></div><div class="totals-row"><span>QST (${config.taxes.qst}%)</span><span>$${totalQst.toFixed(2)}</span></div><div class="totals-row grand"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;document.getElementById('totalsBlock').style.display='block';document.getElementById('totalsContent').innerHTML=h;renderLivePreview();triggerAutoSave();}
+function renderItems(){renderEditableInvoice();triggerAutoSave();}
 
-// ── Live Invoice Preview ──
-function renderLivePreview(){
-  const el=document.getElementById('livePreview');if(!el)return;
+// ── Editable Invoice ──
+function renderLivePreview(){renderEditableInvoice();}
+function renderEditableInvoice(){
+  const el=document.getElementById('editableInvoice');if(!el)return;
   const client=clients.find(c=>c.id===selectedClientId);
-  const invoiceNum=document.getElementById('invoiceNumber').value||'INV-XXXX-XXX';
-  const monthVal=document.getElementById('invoiceMonth').value;
+  const invoiceNum=document.getElementById('invoiceNumber')?.value||currentInvoiceNum||'INV-XXXX-XXX';
+  const monthVal=document.getElementById('invoiceMonth')?.value||`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`;
   const[year,month]=(monthVal||'').split('-');
-  const monthName=month?new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'}):'';
+  const monthLabel=month?new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'}):'';
   const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
-  const notes=document.getElementById('notes').value.trim();
-  if(!items.length){el.innerHTML='<div class="preview-empty">Your invoice preview will appear here as you add listings.</div>';return;}
-  const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0);
-  const totalGst=items.reduce((s,it)=>s+(it.gst||0),0);
-  const totalQst=items.reduce((s,it)=>s+(it.qst||0),0);
-  const discount=getClientDiscount(subtotal);
-  const total=subtotal-discount.amount+totalGst+totalQst;
-  el.innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);
+
+  // Build items rows
+  let rowsHtml='';
+  items.forEach((item,i)=>{
+    const details=[];
+    if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}
+    (item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));
+    if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);
+    if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);
+    if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);
+    rowsHtml+=`<tr class="inv-item-row" onclick="openListingModal(${i})"><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;
+  });
+
+  // Build totals
+  let totH='';
+  if(items.length){
+    const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0);
+    const totalGst=items.reduce((s,it)=>s+(it.gst||0),0);
+    const totalQst=items.reduce((s,it)=>s+(it.qst||0),0);
+    const discount=getClientDiscount(subtotal);
+    const total=subtotal-discount.amount+totalGst+totalQst;
+    totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;
+    if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;
+    totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;
+  }
+
+  // Get current notes value (preserve if element exists)
+  const existingNotes=el.querySelector('.inv-notes-edit');
+  const notesVal=existingNotes?existingNotes.value:currentNotesVal;
+
+  // Build client dropdown
+  let clientOpts=`<option value="" disabled${!selectedClientId?' selected':''}>Select client</option>`;
+  clients.forEach(c=>{const sel=c.id===selectedClientId?' selected':'';clientOpts+=`<option value="${c.id}"${sel}>${c.company?`${c.company}${c.name?' — '+c.name:''}`:(c.name||'(unnamed)')}</option>`;});
+
+  // Client info display
+  let clientInfo='';
+  if(client){
+    if(client.company)clientInfo+=`<div style="font-weight:600">${client.company}</div>`;
+    if(client.name)clientInfo+=`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`;
+    if(client.address)clientInfo+=`<div>${client.address}</div>`;
+    if(client.email||client.phone)clientInfo+=`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`;
+    if(client.taxNumbers)clientInfo+=`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`;
+  }
+
+  el.innerHTML=`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><input type="text" class="inv-edit-input inv-number-edit" id="invoiceNumber" value="${esc(invoiceNum)}" placeholder="INV-2026-001"><div>${issueDate}</div><div style="margin-top:4px;">Period: <span class="inv-period-inline"><button class="month-nav" onclick="shiftMonth(-1)">&lsaquo;</button><span id="monthLabel">${monthLabel}</span><button class="month-nav" onclick="shiftMonth(1)">&rsaquo;</button></span></div><input type="hidden" id="invoiceMonth" value="${monthVal}"></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div><div class="inv-client-select"><select id="clientSelect" onchange="selectedClientId=this.value;const c=clients.find(x=>x.id===selectedClientId);if(c?.defaultNotes){const n=document.querySelector('.inv-notes-edit');if(n)n.value=c.defaultNotes;}rebuildInvoiceTab();renderEditableInvoice();">${clientOpts}</select><button class="inv-client-add" onclick="openQuickClient()" title="New client">+</button></div>${clientInfo||'<div style="color:var(--text-3);font-style:italic;">No client selected</div>'}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><button class="inv-add-listing" onclick="openListingModal()">+ Add Listing</button>${items.length?`<div class="inv-totals">${totH}</div>`:''}<div class="inv-notes"><div class="inv-notes-label">Notes</div><textarea class="inv-notes-edit" id="notes" placeholder="Payment terms, special instructions..." oninput="triggerAutoSave()">${esc(notesVal)}</textarea></div><div class="inv-footer"><span>Thank you for your business.</span><span>${esc(invoiceNum)}</span></div>`;
+  // Re-attach invoice number listener
+  document.getElementById('invoiceNumber').addEventListener('input',()=>triggerAutoSave());
 }
 
 function buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes){let rowsHtml='';items.forEach(item=>{const details=[];if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}(item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);rowsHtml+=`<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;});let totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;return`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div>${issueDate}</div><div style="margin-top:4px;">Period: ${monthName}</div></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div>${client?.company?`<div style="font-weight:600">${client.company}</div>`:''}${client?.name?`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`:'<div>—</div>'}${client?.address?`<div>${client.address}</div>`:''}${client?.email||client?.phone?`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`:''}${client?.taxNumbers?`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`:''}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><div class="inv-totals">${totH}</div>${notes?`<div class="inv-notes"><div class="inv-notes-label">Notes</div>${notes}</div>`:''}<div class="inv-footer"><span>Thank you for your business.</span><span>${invoiceNum}</span></div>`;}
 
-function confirmSendInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId);const total=items.reduce((s,it)=>s+(it.total||0),0);const clientName=client?.company||client?.name||'No client selected';showConfirm('Send this invoice?',`${clientName} — ${items.length} listing${items.length!==1?'s':''} · $${total.toFixed(2)}. This will finalize the invoice.`,'Send Invoice',()=>generateInvoice(),'btn-send');}
-function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=document.getElementById('notes').value.trim();const monthVal=document.getElementById('invoiceMonth').value,invoiceNum=document.getElementById('invoiceNumber').value.trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
-let viewingInvoiceId=null;
+function confirmSendInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId);const total=items.reduce((s,it)=>s+(it.total||0),0);const clientName=client?.company||client?.name||'No client selected';const isEdit=!!editingInvoiceId;showConfirm(isEdit?'Update this invoice?':'Send this invoice?',`${clientName} — ${items.length} listing${items.length!==1?'s':''} · $${total.toFixed(2)}.${isEdit?' This will update the existing invoice.':' This will finalize the invoice.'}`,isEdit?'Update Invoice':'Send Invoice',()=>generateInvoice(),'btn-send');}
+function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=(document.getElementById('notes')?.value||'').trim();const monthVal=document.getElementById('invoiceMonth')?.value||`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`,invoiceNum=(document.getElementById('invoiceNumber')?.value||currentInvoiceNum||'').trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;if(editingInvoiceId){const idx=invoices.findIndex(i=>i.id===editingInvoiceId);if(idx>=0){const existing=invoices[idx];invoices[idx]={...existing,number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,notes,items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total};saveInvoices();viewingInvoiceId=editingInvoiceId;editingInvoiceId=null;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,existing.issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display=existing.status==='paid'?'none':'';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';showToast('Invoice updated');return;}}const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
+let viewingInvoiceId=null;let editingInvoiceId=null;
 function viewInvoice(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;viewingInvoiceId=id;const client=clients.find(c=>c.id===inv.clientId);document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(inv.number,inv.issueDate,inv.monthName,client,inv.items||[],inv.subtotal,inv.totalGst,inv.totalQst,inv.discount,inv.total,inv.notes);const paidBtn=document.getElementById('markPaidBtn');paidBtn.style.display=inv.status==='paid'?'none':'';paidBtn.textContent=inv.status==='sent'?'Mark as Paid':'Mark as Paid';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
 function markViewedInvoicePaid(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;inv.status='paid';saveInvoices();document.getElementById('markPaidBtn').style.display='none';showToast('Invoice marked as paid');}
-function openEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;document.getElementById('editInvNumber').value=inv.number||'';document.getElementById('editInvNotes').value=inv.notes||'';const sel=document.getElementById('editInvPeriod');let opts='';for(let mi=0;mi<12;mi++){for(const yr of[new Date().getFullYear()-1,new Date().getFullYear(),new Date().getFullYear()+1]){const val=`${yr}-${String(mi+1).padStart(2,'0')}`;const label=new Date(yr,mi).toLocaleDateString('en-CA',{month:'long',year:'numeric'});const selected=val===inv.month?' selected':'';opts+=`<option value="${val}"${selected}>${label}</option>`;}}sel.innerHTML=opts;document.getElementById('editInvoiceModal').classList.add('open');}
-function saveEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;const newNumber=document.getElementById('editInvNumber').value.trim();const newMonth=document.getElementById('editInvPeriod').value;const newNotes=document.getElementById('editInvNotes').value.trim();if(newNumber)inv.number=newNumber;if(newMonth){const[y,m]=newMonth.split('-');inv.month=newMonth;inv.monthName=new Date(y,m-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});}inv.notes=newNotes;saveInvoices();viewInvoice(viewingInvoiceId);closeEditInvoice();showToast('Invoice updated');}
-function closeEditInvoice(){document.getElementById('editInvoiceModal').classList.remove('open');}
-function backToApp(){document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';viewingInvoiceId=null;}
+function openEditInvoice(){if(!viewingInvoiceId)return;const inv=invoices.find(i=>i.id===viewingInvoiceId);if(!inv)return;editingInvoiceId=inv.id;currentDraftId=null;items.length=0;let invItems=inv.items||[];if(!Array.isArray(invItems))invItems=Object.values(invItems);invItems.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);items.push(JSON.parse(JSON.stringify(it)));});if(inv.clientId){selectedClientId=inv.clientId;rebuildInvoiceTab();}if(inv.month){const[y,m]=inv.month.split('-');pickerYear=parseInt(y);pickerMonth=parseInt(m)-1;}currentInvoiceNum=inv.number||'';currentNotesVal=inv.notes||'';renderEditableInvoice();document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';viewingInvoiceId=null;navigateTo('editor');}
+function backToApp(){document.getElementById('app').style.display='block';document.getElementById('view-invoice').style.display='none';viewingInvoiceId=null;navigateTo('invoicing');}
 function deleteInvoice(id){const inv=invoices.find(i=>i.id===id);showConfirm('Delete invoice?',`${inv?.clientName||'This invoice'} — $${(inv?.total||0).toFixed(2)}. This cannot be undone.`,'Delete',()=>{invoices=invoices.filter(i=>i.id!==id);saveInvoices();renderDashboard();showToast('Invoice deleted');});}
 
 let drafts=JSON.parse(localStorage.getItem('inv_drafts')||'[]');let currentDraftId=null;
 function saveDrafts(){localStorage.setItem('inv_drafts',JSON.stringify(drafts));firebaseSave('drafts',drafts);}
-function saveDraft(){const clientId=document.getElementById('clientSelect').value,month=document.getElementById('invoiceMonth').value,notes=document.getElementById('notes').value;if(!items.length)return;const data={clientId,month,notes,items:JSON.parse(JSON.stringify(items))};if(currentDraftId){const idx=drafts.findIndex(d=>d.id===currentDraftId);if(idx>=0)drafts[idx]={...drafts[idx],...data,updatedAt:Date.now()};}else{const draft={id:'d'+Date.now(),...data,savedAt:Date.now(),updatedAt:Date.now()};drafts.unshift(draft);currentDraftId=draft.id;}saveDrafts();showToast('Draft saved');}
-function loadDraft(id){const draft=drafts.find(d=>d.id===id);if(!draft)return;currentDraftId=draft.id;items.length=0;let draftItems=draft.items||[];if(!Array.isArray(draftItems))draftItems=Object.values(draftItems);draftItems.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);items.push(it);});if(draft.clientId){selectedClientId=draft.clientId;document.getElementById('clientSelect').value=draft.clientId;rebuildInvoiceTab();}if(draft.month){const[y,m]=draft.month.split('-');pickerYear=parseInt(y);pickerMonth=parseInt(m)-1;updateMonthPicker();}document.getElementById('notes').value=draft.notes||'';renderItems();navigateTo('editor');}
+function saveDraft(){const clientId=selectedClientId||'';const month=document.getElementById('invoiceMonth')?.value||`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`;const notes=document.getElementById('notes')?.value||'';if(!items.length)return;const data={clientId,month,notes,items:JSON.parse(JSON.stringify(items))};if(currentDraftId){const idx=drafts.findIndex(d=>d.id===currentDraftId);if(idx>=0)drafts[idx]={...drafts[idx],...data,updatedAt:Date.now()};}else{const draft={id:'d'+Date.now(),...data,savedAt:Date.now(),updatedAt:Date.now()};drafts.unshift(draft);currentDraftId=draft.id;}saveDrafts();showToast('Draft saved');}
+function loadDraft(id){const draft=drafts.find(d=>d.id===id);if(!draft)return;currentDraftId=draft.id;items.length=0;let draftItems=draft.items||[];if(!Array.isArray(draftItems))draftItems=Object.values(draftItems);draftItems.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);items.push(it);});if(draft.clientId){selectedClientId=draft.clientId;rebuildInvoiceTab();}if(draft.month){const[y,m]=draft.month.split('-');pickerYear=parseInt(y);pickerMonth=parseInt(m)-1;}currentNotesVal=draft.notes||'';renderEditableInvoice();navigateTo('editor');}
 function deleteDraft(id){showConfirm('Delete draft?','This draft will be permanently removed.','Delete',()=>{drafts=drafts.filter(d=>d.id!==id);if(currentDraftId===id)currentDraftId=null;saveDrafts();renderDashboard();showToast('Draft deleted');});}
-function newInvoice(){items.length=0;currentDraftId=null;editingIndex=null;selectedClientId=null;document.getElementById('clientSelect').value='';document.getElementById('invoiceNumber').value=`INV-${new Date().getFullYear()}-${String(invoiceSeq+1).padStart(3,'0')}`;document.getElementById('notes').value='';document.getElementById('address').value='';document.getElementById('unitNumber').value='';document.getElementById('travelResult').textContent='';currentTravel={distance:0,fee:0,calculated:false};const now=new Date();pickerYear=now.getFullYear();pickerMonth=now.getMonth();updateMonthPicker();rebuildInvoiceTab();renderItems();navigateTo('editor');}
+function newInvoice(){items.length=0;currentDraftId=null;editingInvoiceId=null;editingIndex=null;selectedClientId=null;currentInvoiceNum=`INV-${new Date().getFullYear()}-${String(invoiceSeq+1).padStart(3,'0')}`;currentNotesVal='';currentTravel={distance:0,fee:0,calculated:false};const now=new Date();pickerYear=now.getFullYear();pickerMonth=now.getMonth();rebuildInvoiceTab();renderEditableInvoice();navigateTo('editor');}
 
 function exportData(){const data={version:1,exportedAt:new Date().toISOString(),config:JSON.parse(localStorage.getItem('inv_config')||'null'),clients:JSON.parse(localStorage.getItem('inv_clients')||'[]'),drafts:JSON.parse(localStorage.getItem('inv_drafts')||'[]'),invoices:JSON.parse(localStorage.getItem('inv_invoices')||'[]')};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`lumeria-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);document.getElementById('dataStatus').textContent='Backup exported.';}
 function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!data.version)throw new Error('Invalid');if(data.config){config=data.config;saveConfig();}if(data.clients){clients=data.clients;saveClients();}if(data.drafts){drafts=data.drafts;saveDrafts();}if(data.invoices){invoices=data.invoices;saveInvoices();}rebuildClientDropdown();rebuildInvoiceTab();document.getElementById('dataStatus').textContent='Backup restored.';renderDataTab();}catch{document.getElementById('dataStatus').textContent='Invalid backup file.';}};reader.readAsText(file);e.target.value='';}
@@ -1251,7 +2303,7 @@ function renderDataTab(){const cCount=clients.length,dCount=drafts.length,iCount
 
 function openQuickClient(){document.getElementById('qcName').value='';document.getElementById('qcCompany').value='';document.getElementById('qcEmail').value='';document.getElementById('quickClientModal').classList.add('open');setTimeout(()=>document.getElementById('qcName').focus(),100);}
 function closeQuickClient(){document.getElementById('quickClientModal').classList.remove('open');}
-function saveQuickClient(){const name=document.getElementById('qcName').value.trim(),company=document.getElementById('qcCompany').value.trim(),email=document.getElementById('qcEmail').value.trim();if(!name&&!company){document.getElementById('qcName').focus();return;}const c={id:'c'+Date.now(),name,company,email,phone:'',contact:'',address:'',taxNumbers:'',defaultNotes:'',discount:{type:'%',value:0},overrides:{packages:{},addons:{}}};clients.push(c);saveClients();rebuildClientDropdown();document.getElementById('clientSelect').value=c.id;selectedClientId=c.id;rebuildInvoiceTab();closeQuickClient();showToast('Client added');}
+function saveQuickClient(){const name=document.getElementById('qcName').value.trim(),company=document.getElementById('qcCompany').value.trim(),email=document.getElementById('qcEmail').value.trim();if(!name&&!company){document.getElementById('qcName').focus();return;}const c={id:'c'+Date.now(),name,company,email,phone:'',contact:'',address:'',taxNumbers:'',defaultNotes:'',discount:{type:'%',value:0},overrides:{packages:{},addons:{}}};clients.push(c);saveClients();selectedClientId=c.id;rebuildInvoiceTab();renderEditableInvoice();closeQuickClient();showToast('Client added');}
 document.getElementById('quickClientModal').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveQuickClient();}if(e.key==='Escape')closeQuickClient();});
 
 // ── Confirm modal ──
@@ -1263,8 +2315,8 @@ document.getElementById('confirmYes').addEventListener('click',()=>{if(confirmCa
 // ── Auto-save drafts ──
 let autoSaveTimer=null;
 function triggerAutoSave(){if(autoSaveTimer)clearTimeout(autoSaveTimer);autoSaveTimer=setTimeout(()=>performAutoSave(),1500);}
-function performAutoSave(){if(!items.length||currentView!=='editor')return;const data={clientId:document.getElementById('clientSelect').value,month:document.getElementById('invoiceMonth').value,notes:document.getElementById('notes').value,items:JSON.parse(JSON.stringify(items))};if(currentDraftId){const idx=drafts.findIndex(d=>d.id===currentDraftId);if(idx>=0)drafts[idx]={...drafts[idx],...data,updatedAt:Date.now()};}else{const draft={id:'d'+Date.now(),...data,savedAt:Date.now(),updatedAt:Date.now()};drafts.unshift(draft);currentDraftId=draft.id;}saveDrafts();const el=document.getElementById('autosaveStatus');if(el){el.textContent='Saved';el.style.opacity='1';setTimeout(()=>{el.style.opacity='0';},2000);}}
-function startAutoSave(){document.getElementById('clientSelect').addEventListener('change',triggerAutoSave);document.getElementById('notes').addEventListener('input',triggerAutoSave);document.getElementById('invoiceMonth').addEventListener('change',triggerAutoSave);}
+function performAutoSave(){if(!items.length||currentView!=='editor')return;const data={clientId:selectedClientId||'',month:document.getElementById('invoiceMonth')?.value||`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`,notes:document.getElementById('notes')?.value||'',items:JSON.parse(JSON.stringify(items))};if(currentDraftId){const idx=drafts.findIndex(d=>d.id===currentDraftId);if(idx>=0)drafts[idx]={...drafts[idx],...data,updatedAt:Date.now()};}else{const draft={id:'d'+Date.now(),...data,savedAt:Date.now(),updatedAt:Date.now()};drafts.unshift(draft);currentDraftId=draft.id;}saveDrafts();const el=document.getElementById('autosaveStatus');if(el){el.textContent='Saved';el.style.opacity='1';setTimeout(()=>{el.style.opacity='0';},2000);}}
+function startAutoSave(){/* Auto-save triggers are handled inline in renderEditableInvoice */}
 
 function toggleTheme(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',isDark?'':'dark');localStorage.setItem('inv_theme',isDark?'light':'dark');const btn=document.getElementById('themeBtn');btn.innerHTML=isDark?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}
 (function(){const saved=localStorage.getItem('inv_theme');const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;if(saved==='dark'||(!saved&&prefersDark)){document.documentElement.setAttribute('data-theme','dark');document.getElementById('themeBtn').innerHTML='<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}})();
