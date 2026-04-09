@@ -289,7 +289,6 @@
     border: 1px solid var(--border);
     transition: all var(--t-smooth);
   }
-  .dash-stat-card:hover { border-color: var(--text-3); }
   .dash-stat-top {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
   }
@@ -349,6 +348,16 @@
     transition: all var(--t-fast); cursor: pointer;
   }
   .chart-dot:hover { r: 6; fill: var(--accent); }
+  .chart-val {
+    font-size: 9px; fill: var(--text-3); font-weight: 500; opacity: 0;
+    transition: all var(--t-fast); font-variant-numeric: tabular-nums;
+  }
+  .chart-val.show { opacity: 0.7; }
+  .chart-dot-group:hover .chart-val { opacity: 1; fill: var(--text); }
+  .chart-month {
+    font-size: 9px; fill: var(--text-3); font-weight: 400; letter-spacing: 0.2px;
+  }
+  .chart-month.current { fill: var(--text); font-weight: 600; }
   .chart-dot-group:hover .chart-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
   .chart-tooltip {
     position: absolute; top: -8px; left: 50%; transform: translateX(-50%) translateY(4px);
@@ -357,12 +366,9 @@
     opacity: 0; transition: all var(--t-fast); pointer-events: none;
     font-variant-numeric: tabular-nums;
   }
-  .chart-labels {
-    display: flex; justify-content: space-between; padding: 8px 0 0;
-  }
   .chart-label {
     font-size: 10px; color: var(--text-3); font-weight: 400; letter-spacing: 0.2px;
-    text-align: center; flex: 1;
+    text-align: center;
   }
   .chart-label.current { color: var(--accent); font-weight: 600; }
 
@@ -1673,22 +1679,26 @@ function renderDashboard(){
     if(dMonth===thisMonth){monthRevenue+=dTotal;monthTaxGst+=dGst;monthTaxQst+=dQst;}
     if(dMonth===lastMonth)lastMonthRevenue+=dTotal;
   });
-  // Revenue trend: last 6 months
-  const trendMonths=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
+  // Revenue trend: last 12 months
+  const trendMonths=[];for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
   invoices.forEach(inv=>{const m=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
   drafts.forEach(d=>{const m=d.month||'';const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=(d.items||[]).reduce((s,it)=>s+(it.total||0),0);});
   const maxRev=Math.max(...trendMonths.map(t=>t.revenue),1);
   const trendTotal=trendMonths.reduce((s,t)=>s+t.revenue,0);
 
+  // Chart layout constants
+  const cLeft=10, cRight=890, cTop=24, cBot=140;
+  const cW=cRight-cLeft, cH=cBot-cTop;
+
   // Build chart points for SVG area chart
   const chartPts = trendMonths.map((t, i) => {
-    const x = 30 + i * (440 / (trendMonths.length - 1));
-    const y = maxRev > 0 ? 150 - (t.revenue / maxRev) * 120 : 145;
+    const x = cLeft + i * (cW / (trendMonths.length - 1));
+    const y = maxRev > 0 ? cBot - (t.revenue / maxRev) * cH : cBot - 2;
     return { x, y, val: t.revenue };
   });
   function smoothPath(pts) {
     if (pts.length < 2) return '';
-    const clamp = v => Math.min(150, Math.max(10, v));
+    const clamp = v => Math.min(cBot, Math.max(cTop - 4, v));
     let d = `M${pts[0].x},${pts[0].y}`;
     for (let i = 0; i < pts.length - 1; i++) {
       const p0 = pts[Math.max(0, i - 1)];
@@ -1704,8 +1714,24 @@ function renderDashboard(){
     return d;
   }
   const linePath = smoothPath(chartPts);
-  const areaPath = linePath + ` L${chartPts[chartPts.length-1].x},150 L${chartPts[0].x},150 Z`;
-  const chartDots = chartPts.map((p, i) => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" data-val="${p.val}"/>`).join('');
+  const areaPath = linePath + ` L${chartPts[chartPts.length-1].x},${cBot} L${chartPts[0].x},${cBot} Z`;
+  const chartDots = chartPts.map((p, i) => {
+    const label = p.val >= 1000 ? `$${(p.val/1000).toFixed(1)}k` : `$${p.val.toFixed(0)}`;
+    const ty = p.y <= cTop + 18 ? p.y + 20 : p.y - 12;
+    const showLabel = p.val > 0;
+    return `<g class="chart-dot-group"><circle class="chart-dot" cx="${p.x}" cy="${p.y}"/>${showLabel ? `<text class="chart-val show" x="${p.x}" y="${ty}" text-anchor="middle">${label}</text>` : ''}</g>`;
+  }).join('');
+  const chartMonthLabels = chartPts.map((p, i) => {
+    const isCurrent = i === chartPts.length - 1;
+    const showLabel = i === 0 || isCurrent || i % 2 === 1;
+    if (!showLabel) return '';
+    return `<text class="chart-month${isCurrent ? ' current' : ''}" x="${p.x}" y="${cBot + 18}" text-anchor="middle">${trendMonths[i].label}</text>`;
+  }).join('');
+  // Grid lines only (no Y-axis labels)
+  const chartGrid = [0.5].map(s => {
+    const y = cTop + s * cH;
+    return `<line class="chart-grid-line" x1="${cLeft}" y1="${y}" x2="${cRight}" y2="${y}"/>`;
+  }).join('');
 
   // Build items list
   const allItems=[];
@@ -1788,23 +1814,19 @@ function renderDashboard(){
         <div class="dash-chart-total">$${trendTotal.toLocaleString('en-CA',{minimumFractionDigits:0})} total</div>
       </div>
       <div class="chart-wrap">
-        <svg class="chart-svg" viewBox="0 0 500 160" preserveAspectRatio="xMidYMid meet">
+        <svg class="chart-svg" viewBox="0 0 900 165" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.5"/>
               <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
             </linearGradient>
           </defs>
-          <line class="chart-grid-line" x1="30" y1="30" x2="470" y2="30"/>
-          <line class="chart-grid-line" x1="30" y1="80" x2="470" y2="80"/>
-          <line class="chart-grid-line" x1="30" y1="130" x2="470" y2="130"/>
+          ${chartGrid}
           <path class="chart-area" d="${areaPath}"/>
           <path class="chart-line" d="${linePath}"/>
           ${chartDots}
+          ${chartMonthLabels}
         </svg>
-      </div>
-      <div class="chart-labels">
-        ${trendMonths.map((t,i)=>`<span class="chart-label${i===trendMonths.length-1?' current':''}">${t.label}</span>`).join('')}
       </div>
     </div>
     <div class="dash-list-card dash-animate">
