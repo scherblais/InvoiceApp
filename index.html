@@ -375,14 +375,25 @@
 
   .dash-new-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 16px; background: var(--accent); border: none;
-    border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
-    font-size: 12px; font-weight: 600; color: var(--accent-text); transition: all var(--t-fast);
-    letter-spacing: 0px; flex-shrink: 0;
+    padding: 7px 16px; color: #fff;
+    background: linear-gradient(180deg, rgb(41, 41, 41) 0%, rgb(20, 20, 20) 100%);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px; cursor: pointer; font-family: inherit;
+    font-size: 12px; font-weight: 500; transition: all var(--t-fast);
+    letter-spacing: -0.01em; flex-shrink: 0;
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.2), inset 0px 2px 0px 0px rgba(255,255,255,0.12);
   }
-  .dash-new-btn:hover { background: var(--accent-hover); }
+  .dash-new-btn:hover { background: linear-gradient(180deg, rgb(50, 50, 50) 0%, rgb(30, 30, 30) 100%); }
   .dash-new-btn:active { transform: scale(0.98); }
   .dash-new-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+  [data-theme="dark"] .dash-new-btn {
+    background: linear-gradient(180deg, rgb(255,255,255) 0%, rgb(235,235,235) 100%);
+    color: #111; border-color: rgba(255,255,255,0.15);
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.3), inset 0px 1px 0px 0px rgba(255,255,255,0.5);
+  }
+  [data-theme="dark"] .dash-new-btn:hover {
+    background: linear-gradient(180deg, rgb(240,240,240) 0%, rgb(225,225,225) 100%);
+  }
 
   .dash-list-card {
     background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border);
@@ -485,20 +496,48 @@
   }
   .inv-period-inline .month-nav:hover { border-color: var(--border); color: var(--accent); }
 
+  /* Custom dropdowns */
+  .custom-dropdown { position: relative; }
+  .custom-dropdown-trigger {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-card); color: inherit;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--t-fast);
+    font-family: inherit; width: 100%;
+  }
+  .custom-dropdown-trigger:hover { border-color: var(--text-3); }
+  .custom-dropdown-trigger.open { border-color: var(--accent); background: var(--bg-inset); }
+  .custom-dropdown-trigger span { flex: 1; text-align: left; }
+  .custom-dropdown-trigger svg { width: 12px; height: 12px; stroke: var(--text-3); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform var(--t-fast); }
+  .custom-dropdown-trigger.open svg { transform: rotate(180deg); }
+  .custom-dropdown-menu {
+    display: none; position: absolute; top: 100%; left: 0; right: 0; min-width: 100%; z-index: 20;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: var(--shadow-float); padding: 4px; margin-top: 4px;
+    max-height: 220px; overflow-y: auto;
+  }
+  .custom-dropdown-menu.open { display: block; }
+  .custom-dropdown-option {
+    padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    font-family: inherit; transition: background var(--t-fast); color: var(--text-1);
+  }
+  .custom-dropdown-option:hover { background: var(--bg-inset); }
+  .custom-dropdown-option.selected { background: var(--accent-light); font-weight: 600; }
+  .custom-dropdown-option .opt-sub { color: var(--text-3); font-size: 12px; }
+
   /* Client selector in Bill To */
   .inv-client-select {
-    display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px; margin: -2px 0 2px -8px; position: relative;
   }
-  .inv-client-select select {
-    flex: 1; font-size: 12px; padding: 4px 8px; border-radius: 4px;
-    border: 1px solid transparent; background: transparent; color: inherit;
-    font-weight: 600; cursor: pointer; transition: border-color var(--t-fast);
-    font-family: inherit;
+  .inv-client-select .custom-dropdown-trigger {
+    border: 1px solid transparent; background: transparent;
+    font-weight: 600; padding: 3px 8px; border-radius: 6px; line-height: 1.8; width: auto;
   }
-  .inv-client-select select:hover { border-color: var(--border); }
-  .inv-client-select select:focus { border-color: var(--accent); outline: none; background: var(--bg-inset); }
+  .inv-client-select .custom-dropdown-trigger:hover { border-color: var(--border); background: var(--bg-inset); }
+  .inv-client-select .custom-dropdown-trigger.open { border-color: var(--accent); background: var(--bg-inset); }
+  .inv-client-select .custom-dropdown-menu { min-width: 260px; }
   .inv-client-add {
-    background: none; border: 1px solid var(--border); border-radius: 4px;
+    background: none; border: 1px solid var(--border); border-radius: 6px;
     font-size: 14px; cursor: pointer; color: var(--text-3); padding: 2px 8px;
     transition: all var(--t-fast); line-height: 1; font-family: inherit;
   }
@@ -507,6 +546,33 @@
   /* Editable items table */
   .inv-table .inv-item-row { transition: background var(--t-fast); cursor: pointer; }
   .inv-table .inv-item-row:hover { background: var(--bg-inset); }
+  .reorder-toggle {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; font-weight: 500; color: var(--text-3);
+    cursor: pointer; transition: all var(--t-fast); font-family: inherit;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .reorder-toggle:hover { border-color: var(--text-3); color: var(--text-2); }
+  .reorder-toggle.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .reorder-toggle svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .inv-item-row .move-btns { display: none; }
+  .inv-table.reorder-mode .inv-item-row { cursor: default; }
+  .inv-table.reorder-mode .inv-item-row:hover { background: transparent; }
+  .inv-table.reorder-mode .move-btns {
+    display: flex; gap: 4px; margin-left: 10px;
+  }
+  .move-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg-card); color: var(--text-2); cursor: pointer;
+    transition: all var(--t-fast); padding: 0;
+  }
+  .move-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .move-btn:active { transform: scale(0.92); }
+  .move-btn:disabled { opacity: 0.2; cursor: default; transform: none; }
+  .move-btn:disabled:hover { border-color: var(--border); color: var(--text-2); background: var(--bg-card); }
+  .move-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
   /* Add listing button in invoice */
   .inv-add-listing {
@@ -610,22 +676,32 @@
   .row { display: flex; gap: 12px; }
   .row > * { flex: 1; }
 
-  /* Buttons */
+  /* Buttons — Cal.com style */
   .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 10px 20px; background: var(--accent); color: var(--accent-text);
-    border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 24px; color: #fff;
+    background: linear-gradient(180deg, rgb(41, 41, 41) 0%, rgb(20, 20, 20) 100%);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px; font-size: 14px; font-weight: 500;
     cursor: pointer; transition: all var(--t-fast); width: auto;
-    letter-spacing: 0px; font-family: inherit;
+    letter-spacing: -0.01em; font-family: inherit;
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.2), inset 0px 2px 0px 0px rgba(255,255,255,0.12);
+    position: relative;
   }
-  .btn:hover { background: var(--accent-hover); }
+  .btn::after { content: '\203A'; font-size: 18px; font-weight: 400; line-height: 1; opacity: 0.5; transition: all var(--t-fast); margin-left: 2px; }
+  .btn:hover { background: linear-gradient(180deg, rgb(50, 50, 50) 0%, rgb(30, 30, 30) 100%); }
+  .btn:hover::after { transform: translateX(2px); opacity: 0.7; }
   .btn:active { transform: scale(0.98); }
   .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
   .btn-outline {
-    background: var(--bg-card); color: var(--text-2); border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgb(255,255,255) 0%, rgb(244,244,245) 100%);
+    color: var(--text-1); border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.06), inset 0px 1px 0px 0px rgba(255,255,255,0.8);
   }
-  .btn-outline:hover { border-color: var(--text-3); background: var(--bg-inset); }
-  .btn-sm { padding: 7px 16px; font-size: 12px; width: auto; border-radius: var(--radius-sm); }
+  .btn-outline::after { color: var(--text-3); }
+  .btn-outline:hover { background: linear-gradient(180deg, rgb(248,248,249) 0%, rgb(240,240,241) 100%); }
+  .btn-sm { padding: 7px 16px; font-size: 12px; width: auto; border-radius: 10px; }
+  .btn-no-arrow::after { display: none; }
   .btn-row { display: flex; gap: 10px; }
   .btn-row .btn { flex: 1; }
 
@@ -667,6 +743,7 @@
     display: flex; align-items: center; gap: 10px;
     padding: 10px 14px; cursor: pointer; transition: background var(--t-fast);
     user-select: none; font-family: inherit; border-bottom: 1px solid var(--border-subtle);
+    min-height: 51px; box-sizing: border-box;
   }
   .addon-row:last-child { border-bottom: none; }
   .addon-row:hover { background: var(--bg-inset); }
@@ -681,14 +758,15 @@
   }
   .addon-row .addon-check svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
   .addon-row.selected .addon-check svg { opacity: 1; }
-  .addon-row .addon-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 400; }
+  .addon-row .addon-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .addon-row .addon-price { font-size: 12px; color: var(--text-3); font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .addon-stepper {
-    display: none; align-items: center; gap: 0;
+    display: flex; align-items: center; gap: 0;
     border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
     background: var(--bg-card); flex-shrink: 0;
+    visibility: hidden; opacity: 0; transition: opacity var(--t-fast);
   }
-  .addon-row.selected .addon-stepper { display: flex; }
+  .addon-row.selected .addon-stepper { visibility: visible; opacity: 1; }
   .addon-stepper-btn {
     width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
     background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-3);
@@ -852,6 +930,25 @@
   [data-theme="dark"] .toast-undo { background: rgba(0,0,0,0.08); }
   [data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.15); }
 
+  [data-theme="dark"] .btn {
+    background: linear-gradient(180deg, rgb(255,255,255) 0%, rgb(235,235,235) 100%);
+    color: #111; border-color: rgba(255,255,255,0.15);
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.3), inset 0px 1px 0px 0px rgba(255,255,255,0.5);
+  }
+  [data-theme="dark"] .btn:hover {
+    background: linear-gradient(180deg, rgb(240,240,240) 0%, rgb(225,225,225) 100%);
+  }
+  [data-theme="dark"] .btn::after { color: #111; }
+  [data-theme="dark"] .btn-outline {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+    color: var(--text-1); border-color: rgba(255,255,255,0.12);
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.3), inset 0px 1px 0px 0px rgba(255,255,255,0.06);
+  }
+  [data-theme="dark"] .btn-outline::after { color: var(--text-3); }
+  [data-theme="dark"] .btn-outline:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.05) 100%);
+  }
+
   /* Login */
   .login-screen {
     display: flex; align-items: center; justify-content: center;
@@ -930,21 +1027,31 @@
     display: flex; flex-direction: column; flex: 1; min-height: 0;
   }
   .cal-header {
-    display: flex; align-items: center; justify-content: center;
-    padding: 10px 24px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px; flex-shrink: 0;
   }
-  .cal-nav { display: flex; align-items: center; gap: 6px; }
-  .cal-nav-btn {
-    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
-    background: var(--bg-card); color: var(--text-2); cursor: pointer; display: flex;
-    align-items: center; justify-content: center; font-size: 18px; transition: all var(--t-fast);
-  }
-  .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-  .cal-nav-btn:active { transform: scale(0.92); }
+  .cal-header-left { display: flex; align-items: center; gap: 8px; }
   .cal-month-label {
-    font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px;
-    min-width: 170px; text-align: center; user-select: none;
+    font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.2px;
+    user-select: none; white-space: nowrap;
   }
+  .cal-header-right { display: flex; align-items: center; gap: 8px; }
+  .cal-today-btn {
+    padding: 6px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--bg-card); font-size: 12px; font-weight: 600; color: var(--text);
+    cursor: pointer; transition: all var(--t-fast); font-family: inherit;
+  }
+  .cal-today-btn:hover { background: var(--bg-inset); border-color: var(--text-3); }
+  .cal-nav { display: flex; align-items: center; gap: 0; }
+  .cal-nav-btn {
+    width: 32px; height: 32px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-2); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 16px; transition: all var(--t-fast);
+  }
+  .cal-nav-btn:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); border-right: none; }
+  .cal-nav-btn:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .cal-nav-btn:hover { background: var(--bg-inset); color: var(--text); }
+  .cal-nav-btn:active { transform: scale(0.95); }
   .cal-grid {
     flex: 1; display: flex; flex-direction: column;
     background: var(--bg-card); border-top: 1px solid var(--border);
@@ -1085,90 +1192,85 @@
   .cal-time-row { display: flex; gap: 8px; }
   .cal-time-row input, .cal-time-row select { flex: 1; }
   /* View toggle */
-  .cal-toolbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 20px; flex-shrink: 0; gap: 12px;
-  }
   .cal-view-toggle {
-    display: flex; background: var(--bg-inset); border-radius: var(--radius-sm);
-    padding: 3px; gap: 2px; border: 1px solid var(--border);
+    display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
   }
   .cal-view-btn {
-    padding: 5px 14px; border-radius: 6px; border: none; background: none;
-    font-size: 11px; font-weight: 600; color: var(--text-3); cursor: pointer;
-    transition: all var(--t-fast); letter-spacing: 0.3px;
+    padding: 6px 10px; border: none; background: none; border-right: 1px solid var(--border);
+    color: var(--text-3); cursor: pointer; transition: all var(--t-fast);
+    display: flex; align-items: center; justify-content: center;
   }
-  .cal-view-btn:hover { color: var(--text-2); }
-  .cal-view-btn.active { background: var(--bg-card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  [data-theme="dark"] .cal-view-btn.active { box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-  .cal-today-link {
-    font-size: 11px; font-weight: 600; color: var(--accent); cursor: pointer;
-    padding: 5px 12px; border-radius: 6px; border: 1px solid transparent;
-    background: none; transition: all var(--t-fast);
-  }
-  .cal-today-link:hover { background: var(--accent-light); border-color: var(--accent); }
-  .cal-shortcuts-hint {
-    font-size: 10px; color: var(--text-3); opacity: 0.6; letter-spacing: 0.3px;
-  }
+  .cal-view-btn:last-child { border-right: none; }
+  .cal-view-btn:hover { color: var(--text-2); background: var(--bg-inset); }
+  .cal-view-btn.active { background: var(--bg-inset); color: var(--text); }
+  .cal-view-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Week view */
-  .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); border-top: 1px solid var(--border); }
+  .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
   .cal-week-header {
-    display: grid; grid-template-columns: 48px repeat(7, 1fr);
+    display: grid; grid-template-columns: 56px repeat(7, 1fr);
     border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-  .cal-week-header-cell {
-    text-align: center; padding: 8px 2px; font-size: 10px; font-weight: 700;
-    letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3);
+  .cal-week-header-tz {
+    font-size: 9px; color: var(--text-3); font-weight: 500;
+    display: flex; align-items: flex-end; justify-content: center; padding: 0 0 8px;
   }
-  .cal-week-header-cell.today { color: var(--accent); }
+  .cal-week-header-cell {
+    text-align: center; padding: 10px 2px 8px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3);
+    border-left: 1px solid var(--border);
+  }
+  .cal-week-header-cell.today { color: var(--text); }
   .cal-week-header-date {
-    font-size: 18px; font-weight: 700; letter-spacing: -0.5px;
-    color: var(--text); display: block; margin-top: 2px; text-transform: none;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+    color: var(--text); display: block; margin-top: 3px; text-transform: none;
   }
   .cal-week-header-cell.today .cal-week-header-date {
-    background: var(--accent); color: var(--accent-text); width: 30px; height: 30px;
+    background: var(--accent); color: var(--accent-text); width: 32px; height: 32px;
     border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-    font-size: 15px;
+    font-size: 16px;
   }
   .cal-week-body { flex: 1; display: flex; overflow-y: auto; }
-  .cal-week-gutter-col { width: 48px; flex-shrink: 0; }
+  .cal-week-gutter-col { width: 56px; flex-shrink: 0; }
   .cal-week-gutter {
-    font-size: 9px; color: var(--text-3); text-align: right; padding-right: 8px;
-    position: relative; height: 60px; border-right: 1px solid var(--border);
+    font-size: 10px; color: var(--text-3); text-align: right; padding-right: 10px;
+    position: relative; height: 60px;
   }
-  .cal-week-gutter span { position: absolute; top: -6px; right: 8px; }
+  .cal-week-gutter span { position: absolute; top: -7px; right: 10px; font-weight: 400; }
   .cal-week-cols { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); }
-  .cal-week-col { position: relative; border-right: 1px solid var(--border); }
-  .cal-week-col:last-child { border-right: none; }
+  .cal-week-col { position: relative; border-left: 1px solid var(--border); }
+  .cal-week-col.weekend { background: var(--bg-inset); }
   .cal-week-hour {
     height: 60px; border-bottom: 1px solid var(--border-subtle);
     cursor: pointer; transition: background var(--t-fast);
   }
   .cal-week-hour:hover { background: var(--accent-light); }
   .cal-week-event {
-    position: absolute; left: 2px; right: 2px; border-radius: 4px;
-    padding: 3px 6px; font-size: 10px; font-weight: 500; cursor: pointer;
+    position: absolute; left: 3px; right: 3px; border-radius: 5px;
+    padding: 4px 8px; font-size: 11px; font-weight: 500; cursor: pointer;
     overflow: hidden; border-left: 3px solid; z-index: 2;
-    transition: all var(--t-fast); line-height: 1.3;
+    transition: all var(--t-fast); line-height: 1.4;
   }
   .cal-week-event:hover { filter: brightness(1.08); z-index: 3; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
   .cal-week-ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cal-week-ev-time { opacity: 0.7; font-size: 9px; }
+  .cal-week-ev-time { opacity: 0.7; font-size: 10px; }
   .cal-week-now {
-    position: absolute; left: 0; right: 0; height: 2px; background: var(--accent);
+    position: absolute; left: 0; right: 0; height: 2px; background: #ef4444;
     z-index: 5; pointer-events: none;
   }
   .cal-week-now::before {
-    content: ''; position: absolute; left: -4px; top: -3px;
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    content: ''; position: absolute; left: -5px; top: -4px;
+    width: 10px; height: 10px; border-radius: 50%; background: #ef4444;
+  }
+  .cal-week-now-label {
+    position: absolute; left: -56px; top: -7px; font-size: 10px; font-weight: 600;
+    color: #ef4444; width: 50px; text-align: right; pointer-events: none; z-index: 5;
   }
   .cal-week-allday {
-    display: grid; grid-template-columns: 48px repeat(7, 1fr);
+    display: grid; grid-template-columns: 56px repeat(7, 1fr);
     border-bottom: 1px solid var(--border); min-height: 0;
   }
-  .cal-week-allday-label { font-size: 9px; color: var(--text-3); padding: 4px 6px; text-align: right; border-right: 1px solid var(--border); }
-  .cal-week-allday-cell { padding: 2px; border-right: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 2px; }
-  .cal-week-allday-cell:last-child { border-right: none; }
+  .cal-week-allday-label { font-size: 9px; color: var(--text-3); padding: 4px 6px; text-align: right; }
+  .cal-week-allday-cell { padding: 2px; border-left: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 2px; }
   /* Agenda view */
   .cal-agenda { flex: 1; overflow-y: auto; background: var(--bg-card); border-top: 1px solid var(--border); }
   .cal-agenda-empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
@@ -1254,7 +1356,11 @@
     .status-pill { font-size: 9px; padding: 2px 7px; }
     .inv-aging { font-size: 9px; padding: 1px 6px; }
     .cal-fullscreen { height: calc(100vh - 56px); }
-    .cal-header { padding: 6px 12px; }
+    .cal-header { padding: 8px 12px; }
+    .cal-header-right { gap: 6px; }
+    .cal-month-label { font-size: 12px; }
+    .cal-today-btn { padding: 4px 10px; font-size: 11px; }
+    .cal-nav-btn { width: 28px; height: 28px; font-size: 14px; }
     .cal-day { padding: 3px 2px 2px; }
     .cal-day-num { font-size: 11px; width: 22px; height: 22px; }
     .cal-day.today .cal-day-num { box-shadow: 0 1px 4px rgba(24,24,27,0.15); }
@@ -1262,22 +1368,20 @@
     .cal-ev-dot { width: 5px; height: 5px; }
     .cal-ev-time { font-size: 9px; }
     .cal-ev-label { font-size: 9px; }
-    .cal-month-label { font-size: 15px; min-width: 130px; }
-    .cal-nav-btn { width: 32px; height: 32px; font-size: 16px; }
     .cal-weekday { font-size: 9px; padding: 6px 0; letter-spacing: 0.5px; }
     .cal-day-popup { width: 220px; padding: 12px; left: 50%; }
     .cal-more { font-size: 8px; padding: 0 4px; }
-    .cal-toolbar { padding: 4px 12px; gap: 8px; }
-    .cal-view-btn { padding: 4px 10px; font-size: 10px; }
-    .cal-today-link { font-size: 10px; padding: 4px 8px; }
-    .cal-shortcuts-hint { display: none; }
-    .cal-week-gutter-col { width: 36px; }
-    .cal-week-gutter { font-size: 8px; }
-    .cal-week-gutter span { right: 3px; }
-    .cal-week-header { grid-template-columns: 36px repeat(7, 1fr); }
-    .cal-week-allday { grid-template-columns: 36px repeat(7, 1fr); }
+    .cal-view-btn { padding: 4px 8px; }
+    .cal-view-btn svg { width: 14px; height: 14px; }
+    .cal-week-gutter-col { width: 40px; }
+    .cal-week-gutter { font-size: 9px; }
+    .cal-week-gutter span { right: 4px; }
+    .cal-week-header { grid-template-columns: 40px repeat(7, 1fr); }
+    .cal-week-header-tz { font-size: 8px; }
+    .cal-week-allday { grid-template-columns: 40px repeat(7, 1fr); }
     .cal-week-header-cell { font-size: 9px; padding: 6px 1px; }
     .cal-week-header-date { font-size: 14px; }
+    .cal-week-now-label { left: -40px; font-size: 9px; width: 36px; }
     .cal-week-event { font-size: 9px; padding: 2px 4px; }
     .cal-agenda-event { padding: 10px 14px; gap: 10px; }
     .cal-agenda-day-header { padding: 10px 14px; }
@@ -1319,7 +1423,7 @@
     <div class="field"><div class="label">Email</div><input type="text" id="qcEmail" placeholder="Email (optional)"></div>
     <div class="btn-row">
       <button class="btn" onclick="saveQuickClient()">Add Client</button>
-      <button class="btn btn-outline" onclick="closeQuickClient()">Cancel</button>
+      <button class="btn btn-outline btn-no-arrow" onclick="closeQuickClient()">Cancel</button>
     </div>
   </div>
 </div>
@@ -1367,8 +1471,7 @@
         <div class="invoice" id="editableInvoice"></div>
         <div class="editor-actions">
           <button class="btn" id="editorSendBtn" onclick="confirmSendInvoice()">Send Invoice</button>
-          <button class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
-          <button class="btn btn-outline" id="editorCancelBtn" onclick="cancelEditor()" style="color:var(--text-3);">Cancel</button>
+          <button class="btn btn-outline btn-no-arrow" id="editorCancelBtn" onclick="cancelEditor()" style="color:var(--text-3);">Cancel</button>
           <div class="autosave-inline" id="autosaveStatus"></div>
         </div>
       </div>
@@ -1382,13 +1485,13 @@
       <div class="listing-modal-form">
         <div class="field"><div class="label">Address</div><div class="addr-wrap"><input type="text" id="address" placeholder="e.g. 1000 Lumeria Ave, Montreal, QC" autocomplete="off"><div class="addr-suggestions" id="addrSuggestions"></div></div><div id="travelResult" class="travel-result"></div></div>
         <div class="field"><div class="label">Apt / Unit # (optional)</div><input type="text" id="unitNumber" placeholder="e.g. Apt 3, Suite 200"></div>
-        <div class="field"><div class="label">Package (optional)</div><select id="packageSelect"><option value="">No package (a la carte)</option></select></div>
+        <div class="field"><div class="label">Package (optional)</div><div class="custom-dropdown"><button type="button" class="custom-dropdown-trigger" onclick="toggleDropdown('packageDropdown',this)" id="packageTrigger"><span>No package (a la carte)</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="custom-dropdown-menu" id="packageDropdown"></div></div><input type="hidden" id="packageSelect" value=""></div>
         <div class="field" id="extrasField" style="display:none;"><div class="label" id="extrasLabel">Additional</div><input type="number" id="extrasQty" min="0" value="0"></div>
         <div class="field"><div class="label">Add-ons</div><div class="addon-list" id="addonsGrid"></div></div>
         <div class="btn-row" style="margin-top:16px;">
           <button class="btn" id="addItemBtn" onclick="addItem()">Add Listing</button>
-          <button class="btn btn-outline" id="cancelEditBtn" onclick="cancelEdit();closeListingModal();" style="display:none;">Cancel Edit</button>
-          <button class="btn btn-outline" onclick="closeListingModal()">Close</button>
+          <button class="btn btn-outline btn-no-arrow" id="cancelEditBtn" onclick="cancelEdit();closeListingModal();" style="display:none;">Cancel Edit</button>
+          <button class="btn btn-outline btn-no-arrow" onclick="closeListingModal()">Close</button>
           <button class="btn-remove-listing" id="removeListingBtn" onclick="removeItem(editingIndex);closeListingModal();" style="display:none;">Remove Listing</button>
         </div>
       </div>
@@ -1417,10 +1520,10 @@
       <div id="settings-account" class="settings-panel">
         <div class="settings-card">
           <div class="cfg-section"><div class="section-title">Backup & Restore</div><p style="font-size:13px;color:var(--text-3);margin-bottom:14px;line-height:1.6;">Export or import your data.</p><div class="btn-row" style="margin-bottom:12px;"><button class="btn" onclick="exportData()">Export</button><button class="btn btn-outline" onclick="document.getElementById('importFile').click()">Import</button><input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)"></div><div id="dataStatus" style="font-size:12px;color:var(--text-3);min-height:16px;"></div></div>
-          <div class="cfg-section"><div class="section-title">Appearance</div><button class="btn btn-outline" onclick="toggleTheme()">Toggle Dark Mode</button></div>
+          <div class="cfg-section"><div class="section-title">Appearance</div><button class="btn btn-outline btn-no-arrow" onclick="toggleTheme()">Toggle Dark Mode</button></div>
           <div class="cfg-section"><div class="section-title">Storage</div><div id="storageInfo" style="font-size:13px;color:var(--text-3);line-height:1.8;"></div></div>
-          <div class="cfg-section"><div class="section-title">Account</div><button class="btn btn-outline" onclick="handleLogout()">Sign Out</button></div>
-          <div class="cfg-section"><div class="section-title" style="color:#ef4444;">Danger Zone</div><button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444;" onclick="clearAllData()">Clear All Data</button></div>
+          <div class="cfg-section"><div class="section-title">Account</div><button class="btn btn-outline btn-no-arrow" onclick="handleLogout()">Sign Out</button></div>
+          <div class="cfg-section"><div class="section-title" style="color:#ef4444;">Danger Zone</div><button class="btn btn-outline btn-no-arrow" style="border-color:#ef4444;color:#ef4444;" onclick="clearAllData()">Clear All Data</button></div>
         </div>
       </div>
     </div>
@@ -1438,7 +1541,7 @@
     </div>
     <div style="flex:1;"></div>
     <button class="btn btn-outline" onclick="openEditInvoice()">Edit Invoice</button>
-    <button class="btn btn-outline" onclick="backToApp()">Back</button>
+    <button class="btn btn-outline btn-no-arrow" onclick="backToApp()">Back</button>
   </div>
 </div>
 <div class="quick-modal-bg" id="calEventModal" onclick="if(event.target===this)closeCalEvent()">
@@ -1477,8 +1580,8 @@
     </div>
     <div class="btn-row">
       <button class="btn" id="calEvSaveBtn" onclick="saveCalEvent()">Add Event</button>
-      <button class="btn btn-outline" onclick="closeCalEvent()">Cancel</button>
-      <button class="btn btn-outline" id="calEvDeleteBtn" style="display:none;border-color:#ef4444;color:#ef4444;" onclick="deleteCalEvent()">Delete</button>
+      <button class="btn btn-outline btn-no-arrow" onclick="closeCalEvent()">Cancel</button>
+      <button class="btn btn-outline btn-no-arrow" id="calEvDeleteBtn" style="display:none;border-color:#ef4444;color:#ef4444;" onclick="deleteCalEvent()">Delete</button>
     </div>
   </div>
 </div>
@@ -1487,8 +1590,8 @@
     <h3 id="confirmTitle">Delete?</h3>
     <p id="confirmMsg">This action cannot be undone.</p>
     <div class="btn-row">
-      <button class="btn btn-danger btn-sm" id="confirmYes">Delete</button>
-      <button class="btn btn-outline btn-sm" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger btn-sm btn-no-arrow" id="confirmYes">Delete</button>
+      <button class="btn btn-outline btn-sm btn-no-arrow" onclick="closeConfirm()">Cancel</button>
     </div>
   </div>
 </div>
@@ -1859,7 +1962,7 @@ function cycleStatus(id){const inv=invoices.find(i=>i.id===id);if(!inv)return;co
 // ── Calendar ──
 let calEvents=JSON.parse(localStorage.getItem('inv_cal_events')||'[]');
 let calYear,calMonth,calEditingId=null,calSelectedColor='blue',calSelectedDate=null;
-let calViewMode=localStorage.getItem('inv_cal_view')||'month';
+let calViewMode=localStorage.getItem('inv_cal_view')||'week';
 let calSelectedType='shoot';
 let calWeekStart=null; // Date object for start of week view
 const CAL_TYPES={shoot:{icon:'\u{1f4f7}',label:'Shoot'},editing:{icon:'\u{1f3a8}',label:'Editing'},meeting:{icon:'\u{1f91d}',label:'Meeting'},delivery:{icon:'\u{1f4e6}',label:'Delivery'},personal:{icon:'\u{1f3e0}',label:'Personal'}};
@@ -1890,42 +1993,42 @@ function renderCalendar(){
   const today=new Date();const todayISO=toISO(today);
   if(!calSelectedDate)calSelectedDate=todayISO;
 
-  // Header + toolbar (shared across all views)
+  // Header (shared across all views)
   let headerLabel='';
   if(calViewMode==='week'){
     const dates=getWeekDates(calWeekStart);
     const s=dates[0],e=dates[6];
-    if(s.getMonth()===e.getMonth())headerLabel=`${s.toLocaleDateString('en-CA',{month:'long'})} ${s.getDate()}\u2013${e.getDate()}, ${s.getFullYear()}`;
+    if(s.getMonth()===e.getMonth())headerLabel=`${s.toLocaleDateString('en-CA',{month:'long'})} ${s.getDate()} \u2013 ${e.getDate()}, ${s.getFullYear()}`;
     else headerLabel=`${s.toLocaleDateString('en-CA',{month:'short'})} ${s.getDate()} \u2013 ${e.toLocaleDateString('en-CA',{month:'short'})} ${e.getDate()}, ${e.getFullYear()}`;
   }else{
     headerLabel=new Date(calYear,calMonth,1).toLocaleDateString('en-CA',{month:'long',year:'numeric'});
   }
 
-  const toolbar=`<div class="cal-toolbar">
-    <div class="cal-view-toggle">
-      <button class="cal-view-btn ${calViewMode==='month'?'active':''}" onclick="calSetView('month')">Month</button>
-      <button class="cal-view-btn ${calViewMode==='week'?'active':''}" onclick="calSetView('week')">Week</button>
-      <button class="cal-view-btn ${calViewMode==='agenda'?'active':''}" onclick="calSetView('agenda')">Agenda</button>
-    </div>
-    <button class="cal-today-link" onclick="calToday()">Today</button>
-    <div class="cal-shortcuts-hint">T today \u00b7 N new \u00b7 M/W/A views</div>
-  </div>`;
-
   const header=`<div class="cal-header">
-    <div class="cal-nav">
-      <button class="cal-nav-btn" onclick="calNav(-1)">&lsaquo;</button>
+    <div class="cal-header-left">
       <div class="cal-month-label">${headerLabel}</div>
-      <button class="cal-nav-btn" onclick="calNav(1)">&rsaquo;</button>
+    </div>
+    <div class="cal-header-right">
+      <button class="cal-today-btn" onclick="calToday()">Today</button>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calNav(-1)">&lsaquo;</button>
+        <button class="cal-nav-btn" onclick="calNav(1)">&rsaquo;</button>
+      </div>
+      <div class="cal-view-toggle">
+        <button class="cal-view-btn ${calViewMode==='agenda'?'active':''}" onclick="calSetView('agenda')" title="Agenda"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        <button class="cal-view-btn ${calViewMode==='week'?'active':''}" onclick="calSetView('week')" title="Week"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg></button>
+        <button class="cal-view-btn ${calViewMode==='month'?'active':''}" onclick="calSetView('month')" title="Month"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+      </div>
     </div>
   </div>`;
 
-  if(calViewMode==='month')renderCalMonth(grid,header,toolbar,todayISO);
-  else if(calViewMode==='week')renderCalWeek(grid,header,toolbar,todayISO);
-  else renderCalAgenda(grid,header,toolbar,todayISO);
+  if(calViewMode==='month')renderCalMonth(grid,header,todayISO);
+  else if(calViewMode==='week')renderCalWeek(grid,header,todayISO);
+  else renderCalAgenda(grid,header,todayISO);
 }
 
 // ── Month View ──
-function renderCalMonth(grid,header,toolbar,todayISO){
+function renderCalMonth(grid,header,todayISO){
   const firstDay=new Date(calYear,calMonth,1);
   const lastDay=new Date(calYear,calMonth+1,0);
   const startDow=firstDay.getDay();
@@ -1941,7 +2044,7 @@ function renderCalMonth(grid,header,toolbar,todayISO){
   const dayNames=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   const weekdayHeaders=dayNames.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
 
-  grid.innerHTML=`${header}${toolbar}
+  grid.innerHTML=`${header}
     <div class="cal-grid">
       <div class="cal-weekdays">${weekdayHeaders}</div>
       <div class="cal-days" style="grid-template-rows:repeat(${rows},1fr)">${cells}</div>
@@ -1967,68 +2070,76 @@ function buildCalDay(day,iso,outside,todayISO,dow){
 }
 
 // ── Week View ──
-function renderCalWeek(grid,header,toolbar,todayISO){
+function renderCalWeek(grid,header,todayISO){
   const dates=getWeekDates(calWeekStart);
   const dayNames=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const offset=new Date().getTimezoneOffset();
+  const tzH=Math.abs(Math.floor(offset/60));const tzLabel=`GMT${offset<=0?'+':'−'}${tzH}`;
 
-  // Header cells with day name + date
-  let headerCells='<div class="cal-week-header-cell"></div>';
+  // Header cells with timezone + day columns
+  let headerCells=`<div class="cal-week-header-tz">${tzLabel}</div>`;
   dates.forEach((d,i)=>{
     const iso=toISO(d);const isToday=iso===todayISO;
     headerCells+=`<div class="cal-week-header-cell ${isToday?'today':''}">
-      ${dayNames[i]}<span class="cal-week-header-date">${d.getDate()}</span>
+      ${dayNames[i]} <span class="cal-week-header-date">${String(d.getDate()).padStart(2,'0')}</span>
     </div>`;
   });
 
   // All-day events row
   let alldayCells='<div class="cal-week-allday-label">all-day</div>';
+  let hasAllDay=false;
   dates.forEach(d=>{
     const iso=toISO(d);
     const allday=calEvents.filter(e=>e.date===iso&&!e.start);
+    if(allday.length)hasAllDay=true;
     alldayCells+=`<div class="cal-week-allday-cell">${allday.map(ev=>`<div class="cal-event" style="font-size:10px;padding:1px 4px;" onclick="openCalEvent('${ev.id}')"><span class="cal-ev-dot ${ev.color||'blue'}"></span><span class="cal-ev-label">${esc(ev.title)}</span></div>`).join('')}</div>`;
   });
 
   // Time grid
   let gutter='';let cols='';
   for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
-    const label=h===0?'12am':h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
+    const label=h===0?'12:00am':h<12?`${h}:00am`:h===12?'12:00pm':`${h-12}:00pm`;
     gutter+=`<div class="cal-week-gutter"><span>${label}</span></div>`;
   }
 
-  dates.forEach(d=>{
+  // Now time label
+  const now=new Date();
+  const nowTimeStr=formatTime12(`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
+
+  dates.forEach((d,di)=>{
     const iso=toISO(d);const isToday=iso===todayISO;
+    const isWeekend=di===0||di===6;
     let hours='';
     for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
       const ts=`${String(h).padStart(2,'0')}:00`;
       hours+=`<div class="cal-week-hour" onclick="openCalEvent(null,'${iso}','${ts}')"></div>`;
     }
-    // Position events
     const timed=calEvents.filter(e=>e.date===iso&&e.start).sort((a,b)=>a.start.localeCompare(b.start));
     let eventsHtml=timed.map(ev=>{
       const startMin=timeToMinutes(ev.start)-CAL_HOURS_START*60;
       const endMin=(ev.end?timeToMinutes(ev.end):timeToMinutes(ev.start)+60)-CAL_HOURS_START*60;
       const top=Math.max(0,startMin);
-      const height=Math.max(15,endMin-startMin);
+      const height=Math.max(20,endMin-startMin);
       return`<div class="cal-week-event cal-ev-${ev.color||'blue'}" style="top:${top}px;height:${height}px;" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)}">
         <div class="cal-week-ev-title">${esc(ev.title)}</div>
         <div class="cal-week-ev-time">${formatTime12(ev.start)}${ev.end?' \u2013 '+formatTime12(ev.end):''}</div>
       </div>`;
     }).join('');
-    // Now line
     if(isToday){
-      const now=new Date();
       const nowMin=now.getHours()*60+now.getMinutes()-CAL_HOURS_START*60;
       if(nowMin>=0&&nowMin<(CAL_HOURS_END-CAL_HOURS_START)*60){
         eventsHtml+=`<div class="cal-week-now" style="top:${nowMin}px"></div>`;
+        if(di===0)eventsHtml+=`<div class="cal-week-now-label" style="top:${nowMin-7}px">${nowTimeStr}</div>`;
       }
     }
-    cols+=`<div class="cal-week-col">${hours}${eventsHtml}</div>`;
+    cols+=`<div class="cal-week-col${isWeekend?' weekend':''}">${hours}${eventsHtml}</div>`;
   });
 
-  grid.innerHTML=`${header}${toolbar}
+  grid.innerHTML=`${header}
     <div class="cal-week">
       <div class="cal-week-header">${headerCells}</div>
-      <div class="cal-week-allday">${alldayCells}</div>
+      ${hasAllDay?`<div class="cal-week-allday">${alldayCells}</div>`:''}
       <div class="cal-week-body">
         <div class="cal-week-gutter-col">${gutter}</div>
         <div class="cal-week-cols">${cols}</div>
@@ -2041,7 +2152,7 @@ function renderCalWeek(grid,header,toolbar,todayISO){
 }
 
 // ── Agenda View ──
-function renderCalAgenda(grid,header,toolbar,todayISO){
+function renderCalAgenda(grid,header,todayISO){
   const today=new Date();
   const daysToShow=30;
   let html='';let hasEvents=false;
@@ -2084,7 +2195,7 @@ function renderCalAgenda(grid,header,toolbar,todayISO){
     </div>`;
   }
 
-  grid.innerHTML=`${header}${toolbar}<div class="cal-agenda">${html}</div>`;
+  grid.innerHTML=`${header}<div class="cal-agenda">${html}</div>`;
 }
 
 // ── Day popup (month view) ──
@@ -2238,8 +2349,8 @@ function saveClient(ci){const card=document.getElementById('cc-'+ci),c=clients[c
 function getPrice(type,id){const client=clients.find(c=>c.id===selectedClientId);if(client?.overrides){const ov=type==='pkg'?client.overrides.packages?.[id]:client.overrides.addons?.[id];if(ov!=null)return ov;}if(type==='pkg')return config.packages.find(p=>p.id===id)?.price||0;return config.addons.find(a=>a.id===id)?.price||0;}
 function getClientDiscount(subtotal){const client=clients.find(c=>c.id===selectedClientId);if(!client?.discount||!client.discount.value)return{amount:0,label:''};const{type,value}=client.discount;if(type==='%')return{amount:Math.round(subtotal*(value/100)*100)/100,label:`Discount (${value}%)`};return{amount:Math.min(value,subtotal),label:'Discount'};}
 
-function rebuildClientDropdown(){const sel=document.getElementById('clientSelect');if(!sel)return;const prev=sel.value;sel.innerHTML='<option value="" disabled>Select client</option>';clients.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.company?`${c.company}${c.name?' — '+c.name:''}`:(c.name||'(unnamed)');sel.appendChild(opt);});if(prev)sel.value=prev;}
-function rebuildInvoiceTab(){const pkgSel=document.getElementById('packageSelect'),prev=pkgSel.value;pkgSel.innerHTML='<option value="">No package (a la carte)</option>';config.packages.forEach(pkg=>{const opt=document.createElement('option');opt.value=pkg.id;const price=getPrice('pkg',pkg.id);opt.textContent=price>0?`${pkg.name} — $${price}`:(pkg.name||'(unnamed)');pkgSel.appendChild(opt);});if(prev)pkgSel.value=prev;const grid=document.getElementById('addonsGrid');grid.innerHTML='';config.addons.forEach(a=>{const price=getPrice('addon',a.id),row=document.createElement('div');row.className='addon-row';row.dataset.addonId=a.id;const qtyHtml=a.qty?`<input type="hidden" class="addon-qty chip-qty" data-addon="${a.id}" value="1"><div class="addon-stepper" onclick="event.stopPropagation()"><button type="button" class="addon-stepper-btn" data-dir="-1" data-addon="${a.id}">−</button><span class="addon-stepper-val" data-addon="${a.id}">1</span><button type="button" class="addon-stepper-btn" data-dir="1" data-addon="${a.id}">+</button></div>`:'';row.innerHTML=`<input type="checkbox" value="${a.id}" style="display:none;"><div class="addon-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></div><span class="addon-name">${a.name||'(unnamed)'}</span>${qtyHtml}<span class="addon-price">$${price}${a.qty?'/ea':''}</span>`;const cb=row.querySelector('input[type="checkbox"]');row.addEventListener('click',e=>{if(e.target.closest('.addon-stepper'))return;cb.checked=!cb.checked;row.classList.toggle('selected',cb.checked);});row.querySelectorAll('.addon-stepper-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();const aid=btn.dataset.addon,dir=parseInt(btn.dataset.dir);const hi=row.querySelector(`.addon-qty[data-addon="${aid}"]`);const valEl=row.querySelector(`.addon-stepper-val[data-addon="${aid}"]`);let v=Math.max(1,parseInt(hi.value)||1)+dir;v=Math.max(1,v);hi.value=v;valEl.textContent=v;});});grid.appendChild(row);});}
+function rebuildClientDropdown(){/* Client dropdown is rebuilt in renderEditableInvoice */}
+function rebuildInvoiceTab(){const pkgHidden=document.getElementById('packageSelect'),prev=pkgHidden.value;const pkgMenu=document.getElementById('packageDropdown');const pkgTrigger=document.getElementById('packageTrigger');let pkgOptsHtml=`<div class="custom-dropdown-option${!prev?' selected':''}" onclick="pickPackage('','No package (a la carte)')">No package (a la carte)</div>`;config.packages.forEach(pkg=>{const price=getPrice('pkg',pkg.id);const label=price>0?`${pkg.name} — $${price}`:(pkg.name||'(unnamed)');pkgOptsHtml+=`<div class="custom-dropdown-option${prev===pkg.id?' selected':''}" onclick="pickPackage('${pkg.id}',this.textContent)">${label}</div>`;});pkgMenu.innerHTML=pkgOptsHtml;if(prev){const pkg=config.packages.find(p=>p.id===prev);if(pkg){const price=getPrice('pkg',pkg.id);pkgTrigger.querySelector('span').textContent=price>0?`${pkg.name} — $${price}`:(pkg.name||'(unnamed)');}else{pkgTrigger.querySelector('span').textContent='No package (a la carte)';}};const grid=document.getElementById('addonsGrid');grid.innerHTML='';config.addons.forEach(a=>{const price=getPrice('addon',a.id),row=document.createElement('div');row.className='addon-row';row.dataset.addonId=a.id;const qtyHtml=a.qty?`<input type="hidden" class="addon-qty chip-qty" data-addon="${a.id}" value="1"><div class="addon-stepper" onclick="event.stopPropagation()"><button type="button" class="addon-stepper-btn" data-dir="-1" data-addon="${a.id}">−</button><span class="addon-stepper-val" data-addon="${a.id}">1</span><button type="button" class="addon-stepper-btn" data-dir="1" data-addon="${a.id}">+</button></div>`:'';row.innerHTML=`<input type="checkbox" value="${a.id}" style="display:none;"><div class="addon-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></div><span class="addon-name">${a.name||'(unnamed)'}</span>${qtyHtml}<span class="addon-price">$${price}${a.qty?'/ea':''}</span>`;const cb=row.querySelector('input[type="checkbox"]');row.addEventListener('click',e=>{if(e.target.closest('.addon-stepper'))return;cb.checked=!cb.checked;row.classList.toggle('selected',cb.checked);});row.querySelectorAll('.addon-stepper-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();const aid=btn.dataset.addon,dir=parseInt(btn.dataset.dir);const hi=row.querySelector(`.addon-qty[data-addon="${aid}"]`);const valEl=row.querySelector(`.addon-stepper-val[data-addon="${aid}"]`);let v=Math.max(1,parseInt(hi.value)||1)+dir;v=Math.max(1,v);hi.value=v;valEl.textContent=v;});});grid.appendChild(row);});}
 
 let pickerYear,pickerMonth;
 (function(){const now=new Date();pickerYear=now.getFullYear();pickerMonth=now.getMonth();updateMonthPicker();})();
@@ -2247,7 +2358,7 @@ function updateMonthPicker(){const ml=document.getElementById('monthLabel'),im=d
 function shiftMonth(delta){pickerMonth+=delta;if(pickerMonth>11){pickerMonth=0;pickerYear++;}if(pickerMonth<0){pickerMonth=11;pickerYear--;}updateMonthPicker();renderEditableInvoice();}
 
 // Client select change is handled inline in renderEditableInvoice
-document.getElementById('packageSelect').addEventListener('change',()=>{const pkg=config.packages.find(p=>p.id===document.getElementById('packageSelect').value);const field=document.getElementById('extrasField');if(pkg?.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=pkg.extraLabel;document.getElementById('extrasQty').value=pkg.price===0?'':'0';document.getElementById('extrasQty').placeholder=pkg.price===0?'Enter amount':'0';}else field.style.display='none';});
+// Package change is now handled by pickPackage()
 document.querySelector('.listing-modal-form').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.tagName!=='TEXTAREA'){if(document.getElementById('addrSuggestions').classList.contains('open'))return;e.preventDefault();addItem();}});
 function openListingModal(idx){
   document.getElementById('listingModalTitle').textContent=idx!=null?'Edit Listing':'Add Listing';
@@ -2269,15 +2380,25 @@ function selectAddr(i){const r=addrResults[i];if(!r)return;addressInput.value=r.
 function closeAddrSuggestions(){addrSuggestions.classList.remove('open');addrResults=[];addrIndex=-1;}
 async function calcTravelFromCoords(lat,lon){travelResult.className='travel-result loading';travelResult.textContent='Calculating distance';try{const routeRes=await fetch(`https://router.project-osrm.org/route/v1/driving/${ORIGIN.lon},${ORIGIN.lat};${lon},${lat}?overview=false`);const rd=await routeRes.json();if(rd.code!=='Ok'||!rd.routes.length){travelResult.className='travel-result error';travelResult.textContent='Could not calculate route.';return;}const km=Math.round(rd.routes[0].distance/1000);const{freeKm,ratePerKm}=config.travel;const fee=km>freeKm?Math.round((km-freeKm)*ratePerKm*100)/100:0;currentTravel={distance:km,fee,calculated:true};travelResult.className='travel-result';travelResult.textContent=`${km} km`+(fee>0?` — $${fee.toFixed(2)} travel fee`:` — no travel fee`);}catch{travelResult.className='travel-result error';travelResult.textContent='Network error.';}}
 
-function addItem(){const address=addressInput.value.trim(),unit=document.getElementById('unitNumber').value.trim();const pkgId=document.getElementById('packageSelect').value,extrasQty=parseInt(document.getElementById('extrasQty').value)||0;if(!address){addressInput.focus();return;}const pkg=pkgId?config.packages.find(p=>p.id===pkgId):null;const isCustom=pkg?(pkg.price===0&&pkg.extraPrice===1):false;const pkgPrice=pkg?getPrice('pkg',pkg.id):0;const pkgAmount=pkg?(isCustom?extrasQty:pkgPrice):0;const extrasAmount=pkg?(isCustom?0:extrasQty*pkg.extraPrice):0;const grid=document.getElementById('addonsGrid'),selectedAddons=[];grid.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const addon=config.addons.find(a=>a.id===cb.value);if(!addon)return;const price=getPrice('addon',addon.id),entry={...addon,price};if(addon.qty){const qi=grid.querySelector(`.addon-qty[data-addon="${addon.id}"]`);entry.count=Math.max(1,parseInt(qi?.value)||1);entry.totalPrice=price*entry.count;}else{entry.count=1;entry.totalPrice=price;}selectedAddons.push(entry);});const addonsTotal=selectedAddons.reduce((s,a)=>s+a.totalPrice,0);if(!pkg&&!selectedAddons.length)return;const listingSubtotal=pkgAmount+extrasAmount+addonsTotal+currentTravel.fee;const listingGst=Math.round(listingSubtotal*config.taxes.gst/100*100)/100;const listingQst=Math.round(listingSubtotal*config.taxes.qst/100*100)/100;const fullAddress=unit?`${address}, ${unit}`:address;const newItem={address:fullAddress,unit,pkg:pkg?{...pkg,isCustom}:null,pkgAmount,extrasQty:isCustom?0:extrasQty,extrasAmount,addons:selectedAddons,addonsTotal,travel:{...currentTravel},subtotal:listingSubtotal,gst:listingGst,qst:listingQst,total:listingSubtotal+listingGst+listingQst};let highlightIdx;if(editingIndex!==null){items[editingIndex]=newItem;highlightIdx=editingIndex;editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';showToast('Listing updated');}else{items.push(newItem);highlightIdx=items.length-1;showToast('Listing added');}addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').selectedIndex=0;document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};renderItems();closeListingModal();}
+function addItem(){const address=addressInput.value.trim(),unit=document.getElementById('unitNumber').value.trim();const pkgId=document.getElementById('packageSelect').value,extrasQty=parseInt(document.getElementById('extrasQty').value)||0;if(!address){addressInput.focus();return;}const pkg=pkgId?config.packages.find(p=>p.id===pkgId):null;const isCustom=pkg?(pkg.price===0&&pkg.extraPrice===1):false;const pkgPrice=pkg?getPrice('pkg',pkg.id):0;const pkgAmount=pkg?(isCustom?extrasQty:pkgPrice):0;const extrasAmount=pkg?(isCustom?0:extrasQty*pkg.extraPrice):0;const grid=document.getElementById('addonsGrid'),selectedAddons=[];grid.querySelectorAll('input[type="checkbox"]:checked').forEach(cb=>{const addon=config.addons.find(a=>a.id===cb.value);if(!addon)return;const price=getPrice('addon',addon.id),entry={...addon,price};if(addon.qty){const qi=grid.querySelector(`.addon-qty[data-addon="${addon.id}"]`);entry.count=Math.max(1,parseInt(qi?.value)||1);entry.totalPrice=price*entry.count;}else{entry.count=1;entry.totalPrice=price;}selectedAddons.push(entry);});const addonsTotal=selectedAddons.reduce((s,a)=>s+a.totalPrice,0);if(!pkg&&!selectedAddons.length)return;const listingSubtotal=pkgAmount+extrasAmount+addonsTotal+currentTravel.fee;const listingGst=Math.round(listingSubtotal*config.taxes.gst/100*100)/100;const listingQst=Math.round(listingSubtotal*config.taxes.qst/100*100)/100;const fullAddress=unit?`${address}, ${unit}`:address;const newItem={address:fullAddress,unit,pkg:pkg?{...pkg,isCustom}:null,pkgAmount,extrasQty:isCustom?0:extrasQty,extrasAmount,addons:selectedAddons,addonsTotal,travel:{...currentTravel},subtotal:listingSubtotal,gst:listingGst,qst:listingQst,total:listingSubtotal+listingGst+listingQst};let highlightIdx;if(editingIndex!==null){items[editingIndex]=newItem;highlightIdx=editingIndex;editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';showToast('Listing updated');}else{items.push(newItem);highlightIdx=items.length-1;showToast('Listing added');}addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').value='';document.getElementById('packageTrigger').querySelector('span').textContent='No package (a la carte)';document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};renderItems();closeListingModal();}
 
 let undoItem=null,undoIdx=null;
 function removeItem(i){undoItem=items[i];undoIdx=i;items.splice(i,1);if(editingIndex===i)cancelEdit();else if(editingIndex!==null&&editingIndex>i)editingIndex--;renderItems();showToastUndo('Listing removed',()=>{items.splice(undoIdx,0,undoItem);undoItem=null;renderItems();showToast('Listing restored');});}
 function duplicateItem(i){const copy=JSON.parse(JSON.stringify(items[i]));copy.address+=' (copy)';items.splice(i+1,0,copy);renderItems();showToast('Listing duplicated');const allItems=document.querySelectorAll('.item');if(allItems[i+1]){allItems[i+1].classList.add('just-added');allItems[i+1].scrollIntoView({behavior:'smooth',block:'nearest'});}}
-function editItem(i){const item=items[i];editingIndex=i;addressInput.value=item.unit?item.address.replace(`, ${item.unit}`,''):item.address;document.getElementById('unitNumber').value=item.unit||'';currentTravel={...item.travel};if(item.travel.calculated){travelResult.className='travel-result';travelResult.textContent=`${item.travel.distance} km`+(item.travel.fee>0?` — $${item.travel.fee.toFixed(2)} travel fee`:` — no travel fee`);}const field=document.getElementById('extrasField');if(item.pkg){document.getElementById('packageSelect').value=item.pkg.id;if(item.pkg.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=item.pkg.extraLabel;document.getElementById('extrasQty').value=item.pkg.isCustom?item.pkgAmount:item.extrasQty;}else field.style.display='none';}else{document.getElementById('packageSelect').selectedIndex=0;field.style.display='none';}const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>{const addon=item.addons.find(a=>a.id===cb.value);cb.checked=!!addon;const row=cb.closest('.addon-row');if(row){row.classList.toggle('selected',!!addon);if(addon){const qtyInput=row.querySelector('.addon-qty');if(qtyInput)qtyInput.value=addon.count;const valEl=row.querySelector('.addon-stepper-val');if(valEl)valEl.textContent=addon.count;}}});document.getElementById('addItemBtn').textContent='Update Listing';document.getElementById('cancelEditBtn').style.display='block';document.getElementById('listingModalTitle').textContent='Edit Listing';}
-function cancelEdit(){editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').selectedIndex=0;document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};}
+function editItem(i){const item=items[i];editingIndex=i;addressInput.value=item.unit?item.address.replace(`, ${item.unit}`,''):item.address;document.getElementById('unitNumber').value=item.unit||'';currentTravel={...item.travel};if(item.travel.calculated){travelResult.className='travel-result';travelResult.textContent=`${item.travel.distance} km`+(item.travel.fee>0?` — $${item.travel.fee.toFixed(2)} travel fee`:` — no travel fee`);}const field=document.getElementById('extrasField');if(item.pkg){document.getElementById('packageSelect').value=item.pkg.id;const _price=getPrice('pkg',item.pkg.id);document.getElementById('packageTrigger').querySelector('span').textContent=_price>0?`${item.pkg.name} — $${_price}`:item.pkg.name;if(item.pkg.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=item.pkg.extraLabel;document.getElementById('extrasQty').value=item.pkg.isCustom?item.pkgAmount:item.extrasQty;}else field.style.display='none';}else{document.getElementById('packageSelect').value='';document.getElementById('packageTrigger').querySelector('span').textContent='No package (a la carte)';field.style.display='none';}const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>{const addon=item.addons.find(a=>a.id===cb.value);cb.checked=!!addon;const row=cb.closest('.addon-row');if(row){row.classList.toggle('selected',!!addon);if(addon){const qtyInput=row.querySelector('.addon-qty');if(qtyInput)qtyInput.value=addon.count;const valEl=row.querySelector('.addon-stepper-val');if(valEl)valEl.textContent=addon.count;}}});document.getElementById('addItemBtn').textContent='Update Listing';document.getElementById('cancelEditBtn').style.display='block';document.getElementById('listingModalTitle').textContent='Edit Listing';}
+function cancelEdit(){editingIndex=null;document.getElementById('addItemBtn').textContent='Add Listing';document.getElementById('cancelEditBtn').style.display='none';addressInput.value='';document.getElementById('unitNumber').value='';document.getElementById('packageSelect').value='';document.getElementById('packageTrigger').querySelector('span').textContent='No package (a la carte)';document.getElementById('extrasQty').value='0';document.getElementById('extrasField').style.display='none';const grid=document.getElementById('addonsGrid');grid.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);grid.querySelectorAll('.addon-row').forEach(el=>el.classList.remove('selected'));grid.querySelectorAll('.addon-qty').forEach(el=>el.value='1');grid.querySelectorAll('.addon-stepper-val').forEach(el=>el.textContent='1');travelResult.textContent='';currentTravel={distance:0,fee:0,calculated:false};}
 
 function renderItems(){renderEditableInvoice();triggerAutoSave();}
+
+// Reorder mode
+let _reorderMode=false;
+function toggleReorder(){_reorderMode=!_reorderMode;renderItems();}
+function moveItem(idx,dir){
+  const to=idx+dir;
+  if(to<0||to>=items.length)return;
+  const temp=items[idx];items[idx]=items[to];items[to]=temp;
+  renderItems();
+}
 
 // ── Editable Invoice ──
 function renderLivePreview(){renderEditableInvoice();}
@@ -2299,7 +2420,7 @@ function renderEditableInvoice(){
     if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);
     if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);
     if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);
-    rowsHtml+=`<tr class="inv-item-row" onclick="openListingModal(${i})"><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;
+    rowsHtml+=`<tr class="inv-item-row" data-idx="${i}" onclick="if(!_reorderMode)openListingModal(${i})"><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}<div class="move-btns"><button class="move-btn" onclick="event.stopPropagation();moveItem(${i},-1)"${i===0?' disabled':''}><svg viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15"/></svg></button><button class="move-btn" onclick="event.stopPropagation();moveItem(${i},1)"${i===items.length-1?' disabled':''}><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button></div></td></tr>`;
   });
 
   // Build totals
@@ -2319,21 +2440,20 @@ function renderEditableInvoice(){
   const existingNotes=el.querySelector('.inv-notes-edit');
   const notesVal=existingNotes?existingNotes.value:currentNotesVal;
 
-  // Build client dropdown
-  let clientOpts=`<option value="" disabled${!selectedClientId?' selected':''}>Select client</option>`;
-  clients.forEach(c=>{const sel=c.id===selectedClientId?' selected':'';clientOpts+=`<option value="${c.id}"${sel}>${c.company?`${c.company}${c.name?' — '+c.name:''}`:(c.name||'(unnamed)')}</option>`;});
+  // Build custom client dropdown
+  const clientLabel=client?(client.company?`${client.company}${client.name?' — '+client.name:''}`:(client.name||'(unnamed)')):'Select client';
+  let clientOptsHtml='';
+  clients.forEach(c=>{const sel=c.id===selectedClientId;clientOptsHtml+=`<div class="custom-dropdown-option${sel?' selected':''}" onclick="pickClient('${c.id}')">${c.company?`<div class="client-opt-company">${c.company}</div>`:''}${c.name?`<div class="opt-sub">${c.name}</div>`:''}</div>`;});
 
-  // Client info display
+  // Client info display (name/company shown in select, so only extra details here)
   let clientInfo='';
   if(client){
-    if(client.company)clientInfo+=`<div style="font-weight:600">${client.company}</div>`;
-    if(client.name)clientInfo+=`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`;
     if(client.address)clientInfo+=`<div>${client.address}</div>`;
     if(client.email||client.phone)clientInfo+=`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`;
     if(client.taxNumbers)clientInfo+=`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`;
   }
 
-  el.innerHTML=`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><input type="text" class="inv-edit-input inv-number-edit" id="invoiceNumber" value="${esc(invoiceNum)}" placeholder="INV-2026-001"><div>${issueDate}</div><div style="margin-top:4px;">Period: <span class="inv-period-inline"><button class="month-nav" onclick="shiftMonth(-1)">&lsaquo;</button><span id="monthLabel">${monthLabel}</span><button class="month-nav" onclick="shiftMonth(1)">&rsaquo;</button></span></div><input type="hidden" id="invoiceMonth" value="${monthVal}"></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div><div class="inv-client-select"><select id="clientSelect" onchange="selectedClientId=this.value;const c=clients.find(x=>x.id===selectedClientId);if(c?.defaultNotes){const n=document.querySelector('.inv-notes-edit');if(n)n.value=c.defaultNotes;}rebuildInvoiceTab();renderEditableInvoice();">${clientOpts}</select><button class="inv-client-add" onclick="openQuickClient()" title="New client">+</button></div>${clientInfo||'<div style="color:var(--text-3);font-style:italic;">No client selected</div>'}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><button class="inv-add-listing" onclick="openListingModal()">+ Add Listing</button>${items.length?`<div class="inv-totals">${totH}</div>`:''}<div class="inv-notes"><div class="inv-notes-label">Notes</div><textarea class="inv-notes-edit" id="notes" placeholder="Payment terms, special instructions..." oninput="triggerAutoSave()">${esc(notesVal)}</textarea></div><div class="inv-footer"><span>Thank you for your business.</span><span>${esc(invoiceNum)}</span></div>`;
+  el.innerHTML=`<div class="inv-top"><div><div class="inv-brand">Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><input type="text" class="inv-edit-input inv-number-edit" id="invoiceNumber" value="${esc(invoiceNum)}" placeholder="INV-2026-001"><div>${issueDate}</div><div style="margin-top:4px;">Period: <span class="inv-period-inline"><button class="month-nav" onclick="shiftMonth(-1)">&lsaquo;</button><span id="monthLabel">${monthLabel}</span><button class="month-nav" onclick="shiftMonth(1)">&rsaquo;</button></span></div><input type="hidden" id="invoiceMonth" value="${monthVal}"></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div><div class="inv-client-select"><div class="custom-dropdown"><button class="custom-dropdown-trigger" onclick="toggleDropdown('clientDropdown',this)" id="clientTrigger"><span>${esc(clientLabel)}</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="custom-dropdown-menu" id="clientDropdown">${clientOptsHtml}</div></div><button class="inv-client-add" onclick="openQuickClient()" title="New client">+</button></div>${client?clientInfo:'<div style="color:var(--text-3);font-style:italic;">No client selected</div>'}</div></div><table class="inv-table${_reorderMode?' reorder-mode':''}" id="invTable"><thead><tr><th>Description</th><th>Amount${items.length>1?`<button class="reorder-toggle${_reorderMode?' active':''}" onclick="event.stopPropagation();toggleReorder()"><svg viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15"/><polyline points="6 9 12 15 18 9" transform="translate(0,6)"/></svg>${_reorderMode?'Done':'Reorder'}</button>`:''}</th></tr></thead><tbody>${rowsHtml}</tbody></table><button class="inv-add-listing" onclick="openListingModal()">+ Add Listing</button>${items.length?`<div class="inv-totals">${totH}</div>`:''}<div class="inv-notes"><div class="inv-notes-label">Notes</div><textarea class="inv-notes-edit" id="notes" placeholder="Payment terms, special instructions..." oninput="triggerAutoSave()">${esc(notesVal)}</textarea></div><div class="inv-footer"><span>Thank you for your business.</span><span>${esc(invoiceNum)}</span></div>`;
   // Re-attach invoice number listener
   document.getElementById('invoiceNumber').addEventListener('input',()=>triggerAutoSave());
 }
@@ -2363,6 +2483,10 @@ function importData(e){const file=e.target.files[0];if(!file)return;const reader
 function clearAllData(){if(!confirm('This will permanently delete all data. Are you sure?'))return;if(!confirm('Really? This cannot be undone.'))return;['inv_config','inv_clients','inv_drafts','inv_invoices','inv_seq'].forEach(k=>localStorage.removeItem(k));config=structuredClone(DEFAULTS);clients=[];drafts=[];invoices=[];invoiceSeq=0;currentDraftId=null;items.length=0;if(dbRef)dbRef.set({config,clients,drafts,invoices,seq:0});rebuildClientDropdown();rebuildInvoiceTab();renderItems();renderDataTab();document.getElementById('dataStatus').textContent='All data cleared.';}
 function renderDataTab(){const cCount=clients.length,dCount=drafts.length,iCount=invoices.length;let totalSize=0;['inv_config','inv_clients','inv_drafts','inv_invoices'].forEach(k=>{const v=localStorage.getItem(k);if(v)totalSize+=v.length*2;});document.getElementById('storageInfo').innerHTML=`<div>${cCount} client${cCount!==1?'s':''} · ${dCount} draft${dCount!==1?'s':''} · ${iCount} invoice${iCount!==1?'s':''}</div><div>Storage: ${(totalSize/1024).toFixed(1)} KB</div>`;}
 
+function toggleDropdown(menuId,trigger){document.querySelectorAll('.custom-dropdown-menu.open').forEach(m=>{if(m.id!==menuId){m.classList.remove('open');m.previousElementSibling?.classList.remove('open');}});const dd=document.getElementById(menuId);dd.classList.toggle('open');trigger.classList.toggle('open');if(dd.classList.contains('open')){setTimeout(()=>document.addEventListener('click',function handler(e){if(!dd.contains(e.target)&&!trigger.contains(e.target)){dd.classList.remove('open');trigger.classList.remove('open');document.removeEventListener('click',handler);}},0));}};
+function pickClient(id){selectedClientId=id;const c=clients.find(x=>x.id===id);if(c?.defaultNotes){const n=document.querySelector('.inv-notes-edit');if(n)n.value=c.defaultNotes;}closeAllDropdowns();rebuildInvoiceTab();renderEditableInvoice();}
+function pickPackage(id,label){document.getElementById('packageSelect').value=id;document.getElementById('packageTrigger').querySelector('span').textContent=label;closeAllDropdowns();const pkg=config.packages.find(p=>p.id===id);const field=document.getElementById('extrasField');if(pkg?.extraLabel){field.style.display='block';document.getElementById('extrasLabel').textContent=pkg.extraLabel;document.getElementById('extrasQty').value=pkg.price===0?'':'0';document.getElementById('extrasQty').placeholder=pkg.price===0?'Enter amount':'0';}else field.style.display='none';}
+function closeAllDropdowns(){document.querySelectorAll('.custom-dropdown-menu.open').forEach(m=>{m.classList.remove('open');m.previousElementSibling?.classList.remove('open');});}
 function openQuickClient(){document.getElementById('qcName').value='';document.getElementById('qcCompany').value='';document.getElementById('qcEmail').value='';document.getElementById('quickClientModal').classList.add('open');setTimeout(()=>document.getElementById('qcName').focus(),100);}
 function closeQuickClient(){document.getElementById('quickClientModal').classList.remove('open');}
 function saveQuickClient(){const name=document.getElementById('qcName').value.trim(),company=document.getElementById('qcCompany').value.trim(),email=document.getElementById('qcEmail').value.trim();if(!name&&!company){document.getElementById('qcName').focus();return;}const c={id:'c'+Date.now(),name,company,email,phone:'',contact:'',address:'',taxNumbers:'',defaultNotes:'',discount:{type:'%',value:0},overrides:{packages:{},addons:{}}};clients.push(c);saveClients();selectedClientId=c.id;rebuildInvoiceTab();renderEditableInvoice();closeQuickClient();showToast('Client added');}
