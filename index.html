@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lumeria Media</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='73' height='73' viewBox='0 0 73 73' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z' fill='%2318181b'/%3E%3C/svg%3E">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -27,30 +27,30 @@
     --input-bg: #ffffff;
     --radius: 14px;
     --radius-sm: 8px;
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
-    --shadow-hover: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03);
-    --shadow-float: 0 8px 30px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.03);
+    --shadow-card: none;
+    --shadow-hover: none;
+    --shadow-float: none;
     --t-fast: 0.15s ease;
     --t-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --t-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   [data-theme="dark"] {
-    --text: #fafafa;
-    --text-2: #a1a1aa;
-    --text-3: #5a5a65;
-    --border: #232328;
-    --border-subtle: #1a1a1e;
-    --accent: #fafafa;
+    --text: #f2f2f3;
+    --text-2: #9e9ea7;
+    --text-3: #63636e;
+    --border: #2c2c31;
+    --border-subtle: #242428;
+    --accent: #f2f2f3;
     --accent-hover: #d4d4d8;
-    --accent-light: rgba(250,250,250,0.06);
-    --accent-text: #09090b;
-    --bg: #0a0a0c;
-    --bg-card: #141416;
-    --bg-inset: #0f0f12;
-    --input-bg: #1e1e22;
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.03);
-    --shadow-hover: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
-    --shadow-float: 0 8px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+    --accent-light: rgba(242,242,243,0.06);
+    --accent-text: #1a1a1d;
+    --bg: #131315;
+    --bg-card: #1a1a1d;
+    --bg-inset: #161618;
+    --input-bg: #222225;
+    --shadow-card: none;
+    --shadow-hover: none;
+    --shadow-float: none;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   ::-webkit-scrollbar { width: 6px; }
@@ -121,6 +121,19 @@
     stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
   }
   .sidebar-theme-left { display: flex; align-items: center; gap: 10px; }
+  .theme-toggle-pill {
+    width: 44px; height: 24px; border-radius: 12px; position: relative;
+    background: var(--border); transition: background 0.3s ease; flex-shrink: 0;
+  }
+  .theme-toggle-pill .toggle-knob {
+    position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+    border-radius: 50%; background: #fff; transition: transform 0.3s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle-pill .toggle-knob svg { width: 12px; height: 12px; stroke: none; fill: #f59e0b; }
+  [data-theme="dark"] .theme-toggle-pill { background: #3a3a40; }
+  [data-theme="dark"] .theme-toggle-pill .toggle-knob { transform: translateX(20px); background: #222225; }
+  [data-theme="dark"] .theme-toggle-pill .toggle-knob svg { fill: #c4b5fd; }
 
   .sidebar-divider { height: 1px; background: var(--border-subtle); margin: 6px 12px; }
 
@@ -223,28 +236,47 @@
   }
   .hub-card-stat { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
   .hub-card-stat strong { font-weight: 600; color: var(--text-2); }
-  .hub-overview {
-    display: flex; align-items: flex-start; gap: 0;
+  .hub-stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .hub-stat-card {
     background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 26px 0; margin-bottom: 20px; box-shadow: var(--shadow-card);
+    padding: 20px; box-shadow: var(--shadow-card);
+    display: flex; flex-direction: column; gap: 12px;
   }
-  .hub-overview-stat {
-    flex: 1; text-align: center; padding: 0 24px;
-    display: flex; flex-direction: column; align-items: center;
+  .hub-stat-top {
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .hub-overview-label {
-    font-size: 10px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase;
-    color: var(--text-3); margin-bottom: 8px;
+  .hub-stat-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .hub-overview-value {
-    font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.6px;
-    font-variant-numeric: tabular-nums;
+  .hub-stat-icon svg {
+    width: 17px; height: 17px; fill: none; stroke: currentColor;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
-  .hub-overview-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; font-weight: 400; letter-spacing: -0.1px; }
-  .hub-overview-warn { color: var(--accent); }
-  .hub-overview-divider {
-    width: 1px; background: var(--border); align-self: stretch;
+  .hub-stat-icon.revenue { background: rgba(16,185,129,0.1); color: #059669; }
+  .hub-stat-icon.ytd { background: rgba(59,130,246,0.1); color: #2563eb; }
+  .hub-stat-icon.unpaid { background: rgba(245,158,11,0.1); color: #d97706; }
+  .hub-stat-icon.tax { background: rgba(139,92,246,0.1); color: #7c3aed; }
+  [data-theme="dark"] .hub-stat-icon.revenue { background: rgba(16,185,129,0.15); color: #34d399; }
+  [data-theme="dark"] .hub-stat-icon.ytd { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  [data-theme="dark"] .hub-stat-icon.unpaid { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  [data-theme="dark"] .hub-stat-icon.tax { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .hub-stat-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--text-3);
   }
+  .hub-stat-value {
+    font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.6px;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .hub-stat-sub {
+    font-size: 11px; color: var(--text-3); font-weight: 400; letter-spacing: -0.1px;
+    margin-top: -4px;
+  }
+  .hub-stat-warn { color: var(--accent); }
   .hub-section-label {
     font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
     color: var(--text-3); margin-bottom: 12px;
@@ -371,7 +403,7 @@
     position: relative;
   }
   .dash-filter-tab:hover { color: var(--text-2); }
-  .dash-filter-tab.active { color: var(--text); background: var(--bg-card); border-color: var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .dash-filter-tab.active { color: var(--text); background: var(--bg-card); border-color: var(--border); }
   .dash-filter-count {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 100px;
     background: var(--border-subtle); color: var(--text-3); line-height: 1.4;
@@ -430,8 +462,9 @@
     text-transform: uppercase;
   }
   .dash-stat-badge {
-    font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 100px;
+    font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 100px;
     background: var(--accent-light); color: var(--text-2); letter-spacing: 0px;
+    white-space: nowrap; line-height: 1;
   }
   .dash-stat-badge.down { background: var(--accent-light); color: var(--text-2); }
   .dash-stat-badge.neutral { background: var(--border-subtle); color: var(--text-3); }
@@ -509,24 +542,19 @@
   .dash-new-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 7px 16px; color: #fff;
-    background: linear-gradient(180deg, #2c2c30 0%, #18181b 100%);
-    border: 1px solid rgba(0,0,0,0.15);
+    background: #18181b; border: 1px solid #18181b;
     border-radius: 9px; cursor: pointer; font-family: inherit;
     font-size: 12px; font-weight: 500; transition: all 0.2s ease;
     letter-spacing: -0.01em; flex-shrink: 0;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  .dash-new-btn:hover { background: linear-gradient(180deg, #363639 0%, #222225 100%); box-shadow: 0 2px 6px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08); }
+  .dash-new-btn:hover { background: #27272a; border-color: #27272a; }
   .dash-new-btn:active { transform: scale(0.97); }
   .dash-new-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; }
   [data-theme="dark"] .dash-new-btn {
-    background: linear-gradient(180deg, #fafafa 0%, #e8e8ea 100%);
-    color: #111; border-color: rgba(255,255,255,0.15);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+    background: #f0f0f2; color: #18181b; border-color: #f0f0f2;
   }
   [data-theme="dark"] .dash-new-btn:hover {
-    background: linear-gradient(180deg, #efefef 0%, #dddde0 100%);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    background: #e4e4e7; border-color: #e4e4e7;
   }
 
   .dash-list-card {
@@ -753,10 +781,7 @@
   .settings-tab:hover { color: var(--text-2); }
   .settings-tab.active {
     color: var(--text); font-weight: 550;
-    background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
-  }
-  [data-theme="dark"] .settings-tab.active {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);
+    background: var(--bg-card); border: 1px solid var(--border);
   }
   .settings-panel { display: none; }
   .settings-panel.active { display: block; }
@@ -803,26 +828,24 @@
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 7px 16px; color: #fff;
-    background: linear-gradient(180deg, #2c2c30 0%, #18181b 100%);
-    border: 1px solid rgba(0,0,0,0.15);
+    background: #18181b;
+    border: 1px solid #18181b;
     border-radius: 9px; font-size: 12px; font-weight: 500;
     cursor: pointer; transition: all 0.2s ease; width: auto;
     letter-spacing: -0.01em; font-family: inherit;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
     position: relative;
   }
   .btn::after { content: '\203A'; font-size: 15px; font-weight: 400; line-height: 1; opacity: 0.4; transition: all var(--t-fast); margin-left: 2px; }
-  .btn:hover { background: linear-gradient(180deg, #363639 0%, #222225 100%); box-shadow: 0 2px 6px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08); }
+  .btn:hover { background: #27272a; border-color: #27272a; }
   .btn:hover::after { transform: translateX(2px); opacity: 0.6; }
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
   .btn-outline {
-    background: linear-gradient(180deg, #fff 0%, #f8f8f9 100%);
-    color: var(--text-1); border: 1px solid rgba(0,0,0,0.10);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+    background: #fff;
+    color: var(--text); border: 1px solid var(--border);
   }
   .btn-outline::after { color: var(--text-3); }
-  .btn-outline:hover { background: linear-gradient(180deg, #f8f8f9 0%, #f0f0f2 100%); box-shadow: 0 2px 6px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9); }
+  .btn-outline:hover { background: var(--bg-inset); }
   .btn-sm { /* kept for backwards compat */ }
   .btn-no-arrow::after { display: none; }
   .btn-row { display: flex; gap: 10px; }
@@ -982,7 +1005,7 @@
   .cfg-toggle-track::after {
     content: ''; position: absolute; top: 2px; left: 2px;
     width: 12px; height: 12px; border-radius: 50%; background: #fff;
-    transition: transform var(--t-fast); box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: transform var(--t-fast);
   }
   .cfg-toggle input:checked + .cfg-toggle-track { background: var(--accent); }
   .cfg-toggle input:checked + .cfg-toggle-track::after { transform: translateX(12px); }
@@ -1089,7 +1112,6 @@
     background: var(--accent); color: var(--accent-text); padding: 10px 22px;
     border-radius: 100px; font-size: 12px; font-weight: 500; z-index: 999;
     opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
   .toast-undo { margin-left: 12px; background: rgba(255,255,255,0.15); border: none; color: inherit; padding: 3px 10px; border-radius: 100px; cursor: pointer; font-size: 11px; font-weight: 500; font-family: inherit; }
@@ -1099,24 +1121,18 @@
   [data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.15); }
 
   [data-theme="dark"] .btn {
-    background: linear-gradient(180deg, #fafafa 0%, #e8e8ea 100%);
-    color: #111; border-color: rgba(255,255,255,0.15);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+    background: #f0f0f2; color: #18181b; border-color: #f0f0f2;
   }
   [data-theme="dark"] .btn:hover {
-    background: linear-gradient(180deg, #efefef 0%, #dddde0 100%);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    background: #e4e4e7; border-color: #e4e4e7;
   }
-  [data-theme="dark"] .btn::after { color: #111; }
+  [data-theme="dark"] .btn::after { color: #52525b; }
   [data-theme="dark"] .btn-outline {
-    background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.04) 100%);
-    color: var(--text-1); border-color: rgba(255,255,255,0.12);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.07); color: var(--text); border-color: var(--border);
   }
   [data-theme="dark"] .btn-outline::after { color: var(--text-3); }
   [data-theme="dark"] .btn-outline:hover {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.07) 100%);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.18);
   }
 
   /* Login */
@@ -1132,16 +1148,11 @@
     background: var(--bg-card); border-radius: 20px;
     padding: 48px 44px; width: 400px; border: 1px solid var(--border);
     max-width: 90vw; position: relative; z-index: 1;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.03);
-  }
-  [data-theme="dark"] .login-box {
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
   }
   .login-logo {
     width: 48px; height: 48px; background: var(--accent); border-radius: 14px;
     margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
     padding: 11px; box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .login-logo svg { width: 100%; height: 100%; }
   .login-logo path { fill: var(--accent-text); }
@@ -1205,13 +1216,22 @@
     .quick-modal-header { border-radius: 16px 16px 0 0; }
     .quick-modal-header::before { display: none; }
   }
-  .btn-danger { background: #ef4444; border-color: #ef4444; }
-  .btn-danger:hover { background: #dc2626; }
-  .btn-danger-outline { background: none; color: #ef4444; border-color: #ef4444; box-shadow: none; }
-  .btn-danger-outline:hover { background: rgba(239,68,68,0.06); }
+  .btn-danger {
+    background: #ef4444; color: #fff; border: 1px solid #ef4444;
+  }
+  .btn-danger::after { display: none; }
+  .btn-danger:hover { background: #dc2626; border-color: #dc2626; }
+  .btn-danger-outline {
+    background: rgba(239,68,68,0.06); color: #dc2626; border: 1px solid rgba(239,68,68,0.18);
+  }
   .btn-danger-outline::after { display: none; }
-  [data-theme="dark"] .btn-danger-outline { background: none; color: #f87171; border-color: rgba(248,113,113,0.4); }
-  [data-theme="dark"] .btn-danger-outline:hover { background: rgba(239,68,68,0.1); }
+  .btn-danger-outline:hover { background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.3); }
+  [data-theme="dark"] .btn-danger {
+    background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(248,113,113,0.2);
+  }
+  [data-theme="dark"] .btn-danger:hover { background: rgba(239,68,68,0.22); }
+  [data-theme="dark"] .btn-danger-outline { background: rgba(239,68,68,0.08); color: #fca5a5; border-color: rgba(248,113,113,0.15); }
+  [data-theme="dark"] .btn-danger-outline:hover { background: rgba(239,68,68,0.14); border-color: rgba(248,113,113,0.25); }
   .btn-send { background: var(--accent); }
   .btn-send:hover { background: var(--accent-hover); }
 
@@ -1260,9 +1280,8 @@
     padding: 6px 16px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--bg-card); font-size: 12px; font-weight: 600; color: var(--text);
     cursor: pointer; transition: all var(--t-fast); font-family: inherit;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
   }
-  .cal-today-btn:hover { background: var(--bg-inset); border-color: var(--text-3); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .cal-today-btn:hover { background: var(--bg-inset); border-color: var(--text-3); }
   .cal-nav { display: flex; align-items: center; gap: 0; }
   .cal-nav-btn {
     width: 34px; height: 34px; border: 1px solid var(--border);
@@ -1305,7 +1324,6 @@
   [data-theme="dark"] .cal-day.today { background: rgba(59,130,246,0.06); }
   .cal-day.today .cal-day-num {
     background: #18181b; color: #fff; border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(24,24,27,0.2);
   }
   [data-theme="dark"] .cal-day.today .cal-day-num {
     background: #fafafa; color: #111;
@@ -1327,22 +1345,22 @@
   .cal-event:hover { filter: brightness(0.92); }
   [data-theme="dark"] .cal-event:hover { filter: brightness(1.15); }
   /* Event color pills */
-  .cal-event.ev-coral { background: rgba(113,113,122,0.12); color: #52525b; border: 1px solid rgba(113,113,122,0.2); }
-  .cal-event.ev-blue { background: rgba(59,130,246,0.12); color: #2563eb; border: 1px solid rgba(59,130,246,0.2); }
-  .cal-event.ev-purple { background: rgba(139,92,246,0.12); color: #7c3aed; border: 1px solid rgba(139,92,246,0.2); }
-  .cal-event.ev-green { background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.2); }
-  .cal-event.ev-amber { background: rgba(245,158,11,0.12); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
-  .cal-event.ev-pink { background: rgba(236,72,153,0.12); color: #db2777; border: 1px solid rgba(236,72,153,0.2); }
-  .cal-event.ev-teal { background: rgba(20,184,166,0.12); color: #0d9488; border: 1px solid rgba(20,184,166,0.2); }
-  .cal-event.ev-red { background: rgba(239,68,68,0.12); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
-  [data-theme="dark"] .cal-event.ev-coral { background: rgba(113,113,122,0.18); color: #a1a1aa; border-color: rgba(113,113,122,0.25); }
-  [data-theme="dark"] .cal-event.ev-blue { background: rgba(59,130,246,0.18); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
-  [data-theme="dark"] .cal-event.ev-purple { background: rgba(139,92,246,0.18); color: #c4b5fd; border-color: rgba(139,92,246,0.25); }
-  [data-theme="dark"] .cal-event.ev-green { background: rgba(16,185,129,0.18); color: #6ee7b7; border-color: rgba(16,185,129,0.25); }
-  [data-theme="dark"] .cal-event.ev-amber { background: rgba(245,158,11,0.18); color: #fcd34d; border-color: rgba(245,158,11,0.25); }
-  [data-theme="dark"] .cal-event.ev-pink { background: rgba(236,72,153,0.18); color: #f9a8d4; border-color: rgba(236,72,153,0.25); }
-  [data-theme="dark"] .cal-event.ev-teal { background: rgba(20,184,166,0.18); color: #5eead4; border-color: rgba(20,184,166,0.25); }
-  [data-theme="dark"] .cal-event.ev-red { background: rgba(239,68,68,0.18); color: #fca5a5; border-color: rgba(239,68,68,0.25); }
+  .cal-event.ev-blue { background: rgba(124,173,240,0.14); color: #3574c4; border: 1px solid rgba(124,173,240,0.25); }
+  .cal-event.ev-purple { background: rgba(167,139,250,0.14); color: #7c3aed; border: 1px solid rgba(167,139,250,0.25); }
+  .cal-event.ev-green { background: rgba(109,212,168,0.14); color: #0e9a6e; border: 1px solid rgba(109,212,168,0.25); }
+  .cal-event.ev-amber { background: rgba(245,201,107,0.14); color: #b8860b; border: 1px solid rgba(245,201,107,0.25); }
+  .cal-event.ev-pink { background: rgba(240,160,196,0.14); color: #c4477a; border: 1px solid rgba(240,160,196,0.25); }
+  .cal-event.ev-teal { background: rgba(94,197,192,0.14); color: #0d8a85; border: 1px solid rgba(94,197,192,0.25); }
+  .cal-event.ev-rose { background: rgba(244,135,127,0.14); color: #c9403a; border: 1px solid rgba(244,135,127,0.25); }
+  .cal-event.ev-indigo { background: rgba(129,140,248,0.14); color: #5558d6; border: 1px solid rgba(129,140,248,0.25); }
+  [data-theme="dark"] .cal-event.ev-blue { background: rgba(124,173,240,0.16); color: #93c5fd; border-color: rgba(124,173,240,0.25); }
+  [data-theme="dark"] .cal-event.ev-purple { background: rgba(167,139,250,0.16); color: #c4b5fd; border-color: rgba(167,139,250,0.25); }
+  [data-theme="dark"] .cal-event.ev-green { background: rgba(109,212,168,0.16); color: #6ee7b7; border-color: rgba(109,212,168,0.25); }
+  [data-theme="dark"] .cal-event.ev-amber { background: rgba(245,201,107,0.16); color: #fcd34d; border-color: rgba(245,201,107,0.25); }
+  [data-theme="dark"] .cal-event.ev-pink { background: rgba(240,160,196,0.16); color: #f9a8d4; border-color: rgba(240,160,196,0.25); }
+  [data-theme="dark"] .cal-event.ev-teal { background: rgba(94,197,192,0.16); color: #5eead4; border-color: rgba(94,197,192,0.25); }
+  [data-theme="dark"] .cal-event.ev-rose { background: rgba(244,135,127,0.16); color: #fca5a5; border-color: rgba(244,135,127,0.25); }
+  [data-theme="dark"] .cal-event.ev-indigo { background: rgba(129,140,248,0.16); color: #a5b4fc; border-color: rgba(129,140,248,0.25); }
   .cal-ev-dot { display: none; }
   .cal-more {
     font-size: 10px; color: var(--text-3); padding: 1px 6px; font-weight: 500;
@@ -1372,13 +1390,11 @@
   .cal-day-popup {
     position: absolute; z-index: 100; top: -4px; left: 50%; transform: translateX(-50%);
     background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
     padding: 14px; width: 250px;
     animation: calPopIn 0.15s ease-out;
   }
   @keyframes calPopIn { from { opacity: 0; transform: translateX(-50%) scale(0.95); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
   .cal-day.has-popup { overflow: visible; z-index: 101; }
-  [data-theme="dark"] .cal-day-popup { box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3); }
   .cal-day-popup-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
@@ -1407,23 +1423,28 @@
   .cal-popup-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99; }
   /* Event modal */
   .cal-event-form .field { margin-bottom: 14px; }
+  .cal-contact-section {
+    background: var(--bg-inset); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;
+  }
+  .cal-contact-section .field { margin-bottom: 10px; }
+  .cal-contact-section .field:last-child { margin-bottom: 0; }
   .cal-color-picker { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 2px; }
   .cal-color-dot {
     width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent;
     transition: all var(--t-fast); display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
-  .cal-color-dot:hover { transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-  .cal-color-dot.active { border-color: var(--text); transform: scale(1.18); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .cal-color-dot:hover { transform: scale(1.18); }
+  .cal-color-dot.active { border-color: var(--text); transform: scale(1.18); }
   .cal-color-dot.active::after { content: '✓'; font-size: 12px; font-weight: 700; }
-  .cal-dot-coral { background: #71717a; color: #fff; }
-  .cal-dot-blue { background: #3b82f6; color: #fff; }
-  .cal-dot-purple { background: #8b5cf6; color: #fff; }
-  .cal-dot-green { background: #10b981; color: #fff; }
-  .cal-dot-amber { background: #f59e0b; color: #fff; }
-  .cal-dot-pink { background: #ec4899; color: #fff; }
-  .cal-dot-teal { background: #14b8a6; color: #fff; }
-  .cal-dot-red { background: #ef4444; color: #fff; }
+  .cal-dot-blue { background: #7cadf0; color: #fff; }
+  .cal-dot-purple { background: #a78bfa; color: #fff; }
+  .cal-dot-green { background: #6dd4a8; color: #fff; }
+  .cal-dot-amber { background: #f5c96b; color: #fff; }
+  .cal-dot-pink { background: #f0a0c4; color: #fff; }
+  .cal-dot-teal { background: #5ec5c0; color: #fff; }
+  .cal-dot-rose { background: #f4877f; color: #fff; }
+  .cal-dot-indigo { background: #818cf8; color: #fff; }
   .cal-time-row { display: flex; gap: 8px; }
   .cal-time-row input, .cal-time-row select { flex: 1; }
   /* View toggle */
@@ -1436,8 +1457,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .cal-view-btn:hover { color: var(--text-2); }
-  .cal-view-btn.active { background: var(--bg-card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04); }
-  [data-theme="dark"] .cal-view-btn.active { box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04); }
+  .cal-view-btn.active { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
   .cal-view-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Week view */
   .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 32px 24px; box-shadow: var(--shadow-card); }
@@ -1485,7 +1505,7 @@
     overflow: hidden; border-left: 3px solid; z-index: 2;
     transition: all var(--t-fast); line-height: 1.4;
   }
-  .cal-week-event:hover { filter: brightness(1.08); z-index: 3; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .cal-week-event:hover { filter: brightness(1.08); z-index: 3; }
   .cal-week-ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cal-week-ev-time { opacity: 0.7; font-size: 10px; }
   .cal-week-now {
@@ -1558,7 +1578,7 @@
     display: none;
     align-items: center;
     justify-content: space-between;
-    height: 48px;
+    height: 56px;
     padding: 0 16px;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border);
@@ -1570,7 +1590,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text);
     letter-spacing: -0.3px;
@@ -1584,8 +1604,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
     border: none;
     background: none;
@@ -1607,14 +1627,13 @@
   .mobile-dropdown {
     display: none;
     position: absolute;
-    top: 48px;
+    top: 56px;
     left: 0;
     right: 0;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border);
     padding: 6px 10px;
     z-index: 49;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     flex-direction: column;
     gap: 2px;
   }
@@ -1623,12 +1642,12 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-radius: 8px;
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 450;
     color: var(--text-3);
     transition: all 0.15s ease;
@@ -1703,7 +1722,7 @@
     .cal-nav-btn { width: 30px; height: 30px; font-size: 14px; }
     .cal-day { padding: 4px 3px 2px; }
     .cal-day-num { font-size: 11px; width: 24px; height: 24px; }
-    .cal-day.today .cal-day-num { box-shadow: 0 1px 4px rgba(24,24,27,0.15); }
+    .cal-day.today .cal-day-num { }
     .cal-event { font-size: 9px; padding: 1px 4px; gap: 2px; line-height: 1.5; border-radius: 3px; }
     .cal-ev-time { font-size: 9px; }
     .cal-ev-label { font-size: 9px; }
@@ -1724,10 +1743,11 @@
     .cal-week-event { font-size: 9px; padding: 2px 4px; }
     .cal-agenda-event { padding: 10px 14px; gap: 10px; }
     .cal-agenda-day-header { padding: 10px 14px; }
-    .hub-overview { flex-wrap: wrap; padding: 20px 0; gap: 12px 0; }
-    .hub-overview-stat { min-width: 45%; padding: 4px 20px; }
-    .hub-overview-value { font-size: 20px; }
-    .hub-overview-divider { display: none; }
+    .hub-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .hub-stat-card { padding: 16px; gap: 10px; }
+    .hub-stat-value { font-size: 20px; }
+    .hub-stat-icon { width: 30px; height: 30px; border-radius: 8px; }
+    .hub-stat-icon svg { width: 15px; height: 15px; }
     .hub-top { flex-direction: column; gap: 16px; }
     .hub-main { grid-template-columns: 1fr; }
     .hub-platforms { grid-template-columns: 1fr; gap: 12px; }
@@ -1737,6 +1757,8 @@
     .dash-filter-tab { padding: 8px 10px; font-size: 11px; }
     .dash-filter-count { font-size: 9px; padding: 1px 5px; }
     .app-breadcrumb-sep, .app-breadcrumb { font-size: 12px; }
+    .btn { min-height: 44px; font-size: 14px; }
+    .btn-sm { min-height: 40px; font-size: 13px; }
     .editor-actions { flex-direction: column; }
     .editor-actions .btn { width: 100%; justify-content: center; }
     .settings-card .btn { width: 100%; justify-content: center; }
@@ -1744,14 +1766,23 @@
     .settings-card .btn-row .btn { width: 100%; justify-content: center; }
     .settings-card div[style*="justify-content:flex-end"] { display: flex; }
     .settings-card div[style*="justify-content:flex-end"] .btn { width: 100%; justify-content: center; }
-    .mobile-header { display: flex; }
-    .app-main { height: calc(100vh - 48px); }
-    .cal-fullscreen { height: calc(100vh - 48px); }
+    .mobile-header { display: flex; height: 56px; }
+    .app-main { height: calc(100vh - 56px); }
+    .cal-fullscreen { height: calc(100vh - 56px); }
   }
 </style>
 </head>
 <body>
 
+<div id="shared-calendar" style="display:none; min-height:100vh; background:var(--bg); color:var(--text); font-family:inherit; padding:20px; max-width:600px; margin:0 auto;">
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+    <svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg" style="width:28px; height:28px; fill:var(--text);"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
+    <span style="font-size:16px; font-weight:600;">Lumeria Media</span>
+  </div>
+  <h2 id="sharedCalTitle" style="font-size:18px; font-weight:600; margin-bottom:4px;">Your Upcoming Shoots</h2>
+  <p id="sharedCalSub" style="font-size:13px; color:var(--text-2); margin-bottom:20px;"></p>
+  <div id="sharedCalEvents"></div>
+</div>
 <div id="login-screen" class="login-screen">
   <div class="login-box">
     <div class="login-logo"><svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg></div>
@@ -1811,7 +1842,7 @@
             <svg viewBox="0 0 24 24" id="sidebarThemeIcon"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             <span id="sidebarThemeLabel">Dark mode</span>
           </span>
-          <span class="cfg-toggle-track" id="sidebarThemeTrack"></span>
+          <span class="theme-toggle-pill" id="sidebarThemeTrack"><span class="toggle-knob" id="themeKnobIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg></span></span>
         </button>
         <button class="sidebar-nav-link" id="navSettings" onclick="navigateTo('settings')">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1919,6 +1950,7 @@
       <div class="settings-tabs">
         <button class="settings-tab active" onclick="settingsSubTab('pricing')">Pricing</button>
         <button class="settings-tab" onclick="settingsSubTab('clients')">Clients</button>
+        <button class="settings-tab" onclick="settingsSubTab('realtors')">Realtors</button>
         <button class="settings-tab" onclick="settingsSubTab('account')">Account</button>
       </div>
       <div id="settings-pricing" class="settings-panel active">
@@ -1933,13 +1965,17 @@
       <div id="settings-clients" class="settings-panel">
         <div class="settings-card"><div id="clientCards"></div><button class="cfg-add" onclick="addClient()">+ New Client</button></div>
       </div>
+      <div id="settings-realtors" class="settings-panel">
+        <div class="settings-card"><div id="realtorCards"></div><button class="cfg-add" onclick="addRealtor()">+ New Realtor</button></div>
+      </div>
       <div id="settings-account" class="settings-panel">
         <div class="settings-card">
           <div class="cfg-section"><div class="section-title">Backup & Restore</div><p style="font-size:13px;color:var(--text-3);margin-bottom:14px;line-height:1.6;">Export or import your data.</p><div class="btn-row" style="margin-bottom:12px;"><button class="btn btn-sm" onclick="exportData()">Export</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">Import</button><input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)"></div><div id="dataStatus" style="font-size:12px;color:var(--text-3);min-height:16px;"></div></div>
+          <div class="cfg-section"><div class="section-title">Email Notifications</div><p style="font-size:13px;color:var(--text-3);margin-bottom:14px;line-height:1.6;">Configure <a href="https://www.emailjs.com/" target="_blank" style="color:var(--text-2);text-decoration:underline;">EmailJS</a> to send shoot notifications to contacts.</p><div class="field" style="margin-bottom:10px;"><input type="text" id="cfgEmailjsService" placeholder="Service ID"></div><div class="field" style="margin-bottom:10px;"><input type="text" id="cfgEmailjsTemplate" placeholder="Template ID"></div><div class="field" style="margin-bottom:10px;"><input type="text" id="cfgEmailjsKey" placeholder="Public Key"></div><button class="btn btn-outline btn-sm btn-no-arrow" onclick="saveEmailjsConfig()">Save Email Config</button></div>
           <div class="cfg-section"><div class="section-title">Appearance</div><button class="btn btn-outline btn-sm btn-no-arrow" onclick="toggleTheme()">Toggle Dark Mode</button></div>
           <div class="cfg-section"><div class="section-title">Storage</div><div id="storageInfo" style="font-size:13px;color:var(--text-3);line-height:1.8;"></div></div>
           <div class="cfg-section"><div class="section-title">Account</div><button class="btn btn-outline btn-sm btn-no-arrow" onclick="handleLogout()">Sign Out</button></div>
-          <div class="cfg-section"><div class="section-title" style="color:#ef4444;">Danger Zone</div><button class="btn btn-danger-outline btn-sm" onclick="clearAllData()">Clear All Data</button></div>
+          <div class="cfg-section"><div class="section-title" style="color:#dc2626;">Danger Zone</div><button class="btn btn-danger-outline btn-sm" onclick="clearAllData()">Clear All Data</button></div>
         </div>
       </div>
     </div>
@@ -1970,39 +2006,39 @@
       <button class="quick-modal-close" onclick="closeCalEvent()">✕</button>
     </div>
     <div class="quick-modal-body cal-event-form">
-      <div class="field"><div class="label">Type</div>
-        <div class="cal-type-picker" id="calTypePicker">
-          <button class="cal-type-btn active" data-type="shoot" onclick="pickCalType('shoot')"><span class="cal-type-icon">&#x1f4f7;</span> Shoot</button>
-          <button class="cal-type-btn" data-type="editing" onclick="pickCalType('editing')"><span class="cal-type-icon">&#x1f3a8;</span> Editing</button>
-          <button class="cal-type-btn" data-type="meeting" onclick="pickCalType('meeting')"><span class="cal-type-icon">&#x1f91d;</span> Meeting</button>
-          <button class="cal-type-btn" data-type="delivery" onclick="pickCalType('delivery')"><span class="cal-type-icon">&#x1f4e6;</span> Delivery</button>
-          <button class="cal-type-btn" data-type="personal" onclick="pickCalType('personal')"><span class="cal-type-icon">&#x1f3e0;</span> Personal</button>
-        </div>
-      </div>
-      <div class="field"><div class="label">Title</div><input type="text" id="calEvTitle" placeholder="e.g. Shoot at 123 Main St"></div>
+      <div class="field"><div class="label">Address</div><input type="text" id="calEvTitle" placeholder="e.g. 123 Main St, Montreal"></div>
+      <div class="field"><div class="label">Apt / Unit # (optional)</div><input type="text" id="calEvUnit" placeholder="e.g. Apt 3, Suite 200"></div>
       <div class="field"><div class="label">Date</div><input type="date" id="calEvDate"></div>
-      <div class="cal-time-row">
-        <div class="field"><div class="label">Start</div><input type="time" id="calEvStart"></div>
-        <div class="field"><div class="label">End</div><input type="time" id="calEvEnd"></div>
+      <div class="field"><div class="label">Time</div><input type="time" id="calEvStart"></div>
+      <input type="hidden" id="calEvLocation">
+      <div class="cal-contact-section">
+        <div class="label" style="margin-bottom:8px;">Seller / Tenant Contact</div>
+        <div class="field"><input type="text" id="calEvContactName" placeholder="Name"></div>
+        <div class="field"><input type="tel" id="calEvContactPhone" placeholder="Phone"></div>
+        <div class="field"><input type="email" id="calEvContactEmail" placeholder="Email"></div>
       </div>
-      <div class="field" id="calLocField"><div class="label">Location</div><input type="text" id="calEvLocation" placeholder="e.g. 450 Rue St-Denis"></div>
+      <div class="field"><div class="label">Realtor</div>
+        <select id="calEvRealtor" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text);font-size:13px;font-family:inherit;">
+          <option value="">None</option>
+        </select>
+      </div>
       <div class="field"><div class="label">Color</div>
         <div class="cal-color-picker" id="calColorPicker">
           <div class="cal-color-dot cal-dot-blue active" data-color="blue" onclick="pickCalColor('blue')"></div>
-          <div class="cal-color-dot cal-dot-blue" data-color="blue" onclick="pickCalColor('blue')"></div>
           <div class="cal-color-dot cal-dot-purple" data-color="purple" onclick="pickCalColor('purple')"></div>
           <div class="cal-color-dot cal-dot-green" data-color="green" onclick="pickCalColor('green')"></div>
           <div class="cal-color-dot cal-dot-amber" data-color="amber" onclick="pickCalColor('amber')"></div>
           <div class="cal-color-dot cal-dot-pink" data-color="pink" onclick="pickCalColor('pink')"></div>
           <div class="cal-color-dot cal-dot-teal" data-color="teal" onclick="pickCalColor('teal')"></div>
-          <div class="cal-color-dot cal-dot-red" data-color="red" onclick="pickCalColor('red')"></div>
+          <div class="cal-color-dot cal-dot-rose" data-color="rose" onclick="pickCalColor('rose')"></div>
+          <div class="cal-color-dot cal-dot-indigo" data-color="indigo" onclick="pickCalColor('indigo')"></div>
         </div>
       </div>
       <div class="field"><div class="label">Notes (optional)</div><textarea id="calEvNotes" placeholder="Additional details..." style="min-height:60px;"></textarea></div>
-      <div class="btn-row" style="margin-top:8px;">
-        <button class="btn btn-sm" id="calEvSaveBtn" onclick="saveCalEvent()">Add Event</button>
-        <button class="btn btn-outline btn-sm btn-no-arrow" onclick="closeCalEvent()">Cancel</button>
-        <button class="btn btn-danger-outline btn-sm" id="calEvDeleteBtn" style="display:none;" onclick="deleteCalEvent()">Delete</button>
+      <div class="cal-ev-actions" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-no-arrow" id="calEvSaveBtn" onclick="saveCalEvent()" style="width:100%; justify-content:center;">Add Event</button>
+        <button class="btn btn-outline btn-no-arrow" onclick="closeCalEvent()" style="width:100%; justify-content:center;">Cancel</button>
+        <button class="btn btn-danger-outline btn-no-arrow" id="calEvDeleteBtn" style="display:none; width:100%; justify-content:center;" onclick="deleteCalEvent()">Delete</button>
       </div>
     </div>
   </div>
@@ -2029,8 +2065,70 @@ firebase.initializeApp(FIREBASE_CONFIG);const auth=firebase.auth();const db=fire
 const ORIGIN={lat:45.44694,lon:-73.33318};const HERE_API_KEY='C1Z2lw2kJYt838jFC2WpA3B_omvn1JLyH3QY31ags3w';
 const DEFAULTS={packages:[{id:'p1',name:'Interior + Exterior',price:150,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5},{id:'p2',name:'Exterior Only',price:85,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5}],addons:[{id:'a1',name:'Front Only (1 to 3 Photos)',price:65,qty:false},{id:'a2',name:'Exterior Only (3 to 7 photos)',price:85,qty:false},{id:'a3',name:'Additional Unit',price:15,qty:true},{id:'a4',name:'Virtual Staging/Room Clearing',price:10,qty:true},{id:'a5',name:'Social Media Video (AI)',price:65,qty:false},{id:'a6',name:'Drone',price:35,qty:false}],travel:{freeKm:25,ratePerKm:0.65},taxes:{gst:5,qst:9.975}};
 
-function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='none';}
-function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';navigateTo('dashboard');}
+// ── Shared Calendar View ──
+(function checkSharedView(){
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('share');
+  if(!token)return;
+  try{
+    const decoded=atob(token+'=='.slice(0,(4-token.length%4)%4));
+    const [uid,realtorId]=decoded.split('::');
+    if(!uid||!realtorId)return;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='none';
+    document.getElementById('shared-calendar').style.display='block';
+    const savedTheme=localStorage.getItem('inv_theme');
+    if(savedTheme==='dark')document.documentElement.setAttribute('data-theme','dark');
+    const ref=db.ref('users/'+uid+'/calEvents');
+    ref.on('value',snap=>{
+      let events=snap.val();
+      if(!events)events=[];
+      if(!Array.isArray(events))events=Object.values(events);
+      const myEvents=events.filter(e=>e.realtorId===realtorId).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
+      const realtorRef=db.ref('users/'+uid+'/realtors');
+      realtorRef.once('value',rsnap=>{
+        let rList=rsnap.val();if(!rList)rList=[];if(!Array.isArray(rList))rList=Object.values(rList);
+        const realtor=rList.find(r=>r.id===realtorId);
+        document.getElementById('sharedCalSub').textContent=realtor?`Calendar for ${realtor.name}`:'Shared calendar';
+        const container=document.getElementById('sharedCalEvents');
+        const todayISO=new Date().toISOString().slice(0,10);
+        const upcoming=myEvents.filter(e=>e.date>=todayISO);
+        const past=myEvents.filter(e=>e.date<todayISO);
+        if(upcoming.length===0&&past.length===0){container.innerHTML='<p style="color:var(--text-3);font-size:14px;">No events scheduled yet.</p>';return;}
+        let html='';
+        if(upcoming.length>0){
+          html+=upcoming.map(ev=>{
+            const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+            const timeStr=ev.start?formatSharedTime(ev.start):'TBD';
+            const loc=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
+            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;">
+              <div style="font-weight:550;font-size:14px;margin-bottom:4px;">${loc||ev.title}</div>
+              <div style="font-size:13px;color:var(--text-2);">${dateStr} · ${timeStr}</div>
+              ${ev.notes?`<div style="font-size:12px;color:var(--text-3);margin-top:6px;">${ev.notes}</div>`:''}
+            </div>`;
+          }).join('');
+        }
+        if(past.length>0){
+          html+=`<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin:20px 0 10px;">Past</div>`;
+          html+=past.reverse().slice(0,10).map(ev=>{
+            const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+            const loc=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
+            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;opacity:0.6;">
+              <div style="font-weight:500;font-size:13px;">${loc||ev.title}</div>
+              <div style="font-size:12px;color:var(--text-3);">${dateStr}</div>
+            </div>`;
+          }).join('');
+        }
+        container.innerHTML=html;
+      });
+    });
+    window._isSharedView=true;
+  }catch(e){console.error('Invalid share token',e);}
+})();
+function formatSharedTime(t){const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';return((h%12)||12)+':'+(m<10?'0':'')+m+' '+ampm;}
+
+function showLogin(){if(window._isSharedView)return;document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='none';}
+function showApp(){if(window._isSharedView)return;document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';navigateTo('dashboard');}
 function toggleAuthMode(){isSignUp=!isSignUp;document.getElementById('loginBtn').textContent=isSignUp?'Create Account':'Sign In';document.getElementById('loginToggle').innerHTML=isSignUp?'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>':'No account? <a onclick="toggleAuthMode()">Create one</a>';document.getElementById('loginError').textContent='';}
 async function handleLogin(){const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const errEl=document.getElementById('loginError');errEl.textContent='';if(!email||!password){errEl.textContent='Please enter email and password.';return;}if(password.length<6){errEl.textContent='Password must be at least 6 characters.';return;}const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent=isSignUp?'Creating account...':'Signing in...';try{if(isSignUp)await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password);}catch(e){errEl.textContent=e.message.replace('Firebase: ','').replace(/ \(auth\/.*\)/,'');btn.disabled=false;btn.textContent=isSignUp?'Create Account':'Sign In';}}
 function handleLogout(){syncListeners.forEach(fn=>fn());syncListeners=[];dbRef=null;auth.signOut();}
@@ -2038,11 +2136,12 @@ auth.onAuthStateChanged(user=>{if(user){dbRef=db.ref('users/'+user.uid);initAppW
 function firebaseSave(key,data){if(!dbRef)return;dbRef.child(key).set(data);}
 function onFirebaseValue(key,callback){if(!dbRef)return;const ref=dbRef.child(key);ref.on('value',snap=>callback(snap.val()));syncListeners.push(()=>ref.off('value'));}
 
-let config=structuredClone(DEFAULTS);let clients=[];let invoices=[];
+let config=structuredClone(DEFAULTS);let clients=[];let invoices=[];let realtors=[];
 function saveConfig(){localStorage.setItem('inv_config',JSON.stringify(config));firebaseSave('config',config);}
 function saveClients(){localStorage.setItem('inv_clients',JSON.stringify(clients));firebaseSave('clients',clients);}
 function saveInvoices(){localStorage.setItem('inv_invoices',JSON.stringify(invoices));firebaseSave('invoices',invoices);}
-function loadLocalState(){try{const c=JSON.parse(localStorage.getItem('inv_config'));if(c)config=c;}catch{}try{const c=JSON.parse(localStorage.getItem('inv_clients'));if(c)clients=c;}catch{}try{const i=JSON.parse(localStorage.getItem('inv_invoices'));if(i)invoices=i;}catch{}}
+function saveRealtors(){localStorage.setItem('inv_realtors',JSON.stringify(realtors));firebaseSave('realtors',realtors);}
+function loadLocalState(){try{const c=JSON.parse(localStorage.getItem('inv_config'));if(c)config=c;}catch{}try{const c=JSON.parse(localStorage.getItem('inv_clients'));if(c)clients=c;}catch{}try{const i=JSON.parse(localStorage.getItem('inv_invoices'));if(i)invoices=i;}catch{}try{const r=JSON.parse(localStorage.getItem('inv_realtors'));if(r)realtors=r;}catch{}}
 
 let items=[];let currentTravel={distance:0,fee:0,calculated:false};let debounceTimer=null;let selectedClientId=null;let editingIndex=null;let currentInvoiceNum='';let currentNotesVal='';
 let toastTimer=null;
@@ -2060,7 +2159,7 @@ function closeMobileMenu(){const dd=document.getElementById('mobileDropdown');co
 document.addEventListener('click',function(e){const hdr=document.getElementById('mobileHeader');const dd=document.getElementById('mobileDropdown');if(dd&&dd.classList.contains('open')&&hdr&&!hdr.contains(e.target))closeMobileMenu();});
 let currentView='dashboard';
 function navigateTo(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');currentView=view;document.querySelectorAll('.sidebar-nav-link').forEach(l=>l.classList.remove('active'));const navMap={dashboard:'navDashboard',invoicing:'navInvoicing',calendar:'navCalendar',editor:'navInvoicing',settings:'navSettings'};const activeNav=document.getElementById(navMap[view]);if(activeNav)activeNav.classList.add('active');if(view==='dashboard')renderHub();if(view==='invoicing')renderDashboard();if(view==='calendar')renderCalendar();if(view==='settings')renderSettingsView();if(view==='editor'){rebuildInvoiceTab();renderItems();const sb=document.getElementById('editorSendBtn');if(sb)sb.textContent=editingInvoiceId?'Update Invoice':'Send Invoice';const cb=document.getElementById('editorCancelBtn');if(cb)cb.style.display=editingInvoiceId?'none':'';}document.querySelectorAll('.mobile-dropdown-link').forEach(l=>{const mv=l.getAttribute('data-view');const mm={dashboard:'dashboard',invoicing:'invoicing',calendar:'calendar',settings:'settings',editor:'invoicing'};l.classList.toggle('active',mv===mm[view]);});const mainEl=document.querySelector('.app-main');if(mainEl)mainEl.scrollTo(0,0);}
-function settingsSubTab(name){document.querySelectorAll('.settings-tab').forEach(t=>t.classList.toggle('active',t.textContent.toLowerCase()===name));document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));document.getElementById('settings-'+name).classList.add('active');if(name==='pricing')renderSettingsTab();if(name==='clients')renderClientsTab();if(name==='account')renderDataTab();}
+function settingsSubTab(name){document.querySelectorAll('.settings-tab').forEach(t=>t.classList.toggle('active',t.textContent.toLowerCase()===name));document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));document.getElementById('settings-'+name).classList.add('active');if(name==='pricing')renderSettingsTab();if(name==='clients')renderClientsTab();if(name==='realtors')renderRealtorsTab();if(name==='account')renderDataTab();}
 
 function initAppWithSync(){loadLocalState();try{const d=JSON.parse(localStorage.getItem('inv_drafts'));if(d)drafts=d;}catch{}invoiceSeq=parseInt(localStorage.getItem('inv_seq')||'0');rebuildClientDropdown();rebuildInvoiceTab();currentInvoiceNum=autoInvoiceNumber(null,`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`);renderEditableInvoice();
 dbRef.once('value').then(snap=>{const data=snap.val();if(!data){dbRef.set({config:JSON.parse(localStorage.getItem('inv_config')||'null')||config,clients:JSON.parse(localStorage.getItem('inv_clients')||'[]'),drafts:JSON.parse(localStorage.getItem('inv_drafts')||'[]'),invoices:JSON.parse(localStorage.getItem('inv_invoices')||'[]'),seq:parseInt(localStorage.getItem('inv_seq')||'0')});}
@@ -2069,6 +2168,7 @@ onFirebaseValue('clients',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object
 onFirebaseValue('drafts',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(d=>{if(!d.items)d.items=[];else if(!Array.isArray(d.items))d.items=Object.values(d.items);d.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});drafts=val;localStorage.setItem('inv_drafts',JSON.stringify(drafts));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
 onFirebaseValue('invoices',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(inv=>{if(!inv.items)inv.items=[];else if(!Array.isArray(inv.items))inv.items=Object.values(inv.items);inv.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});val.forEach(inv=>{if(!inv.status)inv.status='sent';});invoices=val;localStorage.setItem('inv_invoices',JSON.stringify(invoices));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
 onFirebaseValue('calEvents',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);calEvents=val;localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));if(currentView==='calendar')renderCalendar();if(currentView==='dashboard')renderHub();});
+onFirebaseValue('realtors',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);realtors=val;localStorage.setItem('inv_realtors',JSON.stringify(realtors));});
 onFirebaseValue('seq',val=>{if(val!=null&&val>invoiceSeq){invoiceSeq=val;localStorage.setItem('inv_seq',invoiceSeq);}});});renderHub();}
 
 // ── Hub ──
@@ -2137,28 +2237,37 @@ function renderHub(){
       </div>
       <div class="hub-weather" id="hubWeather"></div>
     </div>
-    <div class="hub-overview dash-animate">
-      <div class="hub-overview-stat">
-        <div class="hub-overview-label">This Month</div>
-        <div class="hub-overview-value">$${monthRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
-        <span class="dash-stat-badge ${revBadgeClass}" style="margin-top:6px;">${revBadgeText}</span>
+    <div class="hub-stats-grid dash-animate">
+      <div class="hub-stat-card">
+        <div class="hub-stat-top">
+          <div class="hub-stat-icon revenue"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <span class="dash-stat-badge ${revBadgeClass}">${revBadgeText}</span>
+        </div>
+        <div class="hub-stat-label">This Month</div>
+        <div class="hub-stat-value">$${monthRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
       </div>
-      <div class="hub-overview-divider"></div>
-      <div class="hub-overview-stat">
-        <div class="hub-overview-label">YTD Revenue</div>
-        <div class="hub-overview-value">$${ytdRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+      <div class="hub-stat-card">
+        <div class="hub-stat-top">
+          <div class="hub-stat-icon ytd"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        </div>
+        <div class="hub-stat-label">YTD Revenue</div>
+        <div class="hub-stat-value">$${ytdRevenue.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
       </div>
-      <div class="hub-overview-divider"></div>
-      <div class="hub-overview-stat">
-        <div class="hub-overview-label">Unpaid</div>
-        <div class="hub-overview-value ${pendingAmount>0?'hub-overview-warn':''}">$${pendingAmount.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
-        ${pendingCount>0?`<div style="font-size:11px;color:var(--text-3);margin-top:2px;">${pendingCount} invoice${pendingCount!==1?'s':''}</div>`:''}
+      <div class="hub-stat-card">
+        <div class="hub-stat-top">
+          <div class="hub-stat-icon unpaid"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        </div>
+        <div class="hub-stat-label">Unpaid</div>
+        <div class="hub-stat-value ${pendingAmount>0?'hub-stat-warn':''}">$${pendingAmount.toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        ${pendingCount>0?`<div class="hub-stat-sub">${pendingCount} invoice${pendingCount!==1?'s':''}</div>`:''}
       </div>
-      <div class="hub-overview-divider"></div>
-      <div class="hub-overview-stat">
-        <div class="hub-overview-label">Taxes Owed</div>
-        <div class="hub-overview-value">$${(monthTaxGst+monthTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
-        <div style="font-size:11px;color:var(--text-3);margin-top:2px;">YTD $${(ytdTaxGst+ytdTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+      <div class="hub-stat-card">
+        <div class="hub-stat-top">
+          <div class="hub-stat-icon tax"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        </div>
+        <div class="hub-stat-label">Taxes Owed</div>
+        <div class="hub-stat-value">$${(monthTaxGst+monthTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
+        <div class="hub-stat-sub">YTD $${(ytdTaxGst+ytdTaxQst).toLocaleString('en-CA',{minimumFractionDigits:0})}</div>
       </div>
     </div>
     <div class="hub-main dash-animate">
@@ -2261,8 +2370,9 @@ function renderDashboard(){
     if(dMonth===thisMonth){monthRevenue+=dTotal;monthTaxGst+=dGst;monthTaxQst+=dQst;}
     if(dMonth===lastMonth)lastMonthRevenue+=dTotal;
   });
-  // Revenue trend: last 12 months
-  const trendMonths=[];for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
+  // Revenue trend
+  const trendCount=window.innerWidth<=768?6:12;
+  const trendMonths=[];for(let i=trendCount-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);trendMonths.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('en-CA',{month:'short'}),revenue:0});}
   invoices.forEach(inv=>{const m=inv.month||(inv.createdAt?`${new Date(inv.createdAt).getFullYear()}-${String(new Date(inv.createdAt).getMonth()+1).padStart(2,'0')}`:'');const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=inv.total||0;});
   drafts.forEach(d=>{const m=d.month||'';const bucket=trendMonths.find(t=>t.key===m);if(bucket)bucket.revenue+=(d.items||[]).reduce((s,it)=>s+(it.total||0),0);});
   const maxRev=Math.max(...trendMonths.map(t=>t.revenue),1);
@@ -2339,7 +2449,7 @@ function renderDashboard(){
     const deleteBtn=item.type==='draft'?`<button class="inv-row-delete" onclick="event.stopPropagation();deleteDraft('${item.id}')">&times;</button>`:`<button class="inv-row-delete" onclick="event.stopPropagation();deleteInvoice('${item.id}')">&times;</button>`;
     const statusEl=item.type==='invoice'?`<button class="status-pill pill-${item.status}" onclick="event.stopPropagation();cycleStatus('${item.id}')">${statusLabel}</button>`:`<span class="status-pill pill-draft">${statusLabel}</span>`;
     const aging=getAgingBadge(item,now.getTime());
-    return`<div class="inv-row-item" onclick="${onclick}"><div class="inv-row-left"><div class="inv-row-dot dot-${item.status}"></div><div class="inv-row-info"><div class="inv-row-name">${item.clientName} ${item.number?`<span style="color:var(--text-3);font-weight:400;font-size:11px;margin-left:4px;">${item.number}</span>`:''}</div><div class="inv-row-meta"><span>${period}</span><span>${item.itemCount} listing${item.itemCount!==1?'s':''}</span><span>${dateStr}</span></div></div></div><div class="inv-row-right">${aging}${statusEl}<div class="inv-row-amount">$${item.total.toFixed(2)}</div>${deleteBtn}</div></div>`;
+    return`<div class="inv-row-item" onclick="${onclick}"><div class="inv-row-left"><div class="inv-row-dot dot-${item.status}"></div><div class="inv-row-info"><div class="inv-row-name">${item.clientName} ${item.number?`<span style="color:var(--text-3);font-weight:400;font-size:11px;margin-left:4px;">${item.number}</span>`:''}</div><div class="inv-row-meta"><span>${period}</span><span>${item.itemCount} listing${item.itemCount!==1?'s':''}</span></div></div></div><div class="inv-row-right">${aging}${statusEl}<div class="inv-row-amount">$${item.total.toFixed(2)}</div>${deleteBtn}</div></div>`;
   }).join('');}
 
   const revChange=lastMonthRevenue>0?((monthRevenue-lastMonthRevenue)/lastMonthRevenue*100):0;
@@ -2596,12 +2706,12 @@ function renderCalWeek(grid,header,todayISO){
     const timed=calEvents.filter(e=>e.date===iso&&e.start).sort((a,b)=>a.start.localeCompare(b.start));
     let eventsHtml=timed.map(ev=>{
       const startMin=timeToMinutes(ev.start)-CAL_HOURS_START*60;
-      const endMin=(ev.end?timeToMinutes(ev.end):timeToMinutes(ev.start)+60)-CAL_HOURS_START*60;
+      const endMin=(timeToMinutes(ev.start)+60)-CAL_HOURS_START*60;
       const top=Math.max(0,startMin);
       const height=Math.max(20,endMin-startMin);
       return`<div class="cal-week-event cal-ev-${ev.color||'blue'}" style="top:${top}px;height:${height}px;" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)}">
         <div class="cal-week-ev-title">${esc(ev.title)}</div>
-        <div class="cal-week-ev-time">${formatTime12(ev.start)}${ev.end?' \u2013 '+formatTime12(ev.end):''}</div>
+        <div class="cal-week-ev-time">${formatTime12(ev.start)}</div>
       </div>`;
     }).join('');
     if(isToday){
@@ -2742,6 +2852,10 @@ function pickCalColor(c){calSelectedColor=c;document.querySelectorAll('#calColor
 function pickCalType(t){calSelectedType=t;document.querySelectorAll('#calTypePicker .cal-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===t));}
 
 // ── Event CRUD ──
+function buildRealtorDropdown(selectedId){
+  const sel=document.getElementById('calEvRealtor');
+  sel.innerHTML='<option value="">None</option>'+realtors.filter(r=>r.name).map(r=>`<option value="${r.id}"${r.id===selectedId?' selected':''}>${r.name}${r.company?' — '+r.company:''}</option>`).join('');
+}
 function openCalEvent(id,date,time){
   calEditingId=id||null;
   const modal=document.getElementById('calEventModal');
@@ -2753,44 +2867,62 @@ function openCalEvent(id,date,time){
     titleEl.textContent='Edit Event';
     saveBtn.textContent='Save Changes';
     deleteBtn.style.display='';
-    document.getElementById('calEvTitle').value=ev.title||'';
+    document.getElementById('calEvTitle').value=ev.address||ev.title||'';
+    document.getElementById('calEvUnit').value=ev.unit||'';
     document.getElementById('calEvDate').value=ev.date||'';
     document.getElementById('calEvStart').value=ev.start||'';
-    document.getElementById('calEvEnd').value=ev.end||'';
     document.getElementById('calEvNotes').value=ev.notes||'';
     document.getElementById('calEvLocation').value=ev.location||'';
+    document.getElementById('calEvContactName').value=ev.contactName||'';
+    document.getElementById('calEvContactPhone').value=ev.contactPhone||'';
+    document.getElementById('calEvContactEmail').value=ev.contactEmail||'';
+    buildRealtorDropdown(ev.realtorId||'');
     pickCalColor(ev.color||'blue');
-    pickCalType(ev.eventType||'shoot');
   }else{
     titleEl.textContent='New Event';
     saveBtn.textContent='Add Event';
     deleteBtn.style.display='none';
     document.getElementById('calEvTitle').value='';
+    document.getElementById('calEvUnit').value='';
     document.getElementById('calEvDate').value=date||toISO(new Date());
     document.getElementById('calEvStart').value=time||'';
-    document.getElementById('calEvEnd').value='';
     document.getElementById('calEvNotes').value='';
     document.getElementById('calEvLocation').value='';
+    document.getElementById('calEvContactName').value='';
+    document.getElementById('calEvContactPhone').value='';
+    document.getElementById('calEvContactEmail').value='';
+    buildRealtorDropdown('');
     pickCalColor('blue');
-    pickCalType('shoot');
   }
   modal.classList.add('open');
   setTimeout(()=>document.getElementById('calEvTitle').focus(),100);
 }
 function closeCalEvent(){document.getElementById('calEventModal').classList.remove('open');calEditingId=null;}
 function saveCalEvent(){
-  const title=document.getElementById('calEvTitle').value.trim();
-  if(!title)return;
+  const address=document.getElementById('calEvTitle').value.trim();
+  if(!address)return;
+  const unit=document.getElementById('calEvUnit').value.trim();
+  const title=unit?`${address}, ${unit}`:address;
+  const contactName=document.getElementById('calEvContactName').value.trim();
+  const contactPhone=document.getElementById('calEvContactPhone').value.trim();
+  const contactEmail=document.getElementById('calEvContactEmail').value.trim();
+  const realtorId=document.getElementById('calEvRealtor').value;
   const data={
     title,
+    address,
+    unit,
     date:document.getElementById('calEvDate').value,
     start:document.getElementById('calEvStart').value,
-    end:document.getElementById('calEvEnd').value,
     color:calSelectedColor,
     notes:document.getElementById('calEvNotes').value.trim(),
-    location:document.getElementById('calEvLocation').value.trim(),
-    eventType:calSelectedType
+    location:address,
+    eventType:'shoot',
+    contactName,
+    contactPhone,
+    contactEmail,
+    realtorId
   };
+  const isNew=!calEditingId;
   if(calEditingId){
     const idx=calEvents.findIndex(e=>e.id===calEditingId);
     if(idx>=0)calEvents[idx]={...calEvents[idx],...data};
@@ -2799,6 +2931,46 @@ function saveCalEvent(){
   }
   saveCalEvents();closeCalEvent();renderCalendar();
   showToast(calEditingId?'Event updated':'Event added');
+  if(isNew){
+    if(contactEmail)sendEventNotification(data);
+    if(realtorId){
+      const realtor=realtors.find(r=>r.id===realtorId);
+      if(realtor?.email)sendEventNotification({...data,contactName:realtor.name,contactEmail:realtor.email,contactPhone:realtor.phone||''});
+    }
+  }
+}
+function sendEventNotification(ev){
+  const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const timeStr=ev.start?formatTime12(ev.start):'TBD';
+  const locationStr=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
+  // EmailJS integration — configure your IDs in Settings > Account
+  const emailjsConfig=JSON.parse(localStorage.getItem('inv_emailjs')||'null');
+  if(!emailjsConfig||!emailjsConfig.serviceId||!emailjsConfig.templateId||!emailjsConfig.publicKey){
+    console.log('EmailJS not configured. Skipping email notification.');
+    return;
+  }
+  const templateParams={
+    to_name:ev.contactName||'',
+    to_email:ev.contactEmail,
+    shoot_date:dateStr,
+    shoot_time:timeStr,
+    shoot_address:locationStr,
+    contact_phone:ev.contactPhone||'',
+    notes:ev.notes||''
+  };
+  fetch('https://api.emailjs.com/api/v1.6/email/send',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      service_id:emailjsConfig.serviceId,
+      template_id:emailjsConfig.templateId,
+      user_id:emailjsConfig.publicKey,
+      template_params:templateParams
+    })
+  }).then(r=>{
+    if(r.ok)showToast('Notification sent to '+ev.contactEmail);
+    else showToast('Failed to send notification');
+  }).catch(()=>showToast('Failed to send notification'));
 }
 function deleteCalEvent(){
   if(!calEditingId)return;
@@ -2823,6 +2995,39 @@ function renderClientsTab(){const el=document.getElementById('clientCards');if(!
 function addClient(){clients.push({id:'c'+Date.now(),name:'',company:'',email:'',phone:'',contact:'',address:'',taxNumbers:'',defaultNotes:'',discount:{type:'%',value:0},overrides:{packages:{},addons:{}}});saveClients();renderClientsTab();const last=document.getElementById('cc-'+(clients.length-1));if(last)last.classList.add('open');}
 function removeClient(i){clients.splice(i,1);saveClients();renderClientsTab();rebuildClientDropdown();}
 function saveClient(ci){const card=document.getElementById('cc-'+ci),c=clients[ci];['name','company','email','phone','contact','taxNumbers','address'].forEach(f=>{card.querySelectorAll(`input[data-f="${f}"]`).forEach(inp=>c[f]=inp.value);});card.querySelectorAll('textarea[data-f="defaultNotes"]').forEach(inp=>c.defaultNotes=inp.value);if(!c.discount)c.discount={type:'%',value:0};card.querySelectorAll('select[data-f="discType"]').forEach(s=>c.discount.type=s.value);card.querySelectorAll('input[data-f="discVal"]').forEach(inp=>c.discount.value=parseFloat(inp.value)||0);c.overrides={packages:{},addons:{}};card.querySelectorAll('input[data-type="pkg"]').forEach(inp=>{if(inp.value!=='')c.overrides.packages[inp.dataset.sid]=parseFloat(inp.value)||0;});card.querySelectorAll('input[data-type="addon"]').forEach(inp=>{if(inp.value!=='')c.overrides.addons[inp.dataset.sid]=parseFloat(inp.value)||0;});saveClients();renderClientsTab();rebuildClientDropdown();showToast('Client saved');const el=document.getElementById('cc-'+ci);if(el)el.classList.add('open');}
+
+// ── Realtors ──
+function renderRealtorsTab(){
+  const container=document.getElementById('realtorCards');
+  container.innerHTML=realtors.map((r,i)=>`
+    <div class="cfg-card" id="rc-${i}" onclick="this.classList.toggle('open')">
+      <div class="cfg-card-header"><span class="cfg-card-name">${r.name||'New Realtor'}</span><span class="cfg-card-arrow">›</span></div>
+      <div class="cfg-card-body" onclick="event.stopPropagation()">
+        <div class="field"><div class="label">Name</div><input type="text" data-f="name" value="${(r.name||'').replace(/"/g,'&quot;')}" placeholder="Realtor name"></div>
+        <div class="field"><div class="label">Company</div><input type="text" data-f="company" value="${(r.company||'').replace(/"/g,'&quot;')}" placeholder="Brokerage (optional)"></div>
+        <div class="field"><div class="label">Email</div><input type="email" data-f="email" value="${(r.email||'').replace(/"/g,'&quot;')}" placeholder="Email"></div>
+        <div class="field"><div class="label">Phone</div><input type="tel" data-f="phone" value="${(r.phone||'').replace(/"/g,'&quot;')}" placeholder="Phone (optional)"></div>
+        ${r.name?`<div style="margin-top:10px;padding:10px;background:var(--bg-inset);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <div class="label" style="margin-bottom:6px;">Share Link</div>
+          <div style="display:flex;gap:6px;">
+            <input type="text" readonly value="${getRealtorShareLink(r.id)}" style="flex:1;font-size:11px;color:var(--text-3);" onclick="this.select()">
+            <button class="btn btn-outline btn-no-arrow" style="padding:6px 10px;font-size:11px;" onclick="copyRealtorLink('${r.id}')">Copy</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Send this link to the realtor so they can see their scheduled shoots.</div>
+        </div>`:''}
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn btn-no-arrow" onclick="saveRealtor(${i})">Save</button>
+          <button class="btn btn-danger-outline btn-no-arrow" onclick="removeRealtor(${i})">Remove</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function addRealtor(){realtors.push({id:'r'+Date.now(),name:'',company:'',email:'',phone:''});saveRealtors();renderRealtorsTab();const last=document.getElementById('rc-'+(realtors.length-1));if(last)last.classList.add('open');}
+function removeRealtor(i){realtors.splice(i,1);saveRealtors();renderRealtorsTab();}
+function saveRealtor(i){const card=document.getElementById('rc-'+i),r=realtors[i];['name','company','email','phone'].forEach(f=>{card.querySelectorAll(`input[data-f="${f}"]`).forEach(inp=>r[f]=inp.value);});saveRealtors();renderRealtorsTab();showToast('Realtor saved');const el=document.getElementById('rc-'+i);if(el)el.classList.add('open');}
+function getRealtorShareToken(realtorId){const uid=auth.currentUser?.uid||'';return btoa(uid+'::'+realtorId).replace(/=/g,'');}
+function getRealtorShareLink(realtorId){return window.location.origin+window.location.pathname+'?share='+getRealtorShareToken(realtorId);}
+function copyRealtorLink(realtorId){const link=getRealtorShareLink(realtorId);navigator.clipboard.writeText(link).then(()=>showToast('Share link copied')).catch(()=>showToast('Failed to copy'));}
 
 function getPrice(type,id){const client=clients.find(c=>c.id===selectedClientId);if(client?.overrides){const ov=type==='pkg'?client.overrides.packages?.[id]:client.overrides.addons?.[id];if(ov!=null)return ov;}if(type==='pkg')return config.packages.find(p=>p.id===id)?.price||0;return config.addons.find(a=>a.id===id)?.price||0;}
 function getClientDiscount(subtotal){const client=clients.find(c=>c.id===selectedClientId);if(!client?.discount||!client.discount.value)return{amount:0,label:''};const{type,value}=client.discount;if(type==='%')return{amount:Math.round(subtotal*(value/100)*100)/100,label:`Discount (${value}%)`};return{amount:Math.min(value,subtotal),label:'Discount'};}
@@ -2922,6 +3127,7 @@ function renderEditableInvoice(){
   const clientLabel=client?(client.company?`${client.company}${client.name?' — '+client.name:''}`:(client.name||'(unnamed)')):'Select client';
   let clientOptsHtml='';
   clients.forEach(c=>{const sel=c.id===selectedClientId;clientOptsHtml+=`<div class="custom-dropdown-option${sel?' selected':''}" onclick="pickClient('${c.id}')">${c.company?`<div class="client-opt-company">${c.company}</div>`:''}${c.name?`<div class="opt-sub">${c.name}</div>`:''}</div>`;});
+  clientOptsHtml+=`<div class="custom-dropdown-option" onclick="closeAllDropdowns();openQuickClient();" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px;color:var(--text-3);font-size:12px;font-weight:500;">+ New Client</div>`;
 
   // Client info display (name/company shown in select, so only extra details here)
   let clientInfo='';
@@ -2931,12 +3137,12 @@ function renderEditableInvoice(){
     if(client.taxNumbers)clientInfo+=`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`;
   }
 
-  el.innerHTML=`<div class="inv-top"><div><div class="inv-brand"><svg class="inv-brand-logo" viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><input type="text" class="inv-edit-input inv-number-edit" id="invoiceNumber" value="${esc(invoiceNum)}" placeholder="INV-2026-001"><div>${issueDate}</div><div style="margin-top:4px;">Period: <span class="inv-period-inline"><button class="month-nav" onclick="shiftMonth(-1)">&lsaquo;</button><span id="monthLabel">${monthLabel}</span><button class="month-nav" onclick="shiftMonth(1)">&rsaquo;</button></span></div><input type="hidden" id="invoiceMonth" value="${monthVal}"></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div><div class="inv-client-select"><div class="custom-dropdown"><button class="custom-dropdown-trigger" onclick="toggleDropdown('clientDropdown',this)" id="clientTrigger"><span>${esc(clientLabel)}</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="custom-dropdown-menu" id="clientDropdown">${clientOptsHtml}</div></div><button class="inv-client-add" onclick="openQuickClient()" title="New client">+</button></div>${client?clientInfo:'<div style="color:var(--text-3);font-style:italic;">No client selected</div>'}</div></div><table class="inv-table${_reorderMode?' reorder-mode':''}" id="invTable"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><button class="inv-add-listing" onclick="openListingModal()">+ Add Listing</button>${items.length>1?`<button class="reorder-toggle${_reorderMode?' active':''}" onclick="toggleReorder()">${_reorderMode?'✓ Done Reordering':'↕ Reorder Listings'}</button>`:''}${items.length?`<div class="inv-totals">${totH}</div>`:''}<div class="inv-notes"><div class="inv-notes-label">Notes</div><textarea class="inv-notes-edit" id="notes" placeholder="Payment terms, special instructions..." oninput="triggerAutoSave()">${esc(notesVal)}</textarea></div><div class="inv-footer"><span>Thank you for your business.</span><span>${esc(invoiceNum)}</span></div>`;
+  el.innerHTML=`<div class="inv-top"><div><div class="inv-brand"><svg class="inv-brand-logo" viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><input type="text" class="inv-edit-input inv-number-edit" id="invoiceNumber" value="${esc(invoiceNum)}" placeholder="INV-2026-001"><div style="margin-top:4px;">Period: <span class="inv-period-inline"><button class="month-nav" onclick="shiftMonth(-1)">&lsaquo;</button><span id="monthLabel">${monthLabel}</span><button class="month-nav" onclick="shiftMonth(1)">&rsaquo;</button></span></div><input type="hidden" id="invoiceMonth" value="${monthVal}"></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div><div class="inv-client-select"><div class="custom-dropdown"><button class="custom-dropdown-trigger" onclick="toggleDropdown('clientDropdown',this)" id="clientTrigger"><span>${esc(clientLabel)}</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="custom-dropdown-menu" id="clientDropdown">${clientOptsHtml}</div></div></div>${client?clientInfo:'<div style="color:var(--text-3);font-style:italic;">No client selected</div>'}</div></div><table class="inv-table${_reorderMode?' reorder-mode':''}" id="invTable"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><button class="inv-add-listing" onclick="openListingModal()">+ Add Listing</button>${items.length>1?`<button class="reorder-toggle${_reorderMode?' active':''}" onclick="toggleReorder()">${_reorderMode?'✓ Done Reordering':'↕ Reorder Listings'}</button>`:''}${items.length?`<div class="inv-totals">${totH}</div>`:''}<div class="inv-notes"><div class="inv-notes-label">Notes</div><textarea class="inv-notes-edit" id="notes" placeholder="Payment terms, special instructions..." oninput="triggerAutoSave()">${esc(notesVal)}</textarea></div><div class="inv-footer"><span>Thank you for your business.</span><span>${esc(invoiceNum)}</span></div>`;
   // Re-attach invoice number listener — track manual edits
   document.getElementById('invoiceNumber').addEventListener('input',(e)=>{invoiceNumManuallyEdited=true;triggerAutoSave();});
 }
 
-function buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes){let rowsHtml='';items.forEach(item=>{const details=[];if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}(item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);rowsHtml+=`<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;});let totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;return`<div class="inv-top"><div><div class="inv-brand"><svg class="inv-brand-logo" viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div>${issueDate}</div><div style="margin-top:4px;">Period: ${monthName}</div></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div>${client?.company?`<div style="font-weight:600">${client.company}</div>`:''}${client?.name?`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`:'<div>—</div>'}${client?.address?`<div>${client.address}</div>`:''}${client?.email||client?.phone?`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`:''}${client?.taxNumbers?`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`:''}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><div class="inv-totals">${totH}</div>${notes?`<div class="inv-notes"><div class="inv-notes-label">Notes</div>${notes}</div>`:''}<div class="inv-footer"><span>Thank you for your business.</span><span>${invoiceNum}</span></div>`;}
+function buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes){let rowsHtml='';items.forEach(item=>{const details=[];if(item.pkg){details.push(`${item.pkg.name} $${item.pkgAmount.toFixed(0)}`);if(item.extrasQty>0)details.push(`${item.pkg.extraLabel} x${item.extrasQty} $${item.extrasAmount.toFixed(0)}`);}(item.addons||[]).forEach(a=>details.push((a.count>1?`${a.name} x${a.count}`:a.name)+` $${a.totalPrice.toFixed(0)}`));if(item.travel&&item.travel.fee>0)details.push(`Travel ${item.travel.distance}km $${item.travel.fee.toFixed(2)}`);if(item.gst)details.push(`GST $${item.gst.toFixed(2)}`);if(item.qst)details.push(`QST $${item.qst.toFixed(2)}`);rowsHtml+=`<tr><td><div class="listing-addr">${item.address}</div><div class="listing-detail">${details.join(' · ')}</div></td><td class="listing-amount">$${item.total.toFixed(2)}</td></tr>`;});let totH=`<div class="inv-row"><span class="inv-lbl">Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;if(discount&&discount.amount>0)totH+=`<div class="inv-row discount"><span class="inv-lbl">${discount.label}</span><span>-$${discount.amount.toFixed(2)}</span></div>`;totH+=`<div class="inv-row"><span class="inv-lbl">GST</span><span>$${totalGst.toFixed(2)}</span></div><div class="inv-row"><span class="inv-lbl">QST</span><span>$${totalQst.toFixed(2)}</span></div><div class="inv-row grand"><span class="inv-lbl">Total</span><span>$${total.toFixed(2)}</span></div>`;return`<div class="inv-top"><div><div class="inv-brand"><svg class="inv-brand-logo" viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>Lumeria Media</div><div class="inv-brand-sub">Real Estate Photography Services</div></div><div class="inv-meta"><div class="inv-number">${invoiceNum}</div><div style="margin-top:4px;">Period: ${monthName}</div></div></div><div class="inv-parties"><div class="inv-party"><div class="inv-label">From</div><div style="font-weight:600;">Lumeria Media</div><div>1997 Rue Henriette</div><div>Carignan, QC J3L 4H4 Canada</div><div style="color:var(--text-3)">581-989-4093 · legroupelumeria@gmail.com</div></div><div class="inv-party"><div class="inv-label">Bill to</div>${client?.company?`<div style="font-weight:600">${client.company}</div>`:''}${client?.name?`<div>${client.contact?client.name+' ('+client.contact+')':client.name}</div>`:'<div>—</div>'}${client?.address?`<div>${client.address}</div>`:''}${client?.email||client?.phone?`<div style="color:var(--text-3)">${[client.email,client.phone].filter(Boolean).join(' · ')}</div>`:''}${client?.taxNumbers?`<div style="color:var(--text-3);font-size:10px;">Tax: ${client.taxNumbers}</div>`:''}</div></div><table class="inv-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>${rowsHtml}</tbody></table><div class="inv-totals">${totH}</div>${notes?`<div class="inv-notes"><div class="inv-notes-label">Notes</div>${notes}</div>`:''}<div class="inv-footer"><span>Thank you for your business.</span><span>${invoiceNum}</span></div>`;}
 
 function confirmSendInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId);const total=items.reduce((s,it)=>s+(it.total||0),0);const clientName=client?.company||client?.name||'No client selected';const isEdit=!!editingInvoiceId;showConfirm(isEdit?'Update this invoice?':'Send this invoice?',`${clientName} — ${items.length} listing${items.length!==1?'s':''} · $${total.toFixed(2)}.${isEdit?' This will update the existing invoice.':' This will finalize the invoice.'}`,isEdit?'Update Invoice':'Send Invoice',()=>generateInvoice(),'btn-send');}
 function generateInvoice(){if(!items.length)return;const client=clients.find(c=>c.id===selectedClientId),notes=(document.getElementById('notes')?.value||'').trim();const monthVal=document.getElementById('invoiceMonth')?.value||`${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}`,invoiceNum=(document.getElementById('invoiceNumber')?.value||currentInvoiceNum||'').trim()||nextInvoiceNumber();const[year,month]=monthVal.split('-');const monthName=new Date(year,month-1).toLocaleDateString('en-CA',{year:'numeric',month:'long'});const issueDate=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});const subtotal=items.reduce((s,it)=>s+(it.subtotal||it.total),0),totalGst=items.reduce((s,it)=>s+(it.gst||0),0),totalQst=items.reduce((s,it)=>s+(it.qst||0),0);const discount=getClientDiscount(subtotal),total=subtotal-discount.amount+totalGst+totalQst;if(editingInvoiceId){const idx=invoices.findIndex(i=>i.id===editingInvoiceId);if(idx>=0){const existing=invoices[idx];invoices[idx]={...existing,number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,notes,items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total};saveInvoices();viewingInvoiceId=editingInvoiceId;editingInvoiceId=null;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,existing.issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display=existing.status==='paid'?'none':'';if(existing.status==='paid'){document.getElementById('paidDateWrap').style.display='flex';document.getElementById('paidDateInput').value=existing.paidAt?new Date(existing.paidAt).toISOString().slice(0,10):'';}else{document.getElementById('paidDateWrap').style.display='none';}document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';showToast('Invoice updated');return;}}const invoiceRecord={id:'inv_'+Date.now(),number:invoiceNum,clientId:selectedClientId,clientName:client?.company||client?.name||'(no client)',month:monthVal,monthName,issueDate,notes,status:'sent',items:JSON.parse(JSON.stringify(items)),subtotal,totalGst,totalQst,discount:discount.amount>0?{label:discount.label,amount:discount.amount}:null,total,createdAt:Date.now()};invoices.unshift(invoiceRecord);saveInvoices();if(currentDraftId){drafts=drafts.filter(d=>d.id!==currentDraftId);currentDraftId=null;saveDrafts();}viewingInvoiceId=invoiceRecord.id;document.getElementById('invoiceContent').innerHTML=buildInvoiceHTML(invoiceNum,issueDate,monthName,client,items,subtotal,totalGst,totalQst,discount,total,notes);document.getElementById('markPaidBtn').style.display='';document.getElementById('paidDateWrap').style.display='none';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='block';}
@@ -2956,10 +3162,11 @@ function deleteDraft(id){showConfirm('Delete draft?','This draft will be permane
 function cancelEditor(){items.length=0;currentDraftId=null;editingInvoiceId=null;editingIndex=null;selectedClientId=null;navigateTo('invoicing');}
 function newInvoice(){items.length=0;currentDraftId=null;editingInvoiceId=null;editingIndex=null;selectedClientId=null;invoiceNumManuallyEdited=false;currentInvoiceNum=autoInvoiceNumber(null,`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`);currentNotesVal='';currentTravel={distance:0,fee:0,calculated:false};const now=new Date();pickerYear=now.getFullYear();pickerMonth=now.getMonth();rebuildInvoiceTab();renderEditableInvoice();navigateTo('editor');}
 
-function exportData(){const data={version:1,exportedAt:new Date().toISOString(),config:JSON.parse(localStorage.getItem('inv_config')||'null'),clients:JSON.parse(localStorage.getItem('inv_clients')||'[]'),drafts:JSON.parse(localStorage.getItem('inv_drafts')||'[]'),invoices:JSON.parse(localStorage.getItem('inv_invoices')||'[]')};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`lumeria-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);document.getElementById('dataStatus').textContent='Backup exported.';}
-function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!data.version)throw new Error('Invalid');if(data.config){config=data.config;saveConfig();}if(data.clients){clients=data.clients;saveClients();}if(data.drafts){drafts=data.drafts;saveDrafts();}if(data.invoices){invoices=data.invoices;saveInvoices();}rebuildClientDropdown();rebuildInvoiceTab();document.getElementById('dataStatus').textContent='Backup restored.';renderDataTab();}catch{document.getElementById('dataStatus').textContent='Invalid backup file.';}};reader.readAsText(file);e.target.value='';}
-function clearAllData(){if(!confirm('This will permanently delete all data. Are you sure?'))return;if(!confirm('Really? This cannot be undone.'))return;['inv_config','inv_clients','inv_drafts','inv_invoices','inv_seq'].forEach(k=>localStorage.removeItem(k));config=structuredClone(DEFAULTS);clients=[];drafts=[];invoices=[];invoiceSeq=0;currentDraftId=null;items.length=0;if(dbRef)dbRef.set({config,clients,drafts,invoices,seq:0});rebuildClientDropdown();rebuildInvoiceTab();renderItems();renderDataTab();document.getElementById('dataStatus').textContent='All data cleared.';}
-function renderDataTab(){const cCount=clients.length,dCount=drafts.length,iCount=invoices.length;let totalSize=0;['inv_config','inv_clients','inv_drafts','inv_invoices'].forEach(k=>{const v=localStorage.getItem(k);if(v)totalSize+=v.length*2;});document.getElementById('storageInfo').innerHTML=`<div>${cCount} client${cCount!==1?'s':''} · ${dCount} draft${dCount!==1?'s':''} · ${iCount} invoice${iCount!==1?'s':''}</div><div>Storage: ${(totalSize/1024).toFixed(1)} KB</div>`;}
+function exportData(){const data={version:1,exportedAt:new Date().toISOString(),config:JSON.parse(localStorage.getItem('inv_config')||'null'),clients:JSON.parse(localStorage.getItem('inv_clients')||'[]'),drafts:JSON.parse(localStorage.getItem('inv_drafts')||'[]'),invoices:JSON.parse(localStorage.getItem('inv_invoices')||'[]'),realtors:JSON.parse(localStorage.getItem('inv_realtors')||'[]')};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`lumeria-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);document.getElementById('dataStatus').textContent='Backup exported.';}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!data.version)throw new Error('Invalid');if(data.config){config=data.config;saveConfig();}if(data.clients){clients=data.clients;saveClients();}if(data.drafts){drafts=data.drafts;saveDrafts();}if(data.invoices){invoices=data.invoices;saveInvoices();}if(data.realtors){realtors=data.realtors;saveRealtors();}rebuildClientDropdown();rebuildInvoiceTab();document.getElementById('dataStatus').textContent='Backup restored.';renderDataTab();}catch{document.getElementById('dataStatus').textContent='Invalid backup file.';}};reader.readAsText(file);e.target.value='';}
+function clearAllData(){if(!confirm('This will permanently delete all data. Are you sure?'))return;if(!confirm('Really? This cannot be undone.'))return;['inv_config','inv_clients','inv_drafts','inv_invoices','inv_realtors','inv_seq'].forEach(k=>localStorage.removeItem(k));config=structuredClone(DEFAULTS);clients=[];drafts=[];invoices=[];realtors=[];invoiceSeq=0;currentDraftId=null;items.length=0;if(dbRef)dbRef.set({config,clients,drafts,invoices,realtors,seq:0});rebuildClientDropdown();rebuildInvoiceTab();renderItems();renderDataTab();document.getElementById('dataStatus').textContent='All data cleared.';}
+function renderDataTab(){const cCount=clients.length,dCount=drafts.length,iCount=invoices.length;let totalSize=0;['inv_config','inv_clients','inv_drafts','inv_invoices','inv_realtors','inv_emailjs'].forEach(k=>{const v=localStorage.getItem(k);if(v)totalSize+=v.length*2;});document.getElementById('storageInfo').innerHTML=`<div>${cCount} client${cCount!==1?'s':''} · ${dCount} draft${dCount!==1?'s':''} · ${iCount} invoice${iCount!==1?'s':''}</div><div>Storage: ${(totalSize/1024).toFixed(1)} KB</div>`;const ejs=JSON.parse(localStorage.getItem('inv_emailjs')||'{}');document.getElementById('cfgEmailjsService').value=ejs.serviceId||'';document.getElementById('cfgEmailjsTemplate').value=ejs.templateId||'';document.getElementById('cfgEmailjsKey').value=ejs.publicKey||'';}
+function saveEmailjsConfig(){const serviceId=document.getElementById('cfgEmailjsService').value.trim();const templateId=document.getElementById('cfgEmailjsTemplate').value.trim();const publicKey=document.getElementById('cfgEmailjsKey').value.trim();if(!serviceId||!templateId||!publicKey){showToast('Please fill in all EmailJS fields');return;}localStorage.setItem('inv_emailjs',JSON.stringify({serviceId,templateId,publicKey}));showToast('Email config saved');}
 
 function toggleDropdown(menuId,trigger){document.querySelectorAll('.custom-dropdown-menu.open').forEach(m=>{if(m.id!==menuId){m.classList.remove('open');m.previousElementSibling?.classList.remove('open');}});const dd=document.getElementById(menuId);dd.classList.toggle('open');trigger.classList.toggle('open');if(dd.classList.contains('open')){setTimeout(()=>document.addEventListener('click',function handler(e){if(!dd.contains(e.target)&&!trigger.contains(e.target)){dd.classList.remove('open');trigger.classList.remove('open');document.removeEventListener('click',handler);}},0));}};
 function pickClient(id){selectedClientId=id;const c=clients.find(x=>x.id===id);if(c?.defaultNotes){const n=document.querySelector('.inv-notes-edit');if(n)n.value=c.defaultNotes;}closeAllDropdowns();updateAutoInvoiceNumber();rebuildInvoiceTab();renderEditableInvoice();}
@@ -2983,7 +3190,7 @@ function performAutoSave(){if(!items.length||currentView!=='editor'||editingInvo
 function startAutoSave(){/* Auto-save triggers are handled inline in renderEditableInvoice */}
 
 function updateSidebarUser(){const user=auth.currentUser;if(!user)return;const email=user.email||'';const name=user.displayName||email;let initials='';if(user.displayName){const parts=user.displayName.trim().split(/\s+/);initials=parts.length>1?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():parts[0].substring(0,2).toUpperCase();}else if(email){initials=email.substring(0,2).toUpperCase();}const av=document.getElementById('sidebarAvatar');if(av)av.textContent=initials;const nameEl=document.getElementById('sidebarUserName');if(nameEl)nameEl.textContent=user.displayName||email.split('@')[0];const emailEl=document.getElementById('sidebarUserEmail');if(emailEl)emailEl.textContent=email;}
-function updateThemeUI(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const icon=document.getElementById('sidebarThemeIcon');const label=document.getElementById('sidebarThemeLabel');const track=document.getElementById('sidebarThemeTrack');if(icon)icon.innerHTML=isDark?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>':'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';if(label)label.textContent=isDark?'Light mode':'Dark mode';if(track){track.style.background=isDark?'var(--accent)':'var(--border)';track.style.setProperty('--toggle-offset',isDark?'12px':'0px');}}
+function updateThemeUI(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const icon=document.getElementById('sidebarThemeIcon');const label=document.getElementById('sidebarThemeLabel');const knob=document.getElementById('themeKnobIcon');if(icon)icon.innerHTML=isDark?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>':'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';if(label)label.textContent=isDark?'Light mode':'Dark mode';if(knob)knob.innerHTML=isDark?'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>';}
 function toggleTheme(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',isDark?'':'dark');localStorage.setItem('inv_theme',isDark?'light':'dark');updateThemeUI();}
 (function(){const saved=localStorage.getItem('inv_theme');const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;if(saved==='dark'||(!saved&&prefersDark)){document.documentElement.setAttribute('data-theme','dark');}updateThemeUI();})();
 </script>
