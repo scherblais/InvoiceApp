@@ -1562,6 +1562,56 @@
     background: var(--bg-inset); color: var(--text-3); text-transform: uppercase;
     letter-spacing: 0.5px; white-space: nowrap; margin-top: 4px; display: inline-block;
   }
+  /* Kanban board */
+  .kanban-board {
+    display: flex; gap: 14px; flex: 1; overflow-x: auto;
+    margin: 0 32px 24px; padding-bottom: 8px; min-height: 0;
+  }
+  .kanban-col {
+    flex: 1; min-width: 220px; max-width: 320px;
+    display: flex; flex-direction: column; gap: 0;
+    background: var(--bg-inset); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .kanban-col-header {
+    padding: 14px 16px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3);
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .kanban-col-count {
+    font-size: 10px; font-weight: 500; padding: 1px 7px;
+    border-radius: 100px; background: var(--border); color: var(--text-3);
+  }
+  .kanban-col-body {
+    flex: 1; overflow-y: auto; padding: 10px; display: flex;
+    flex-direction: column; gap: 8px; min-height: 80px;
+  }
+  .kanban-col-body.drag-over { background: rgba(59,130,246,0.04); }
+  [data-theme="dark"] .kanban-col-body.drag-over { background: rgba(59,130,246,0.06); }
+  .kanban-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; cursor: grab;
+    transition: border-color 0.15s ease, transform 0.1s ease;
+  }
+  .kanban-card:hover { border-color: var(--text-3); }
+  .kanban-card:active { cursor: grabbing; transform: scale(0.98); }
+  .kanban-card.dragging { opacity: 0.4; }
+  .kanban-card-title { font-size: 13px; font-weight: 550; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .kanban-card-meta { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+  .kanban-card-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .kanban-card-realtor { font-size: 10px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .kanban-card-realtor svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .kanban-status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .kanban-status-dot.s-received { background: #9e9ea7; }
+  .kanban-status-dot.s-pending { background: #f0a0c4; }
+  .kanban-status-dot.s-scheduled { background: #7cadf0; }
+  .kanban-status-dot.s-shooting { background: #f5c96b; }
+  .kanban-status-dot.s-editing { background: #a78bfa; }
+  .kanban-status-dot.s-delivered { background: #6dd4a8; }
+
   /* Event type selector */
   .cal-type-picker { display: flex; gap: 6px; flex-wrap: wrap; padding: 2px 0; }
   .cal-type-btn {
@@ -1717,6 +1767,9 @@
     .cal-header-left { gap: 8px; }
     .cal-header-right { gap: 4px; }
     .cal-grid, .cal-week, .cal-agenda { margin: 0 12px 16px; border-radius: 10px; }
+    .kanban-board { margin: 0 12px 16px; gap: 10px; flex-direction: column; }
+    .kanban-col { max-width: none; min-width: 0; }
+    .kanban-col-body { min-height: 40px; }
     .cal-month-label { font-size: 14px; }
     .cal-today-btn { padding: 5px 12px; font-size: 11px; }
     .cal-nav-btn { width: 30px; height: 30px; font-size: 14px; }
@@ -1774,13 +1827,15 @@
 </head>
 <body>
 
-<div id="shared-calendar" style="display:none; min-height:100vh; background:var(--bg); color:var(--text); font-family:inherit; padding:20px; max-width:600px; margin:0 auto;">
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
-    <svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg" style="width:28px; height:28px; fill:var(--text);"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
-    <span style="font-size:16px; font-weight:600;">Lumeria Media</span>
+<div id="shared-calendar" style="display:none; min-height:100vh; background:var(--bg); color:var(--text); font-family:inherit;">
+  <div style="padding:20px 20px 0;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+      <svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg" style="width:28px; height:28px; fill:var(--text);"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
+      <span style="font-size:16px; font-weight:600;">Lumeria Media</span>
+    </div>
+    <h2 id="sharedCalTitle" style="font-size:18px; font-weight:600; margin-bottom:4px;">Your Shoots</h2>
+    <p id="sharedCalSub" style="font-size:13px; color:var(--text-2); margin-bottom:16px;"></p>
   </div>
-  <h2 id="sharedCalTitle" style="font-size:18px; font-weight:600; margin-bottom:4px;">Your Upcoming Shoots</h2>
-  <p id="sharedCalSub" style="font-size:13px; color:var(--text-2); margin-bottom:20px;"></p>
   <div id="sharedCalEvents"></div>
 </div>
 <div id="login-screen" class="login-screen">
@@ -2022,6 +2077,16 @@
           <option value="">None</option>
         </select>
       </div>
+      <div class="field"><div class="label">Status</div>
+        <select id="calEvStatus" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--input-bg);color:var(--text);font-size:13px;font-family:inherit;">
+          <option value="received">Received</option>
+          <option value="pending">Pending</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="shooting">Shooting</option>
+          <option value="editing">Editing</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
       <div class="field"><div class="label">Color</div>
         <div class="cal-color-picker" id="calColorPicker">
           <div class="cal-color-dot cal-dot-blue active" data-color="blue" onclick="pickCalColor('blue')"></div>
@@ -2091,35 +2156,40 @@ const DEFAULTS={packages:[{id:'p1',name:'Interior + Exterior',price:150,extraLab
         const realtor=rList.find(r=>r.id===realtorId);
         document.getElementById('sharedCalSub').textContent=realtor?`Calendar for ${realtor.name}`:'Shared calendar';
         const container=document.getElementById('sharedCalEvents');
-        const todayISO=new Date().toISOString().slice(0,10);
-        const upcoming=myEvents.filter(e=>e.date>=todayISO);
-        const past=myEvents.filter(e=>e.date<todayISO);
-        if(upcoming.length===0&&past.length===0){container.innerHTML='<p style="color:var(--text-3);font-size:14px;">No events scheduled yet.</p>';return;}
-        let html='';
-        if(upcoming.length>0){
-          html+=upcoming.map(ev=>{
+        if(myEvents.length===0){container.innerHTML='<p style="color:var(--text-3);font-size:14px;padding:0 20px;">No events scheduled yet.</p>';return;}
+        const sharedCols=[
+          {id:'received',label:'Received',dot:'#9e9ea7'},
+          {id:'pending',label:'Pending',dot:'#f0a0c4'},
+          {id:'scheduled',label:'Scheduled',dot:'#7cadf0'},
+          {id:'shooting',label:'Shooting',dot:'#f5c96b'},
+          {id:'editing',label:'Editing',dot:'#a78bfa'},
+          {id:'delivered',label:'Delivered',dot:'#6dd4a8'}
+        ];
+        const evsByStatus={};
+        sharedCols.forEach(c=>evsByStatus[c.id]=[]);
+        myEvents.forEach(ev=>{const s=ev.status||'scheduled';if(evsByStatus[s])evsByStatus[s].push(ev);else evsByStatus.scheduled.push(ev);});
+        let html=sharedCols.map(col=>{
+          const events=evsByStatus[col.id];
+          if(events.length===0)return'';
+          const cards=events.map(ev=>{
             const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
-            const timeStr=ev.start?formatSharedTime(ev.start):'TBD';
+            const timeStr=ev.start?formatSharedTime(ev.start):'';
             const loc=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
-            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;">
-              <div style="font-weight:550;font-size:14px;margin-bottom:4px;">${loc||ev.title}</div>
-              <div style="font-size:13px;color:var(--text-2);">${dateStr} · ${timeStr}</div>
-              ${ev.notes?`<div style="font-size:12px;color:var(--text-3);margin-top:6px;">${ev.notes}</div>`:''}
+            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+              <div style="font-weight:550;font-size:13px;margin-bottom:4px;">${loc||ev.title}</div>
+              <div style="font-size:11px;color:var(--text-3);">${dateStr}${timeStr?' · '+timeStr:''}</div>
+              ${ev.notes?`<div style="font-size:11px;color:var(--text-3);margin-top:4px;">${ev.notes}</div>`:''}
             </div>`;
           }).join('');
-        }
-        if(past.length>0){
-          html+=`<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin:20px 0 10px;">Past</div>`;
-          html+=past.reverse().slice(0,10).map(ev=>{
-            const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
-            const loc=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
-            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;opacity:0.6;">
-              <div style="font-weight:500;font-size:13px;">${loc||ev.title}</div>
-              <div style="font-size:12px;color:var(--text-3);">${dateStr}</div>
-            </div>`;
-          }).join('');
-        }
-        container.innerHTML=html;
+          return`<div style="background:var(--bg-inset);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
+            <div style="padding:12px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);">
+              <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0;"></span>${col.label}
+              <span style="margin-left:auto;font-size:10px;padding:1px 7px;border-radius:100px;background:var(--border);color:var(--text-3);">${events.length}</span>
+            </div>
+            <div style="padding:10px;">${cards}</div>
+          </div>`;
+        }).join('');
+        container.innerHTML=`<div style="padding:0 20px 20px;">${html}</div>`;
       });
     });
     window._isSharedView=true;
@@ -2605,12 +2675,14 @@ function renderCalendar(){
         <button class="cal-view-btn ${calViewMode==='agenda'?'active':''}" onclick="calSetView('agenda')" title="Agenda"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
         <button class="cal-view-btn ${calViewMode==='week'?'active':''}" onclick="calSetView('week')" title="Week"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg></button>
         <button class="cal-view-btn ${calViewMode==='month'?'active':''}" onclick="calSetView('month')" title="Month"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+        <button class="cal-view-btn ${calViewMode==='kanban'?'active':''}" onclick="calSetView('kanban')" title="Board"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="13" rx="1"/><rect x="17" y="3" width="5" height="8" rx="1"/></svg></button>
       </div>
     </div>
   </div>`;
 
   if(calViewMode==='month')renderCalMonth(grid,header,todayISO);
   else if(calViewMode==='week')renderCalWeek(grid,header,todayISO);
+  else if(calViewMode==='kanban')renderCalKanban(grid,header,todayISO);
   else renderCalAgenda(grid,header,todayISO);
 }
 
@@ -2786,6 +2858,91 @@ function renderCalAgenda(grid,header,todayISO){
   grid.innerHTML=`${header}<div class="cal-agenda">${html}</div>`;
 }
 
+// ── Kanban View ──
+const KANBAN_COLS=[
+  {id:'received',label:'Received',dot:'#9e9ea7'},
+  {id:'pending',label:'Pending',dot:'#f0a0c4'},
+  {id:'scheduled',label:'Scheduled',dot:'#7cadf0'},
+  {id:'shooting',label:'Shooting',dot:'#f5c96b'},
+  {id:'editing',label:'Editing',dot:'#a78bfa'},
+  {id:'delivered',label:'Delivered',dot:'#6dd4a8'}
+];
+function renderCalKanban(grid,header,todayISO){
+  const esc=s=>(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const evsByStatus={};
+  KANBAN_COLS.forEach(c=>evsByStatus[c.id]=[]);
+  calEvents.forEach(ev=>{
+    const s=ev.status||'scheduled';
+    if(evsByStatus[s])evsByStatus[s].push(ev);
+    else evsByStatus.scheduled.push(ev);
+  });
+  // Sort each column by date
+  Object.values(evsByStatus).forEach(arr=>arr.sort((a,b)=>(a.date||'').localeCompare(b.date||'')));
+
+  let cols=KANBAN_COLS.map(col=>{
+    const events=evsByStatus[col.id];
+    const cards=events.map(ev=>{
+      const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'});
+      const timeStr=ev.start?formatTime12(ev.start):'';
+      const realtor=ev.realtorId?realtors.find(r=>r.id===ev.realtorId):null;
+      const dotColors={blue:'#7cadf0',purple:'#a78bfa',green:'#6dd4a8',amber:'#f5c96b',pink:'#f0a0c4',teal:'#5ec5c0',rose:'#f4877f',indigo:'#818cf8'};
+      const dotColor=dotColors[ev.color]||'#7cadf0';
+      return`<div class="kanban-card" draggable="true" data-event-id="${ev.id}" onclick="openCalEvent('${ev.id}')">
+        <div class="kanban-card-title">${esc(ev.title)}</div>
+        <div class="kanban-card-meta">
+          <span class="kanban-card-dot" style="background:${dotColor}"></span>
+          <span>${dateStr}${timeStr?' · '+timeStr:''}</span>
+        </div>
+        ${realtor?`<div class="kanban-card-realtor"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(realtor.name)}</div>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="kanban-col" data-status="${col.id}">
+      <div class="kanban-col-header">
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span class="kanban-status-dot s-${col.id}"></span>${col.label}
+        </span>
+        <span class="kanban-col-count">${events.length}</span>
+      </div>
+      <div class="kanban-col-body" data-status="${col.id}">${cards||`<div style="color:var(--text-3);font-size:12px;text-align:center;padding:16px 0;">No shoots</div>`}</div>
+    </div>`;
+  }).join('');
+
+  grid.innerHTML=`${header}<div class="kanban-board">${cols}</div>`;
+  initKanbanDragDrop();
+}
+
+function initKanbanDragDrop(){
+  let draggedId=null;
+  document.querySelectorAll('.kanban-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      draggedId=card.dataset.eventId;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',draggedId);
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      document.querySelectorAll('.kanban-col-body').forEach(b=>b.classList.remove('drag-over'));
+      draggedId=null;
+    });
+  });
+  document.querySelectorAll('.kanban-col-body').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';col.classList.add('drag-over');});
+    col.addEventListener('dragleave',e=>{if(!col.contains(e.relatedTarget))col.classList.remove('drag-over');});
+    col.addEventListener('drop',e=>{
+      e.preventDefault();col.classList.remove('drag-over');
+      const evId=e.dataTransfer.getData('text/plain');
+      const newStatus=col.dataset.status;
+      const idx=calEvents.findIndex(ev=>ev.id===evId);
+      if(idx>=0&&calEvents[idx].status!==newStatus){
+        calEvents[idx].status=newStatus;
+        saveCalEvents();renderCalendar();
+        showToast(`Moved to ${newStatus.charAt(0).toUpperCase()+newStatus.slice(1)}`);
+      }
+    });
+  });
+}
+
 // ── Day popup (month view) ──
 function calSelectDay(iso,evt){
   closeCalDayPopup();calSelectedDate=iso;
@@ -2877,6 +3034,7 @@ function openCalEvent(id,date,time){
     document.getElementById('calEvContactPhone').value=ev.contactPhone||'';
     document.getElementById('calEvContactEmail').value=ev.contactEmail||'';
     buildRealtorDropdown(ev.realtorId||'');
+    document.getElementById('calEvStatus').value=ev.status||'scheduled';
     pickCalColor(ev.color||'blue');
   }else{
     titleEl.textContent='New Event';
@@ -2892,6 +3050,7 @@ function openCalEvent(id,date,time){
     document.getElementById('calEvContactPhone').value='';
     document.getElementById('calEvContactEmail').value='';
     buildRealtorDropdown('');
+    document.getElementById('calEvStatus').value='scheduled';
     pickCalColor('blue');
   }
   modal.classList.add('open');
@@ -2907,6 +3066,7 @@ function saveCalEvent(){
   const contactPhone=document.getElementById('calEvContactPhone').value.trim();
   const contactEmail=document.getElementById('calEvContactEmail').value.trim();
   const realtorId=document.getElementById('calEvRealtor').value;
+  const status=document.getElementById('calEvStatus').value;
   const data={
     title,
     address,
@@ -2920,7 +3080,8 @@ function saveCalEvent(){
     contactName,
     contactPhone,
     contactEmail,
-    realtorId
+    realtorId,
+    status
   };
   const isNew=!calEditingId;
   if(calEditingId){
@@ -2974,10 +3135,11 @@ function sendEventNotification(ev){
 }
 function deleteCalEvent(){
   if(!calEditingId)return;
-  const ev=calEvents.find(e=>e.id===calEditingId);
+  const evId=calEditingId;
+  const ev=calEvents.find(e=>e.id===evId);
   closeCalEvent();
   showConfirm('Delete event?',`"${ev?.title||'This event'}" will be permanently removed.`,'Delete',()=>{
-    calEvents=calEvents.filter(e=>e.id!==calEditingId);
+    calEvents=calEvents.filter(e=>e.id!==evId);
     saveCalEvents();renderCalendar();showToast('Event deleted');
   });
 }
