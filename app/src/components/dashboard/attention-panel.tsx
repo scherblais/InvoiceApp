@@ -1,0 +1,131 @@
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { formatCurrency, formatShortDate } from "@/lib/format";
+import type { Invoice, Draft, Client } from "@/lib/types";
+
+interface AttentionPanelProps {
+  invoices: Invoice[];
+  drafts: Draft[];
+  clients: Client[];
+}
+
+interface AttentionItem {
+  id: string;
+  kind: "draft" | "unpaid" | "overdue";
+  title: string;
+  meta: string;
+  total: number;
+  onSelect: () => void;
+}
+
+export function AttentionPanel({
+  invoices,
+  drafts,
+  clients,
+}: AttentionPanelProps) {
+  const navigate = useNavigate();
+  const now = Date.now();
+
+  const items: AttentionItem[] = [];
+
+  for (const d of drafts) {
+    const client = clients.find((c) => c.id === d.clientId);
+    const total = (d.items ?? []).reduce((s, it) => s + (it.total ?? 0), 0);
+    items.push({
+      id: `draft-${d.id}`,
+      kind: "draft",
+      title: client?.company ?? client?.name ?? "(no client)",
+      meta: `Draft · ${formatShortDate(d.updatedAt ?? d.savedAt)}`,
+      total,
+      onSelect: () => navigate("/invoices"),
+    });
+  }
+
+  for (const inv of invoices.filter((i) => i.status !== "paid")) {
+    const daysSent = inv.createdAt
+      ? Math.floor((now - inv.createdAt) / (1000 * 60 * 60 * 24))
+      : 0;
+    items.push({
+      id: `inv-${inv.id}`,
+      kind: daysSent > 30 ? "overdue" : "unpaid",
+      title: inv.clientName ?? "(no client)",
+      meta: `Sent ${formatShortDate(inv.createdAt)}${
+        daysSent > 0 ? ` · ${daysSent}d ago` : ""
+      }`,
+      total: inv.total ?? 0,
+      onSelect: () => navigate("/invoices"),
+    });
+  }
+
+  items.sort((a, b) => {
+    const rank = { draft: 0, overdue: 1, unpaid: 2 };
+    return rank[a.kind] - rank[b.kind];
+  });
+
+  const visible = items.slice(0, 6);
+
+  return (
+    <Card className="gap-0 shadow-none">
+      <CardHeader className="flex flex-row items-center justify-between py-4 border-b">
+        <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
+        {items.length > 0 ? (
+          <Badge variant="secondary" className="rounded-full">
+            {items.length}
+          </Badge>
+        ) : null}
+      </CardHeader>
+      <CardContent className="p-0">
+        {visible.length === 0 ? (
+          <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
+            All caught up
+          </div>
+        ) : (
+          <ul className="divide-y">
+            {visible.map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  onClick={item.onSelect}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">
+                      {item.title}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {item.meta}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-medium tabular-nums">
+                      {formatCurrency(item.total, 2)}
+                    </div>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium",
+                        item.kind === "draft" &&
+                          "bg-muted text-muted-foreground",
+                        item.kind === "unpaid" &&
+                          "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                        item.kind === "overdue" &&
+                          "bg-red-500/10 text-red-600 dark:text-red-400"
+                      )}
+                    >
+                      {item.kind === "draft"
+                        ? "Draft"
+                        : item.kind === "overdue"
+                          ? "Overdue"
+                          : "Unpaid"}
+                    </span>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

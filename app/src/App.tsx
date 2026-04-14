@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth-context";
+import { DataProvider } from "@/contexts/data-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/app-shell";
 import { RequireAuth } from "@/components/require-auth";
 import { LoginView } from "@/views/login";
+import { DashboardView } from "@/views/dashboard";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -19,19 +21,13 @@ export default function App() {
               <Route
                 element={
                   <RequireAuth>
-                    <AppShell />
+                    <DataProvider>
+                      <AppShell />
+                    </DataProvider>
                   </RequireAuth>
                 }
               >
-                <Route
-                  path="/"
-                  element={
-                    <PlaceholderView
-                      title="Dashboard"
-                      description="Dashboard view ported next."
-                    />
-                  }
-                />
+                <Route path="/" element={<DashboardView />} />
                 <Route
                   path="/invoices"
                   element={<PlaceholderView title="Invoicing" />}
