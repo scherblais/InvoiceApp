@@ -61,6 +61,33 @@ export interface Realtor {
   company?: string;
   email?: string;
   phone?: string;
+  notes?: string;
+}
+
+export interface ConfigPackage {
+  id: string;
+  name: string;
+  price: number;
+  extraLabel?: string;
+  extraUnit?: string;
+  extraPrice?: number;
+}
+
+export interface ConfigAddon {
+  id: string;
+  name: string;
+  price: number;
+  qty?: boolean;
+}
+
+export interface ConfigTravel {
+  freeKm: number;
+  ratePerKm: number;
+}
+
+export interface ConfigTaxes {
+  gst: number;
+  qst: number;
 }
 
 export interface Config {
@@ -69,5 +96,9 @@ export interface Config {
   phone?: string;
   address?: string;
   logoUrl?: string;
+  packages?: ConfigPackage[];
+  addons?: ConfigAddon[];
+  travel?: ConfigTravel;
+  taxes?: ConfigTaxes;
   [key: string]: unknown;
 }

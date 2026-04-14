@@ -10,6 +10,8 @@ import { LoginView } from "@/views/login";
 import { DashboardView } from "@/views/dashboard";
 import { CalendarView } from "@/views/calendar";
 import { InvoicesView } from "@/views/invoices";
+import { RealtorsView } from "@/views/realtors";
+import { SettingsView } from "@/views/settings";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -32,14 +34,8 @@ export default function App() {
                 <Route path="/" element={<DashboardView />} />
                 <Route path="/invoices" element={<InvoicesView />} />
                 <Route path="/calendar" element={<CalendarView />} />
-                <Route
-                  path="/realtors"
-                  element={<PlaceholderView title="Realtors" />}
-                />
-                <Route
-                  path="/settings"
-                  element={<PlaceholderView title="Settings" />}
-                />
+                <Route path="/realtors" element={<RealtorsView />} />
+                <Route path="/settings" element={<SettingsView />} />
               </Route>
               <Route
                 path="*"
