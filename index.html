@@ -75,7 +75,36 @@
     width: 220px; flex-shrink: 0; display: flex; flex-direction: column;
     background: var(--bg-card); border-right: 1px solid var(--border);
     padding: 0; height: 100vh; position: relative; z-index: 40;
+    transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .app-sidebar.collapsed { width: 64px; }
+  .app-sidebar.collapsed .sidebar-brand-name,
+  .app-sidebar.collapsed .sidebar-nav-link { gap: 0; }
+  .app-sidebar.collapsed .sidebar-nav-link span,
+  .app-sidebar.collapsed .sidebar-brand-name,
+  .app-sidebar.collapsed .sidebar-theme-left span,
+  .app-sidebar.collapsed .theme-toggle-pill,
+  .app-sidebar.collapsed .sidebar-user-info { display: none; }
+  .app-sidebar.collapsed .sidebar-nav-link,
+  .app-sidebar.collapsed .sidebar-theme-row { justify-content: center; padding: 9px 0; }
+  .app-sidebar.collapsed .sidebar-brand { padding: 20px 0 24px; justify-content: center; }
+  .app-sidebar.collapsed .sidebar-user { padding: 14px 0; justify-content: center; }
+  .app-sidebar.collapsed .sidebar-bottom { padding: 0 10px 12px; }
+  .app-sidebar.collapsed .sidebar-collapse-btn { transform: rotate(180deg); }
+  .app-sidebar.collapsed .nav-link-text { display: none; }
+
+  .sidebar-collapse-btn {
+    position: absolute; top: 22px; right: -12px; z-index: 41;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--bg-card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s ease;
+    color: var(--text-3);
+  }
+  .sidebar-collapse-btn:hover { color: var(--text); border-color: var(--text-3); background: var(--bg-inset); }
+  .sidebar-collapse-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @media (max-width: 768px) { .sidebar-collapse-btn { display: none; } }
+
   .sidebar-brand {
     display: flex; align-items: center; gap: 8px; padding: 20px 20px 24px;
     cursor: pointer; transition: opacity var(--t-fast);
@@ -1460,112 +1489,157 @@
   .cal-view-btn.active { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
   .cal-view-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Week view */
-  .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 32px 24px; box-shadow: var(--shadow-card); }
+  .cal-week { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 32px 24px; }
   .cal-week-header {
-    display: grid; grid-template-columns: 56px repeat(7, 1fr);
+    display: grid; grid-template-columns: 64px repeat(7, 1fr);
     border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .cal-week-header-tz {
-    font-size: 9px; color: var(--text-3); font-weight: 500;
-    display: flex; align-items: flex-end; justify-content: center; padding: 0 0 8px;
+    font-size: 10px; color: var(--text-3); font-weight: 500;
+    display: flex; align-items: flex-end; justify-content: center; padding: 0 0 10px;
+    letter-spacing: 0.3px;
   }
   .cal-week-header-cell {
-    text-align: center; padding: 10px 2px 8px; font-size: 11px; font-weight: 600;
-    letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3);
-    border-left: 1px solid var(--border);
+    text-align: center; padding: 12px 2px 10px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-3);
+    border-left: 1px solid var(--border-subtle);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
   }
-  .cal-week-header-cell.today { color: var(--text); }
+  .cal-week-header-cell.today { color: var(--accent); }
   .cal-week-header-date {
-    font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
-    color: var(--text); display: block; margin-top: 3px; text-transform: none;
+    font-size: 18px; font-weight: 600; letter-spacing: -0.3px;
+    color: var(--text); text-transform: none;
   }
   .cal-week-header-cell.today .cal-week-header-date {
-    background: var(--accent); color: var(--accent-text); width: 32px; height: 32px;
+    background: var(--accent); color: var(--accent-text); width: 30px; height: 30px;
     border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: 14px; font-weight: 600;
   }
   .cal-week-body { flex: 1; display: flex; overflow-y: auto; }
-  .cal-week-gutter-col { width: 56px; flex-shrink: 0; }
+  .cal-week-gutter-col { width: 64px; flex-shrink: 0; }
   .cal-week-gutter {
-    font-size: 10px; color: var(--text-3); text-align: right; padding-right: 10px;
-    position: relative; height: 60px;
+    font-size: 10px; color: var(--text-3); text-align: right; padding-right: 12px;
+    position: relative; height: 60px; letter-spacing: 0.2px;
   }
-  .cal-week-gutter span { position: absolute; top: -7px; right: 10px; font-weight: 400; }
+  .cal-week-gutter span { position: absolute; top: -6px; right: 12px; font-weight: 500; background: var(--bg-card); padding: 0 2px; }
   .cal-week-cols { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); }
   .cal-week-col { position: relative; border-left: 1px solid var(--border); }
-  .cal-week-col.weekend { background: var(--bg-inset); }
+  .cal-week-col.today { background: rgba(124,173,240,0.08); }
+  [data-theme="dark"] .cal-week-col.today { background: rgba(0,0,0,0.25); }
   .cal-week-hour {
-    height: 60px; border-bottom: 1px solid var(--border-subtle);
+    height: 60px; border-bottom: 1px solid var(--border);
     cursor: pointer; transition: background var(--t-fast);
   }
-  .cal-week-hour:hover { background: var(--accent-light); }
+  .cal-week-hour:hover { background: var(--bg-inset); }
   .cal-week-event {
-    position: absolute; left: 3px; right: 3px; border-radius: 5px;
-    padding: 4px 8px; font-size: 11px; font-weight: 500; cursor: pointer;
-    overflow: hidden; border-left: 3px solid; z-index: 2;
-    transition: all var(--t-fast); line-height: 1.4;
+    position: absolute; left: 0; right: 0; border-radius: 0;
+    padding: 8px 10px; font-size: 11px; font-weight: 500; cursor: pointer;
+    overflow: hidden; border: none; z-index: 2;
+    transition: filter var(--t-fast); line-height: 1.35;
+    display: flex; flex-direction: column; gap: 2px;
   }
-  .cal-week-event:hover { filter: brightness(1.08); z-index: 3; }
-  .cal-week-ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cal-week-ev-time { opacity: 0.7; font-size: 10px; }
+  .cal-week-event:hover { filter: brightness(0.95); z-index: 3; }
+  [data-theme="dark"] .cal-week-event:hover { filter: brightness(1.15); }
+  .cal-week-ev-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; }
+  .cal-week-ev-time { opacity: 0.75; font-size: 10px; font-weight: 500; }
+  .cal-week-ev-meta { opacity: 0.75; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  /* Pastel week event colors */
+  .cal-week-event.ev-blue { background: rgba(124,173,240,0.16); color: #3574c4; border-color: rgba(124,173,240,0.35); }
+  .cal-week-event.ev-purple { background: rgba(167,139,250,0.16); color: #7c3aed; border-color: rgba(167,139,250,0.35); }
+  .cal-week-event.ev-green { background: rgba(109,212,168,0.16); color: #0e9a6e; border-color: rgba(109,212,168,0.35); }
+  .cal-week-event.ev-amber { background: rgba(245,201,107,0.16); color: #b8860b; border-color: rgba(245,201,107,0.35); }
+  .cal-week-event.ev-pink { background: rgba(240,160,196,0.16); color: #c4477a; border-color: rgba(240,160,196,0.35); }
+  .cal-week-event.ev-teal { background: rgba(94,197,192,0.16); color: #0d8a85; border-color: rgba(94,197,192,0.35); }
+  .cal-week-event.ev-rose { background: rgba(244,135,127,0.16); color: #c9403a; border-color: rgba(244,135,127,0.35); }
+  .cal-week-event.ev-indigo { background: rgba(129,140,248,0.16); color: #5558d6; border-color: rgba(129,140,248,0.35); }
+  [data-theme="dark"] .cal-week-event.ev-blue { background: rgba(124,173,240,0.18); color: #93c5fd; border-color: rgba(124,173,240,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-purple { background: rgba(167,139,250,0.18); color: #c4b5fd; border-color: rgba(167,139,250,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-green { background: rgba(109,212,168,0.18); color: #6ee7b7; border-color: rgba(109,212,168,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-amber { background: rgba(245,201,107,0.18); color: #fcd34d; border-color: rgba(245,201,107,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-pink { background: rgba(240,160,196,0.18); color: #f9a8d4; border-color: rgba(240,160,196,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-teal { background: rgba(94,197,192,0.18); color: #5eead4; border-color: rgba(94,197,192,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-rose { background: rgba(244,135,127,0.18); color: #fca5a5; border-color: rgba(244,135,127,0.3); }
+  [data-theme="dark"] .cal-week-event.ev-indigo { background: rgba(129,140,248,0.18); color: #a5b4fc; border-color: rgba(129,140,248,0.3); }
   .cal-week-now {
-    position: absolute; left: 0; right: 0; height: 2px; background: #ef4444;
-    z-index: 5; pointer-events: none;
+    position: absolute; left: 0; right: 0; height: 2px; background: #f4877f;
+    z-index: 5; pointer-events: none; border-radius: 1px;
   }
   .cal-week-now::before {
     content: ''; position: absolute; left: -5px; top: -4px;
-    width: 10px; height: 10px; border-radius: 50%; background: #ef4444;
+    width: 10px; height: 10px; border-radius: 50%; background: #f4877f;
+    box-shadow: 0 0 0 3px rgba(244,135,127,0.2);
   }
   .cal-week-now-label {
-    position: absolute; left: -56px; top: -7px; font-size: 10px; font-weight: 600;
-    color: #ef4444; width: 50px; text-align: right; pointer-events: none; z-index: 5;
+    position: absolute; left: -64px; top: -8px; font-size: 10px; font-weight: 600;
+    color: #f4877f; width: 56px; text-align: right; padding-right: 10px;
+    pointer-events: none; z-index: 5; background: var(--bg-card);
   }
   .cal-week-allday {
-    display: grid; grid-template-columns: 56px repeat(7, 1fr);
+    display: grid; grid-template-columns: 64px repeat(7, 1fr);
     border-bottom: 1px solid var(--border); min-height: 0;
+    background: var(--bg-inset);
   }
-  .cal-week-allday-label { font-size: 9px; color: var(--text-3); padding: 4px 6px; text-align: right; }
-  .cal-week-allday-cell { padding: 2px; border-left: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 2px; }
+  .cal-week-allday-label { font-size: 10px; color: var(--text-3); padding: 8px 12px 8px 0; text-align: right; font-weight: 500; letter-spacing: 0.2px; display: flex; align-items: center; justify-content: flex-end; }
+  .cal-week-allday-cell { padding: 4px; border-left: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 3px; min-height: 28px; }
   /* Agenda view */
-  .cal-agenda { flex: 1; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 32px 24px; box-shadow: var(--shadow-card); }
-  .cal-agenda-empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
-  .cal-agenda-empty-icon { font-size: 48px; opacity: 0.3; margin-bottom: 12px; }
-  .cal-agenda-empty-text { font-size: 14px; font-weight: 500; }
-  .cal-agenda-day { border-bottom: 1px solid var(--border); }
+  .cal-agenda { flex: 1; overflow-y: auto; margin: 0 32px 24px; display: flex; flex-direction: column; gap: 20px; }
+  .cal-agenda-empty {
+    text-align: center; padding: 80px 20px; color: var(--text-3);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .cal-agenda-empty-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--bg-inset); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: var(--text-3);
+  }
+  .cal-agenda-empty-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .cal-agenda-empty-title { font-size: 15px; font-weight: 600; color: var(--text-2); letter-spacing: -0.2px; }
+  .cal-agenda-empty-text { font-size: 13px; font-weight: 400; color: var(--text-3); }
+  .cal-agenda-day { display: flex; flex-direction: column; gap: 8px; }
   .cal-agenda-day-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 20px; font-size: 12px; font-weight: 700; color: var(--text-2);
-    background: var(--bg-inset); position: sticky; top: 0; z-index: 2;
+    padding: 0 2px; font-size: 11px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.8px;
   }
-  .cal-agenda-day-header.today { color: var(--accent); }
+  .cal-agenda-day-header.today { color: var(--text); }
   .cal-agenda-day-add {
-    width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border);
-    background: none; color: var(--text-3); cursor: pointer; font-size: 14px;
+    width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-3); cursor: pointer; font-size: 13px; line-height: 1;
     display: flex; align-items: center; justify-content: center; transition: all var(--t-fast);
   }
-  .cal-agenda-day-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .cal-agenda-day-add:hover { border-color: var(--text-3); color: var(--text); }
+  .cal-agenda-items { display: flex; flex-direction: column; gap: 8px; }
   .cal-agenda-event {
-    display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px;
-    cursor: pointer; transition: background var(--t-fast); border-bottom: 1px solid var(--border-subtle);
+    display: flex; gap: 14px; padding: 14px 16px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: all 0.15s ease;
   }
-  .cal-agenda-event:last-child { border-bottom: none; }
-  .cal-agenda-event:hover { background: var(--accent-light); }
-  .cal-agenda-ev-color {
-    width: 4px; border-radius: 2px; min-height: 36px; flex-shrink: 0; margin-top: 2px;
+  .cal-agenda-event:hover { border-color: var(--text-3); }
+  .cal-agenda-ev-time {
+    flex-shrink: 0; width: 64px; font-size: 12px; font-weight: 550; color: var(--text);
+    letter-spacing: -0.1px; line-height: 1.3;
   }
+  .cal-agenda-ev-time-sub { font-size: 10px; color: var(--text-3); font-weight: 450; margin-top: 2px; }
+  .cal-agenda-ev-divider { width: 3px; border-radius: 2px; flex-shrink: 0; }
   .cal-agenda-ev-body { flex: 1; min-width: 0; }
-  .cal-agenda-ev-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-  .cal-agenda-ev-time { font-size: 11px; color: var(--text-3); }
-  .cal-agenda-ev-loc { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-  .cal-agenda-ev-type {
-    font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
-    background: var(--bg-inset); color: var(--text-3); text-transform: uppercase;
-    letter-spacing: 0.5px; white-space: nowrap; margin-top: 4px; display: inline-block;
+  .cal-agenda-ev-title { font-size: 13px; font-weight: 550; color: var(--text); margin-bottom: 4px; letter-spacing: -0.1px; line-height: 1.3; }
+  .cal-agenda-ev-meta { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .cal-agenda-ev-meta svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .cal-agenda-ev-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 2px 8px; border-radius: 100px; color: var(--text-2);
+    background: var(--bg-inset); border: 1px solid var(--border);
+    margin-top: 8px;
   }
+  .cal-agenda-ev-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cal-agenda-ev-notes { font-size: 11px; color: var(--text-3); line-height: 1.5; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-subtle); }
   /* Kanban board */
   .kanban-board {
     display: flex; gap: 14px; flex: 1; overflow-x: auto;
     margin: 0 32px 24px; padding-bottom: 8px; min-height: 0;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
   }
   .kanban-col {
     flex: 1; min-width: 220px; max-width: 320px;
@@ -1823,20 +1897,216 @@
     .app-main { height: calc(100vh - 56px); }
     .cal-fullscreen { height: calc(100vh - 56px); }
   }
+
+  /* ── Shared Client View ── */
+  .shared-view {
+    min-height: 100vh; background: var(--bg); color: var(--text);
+    font-family: inherit; display: flex; flex-direction: column;
+  }
+  .shared-header {
+    padding: 20px 28px; border-bottom: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; background: var(--bg-card);
+  }
+  .shared-header-brand { display: flex; align-items: center; gap: 10px; }
+  .shared-header-brand svg { width: 22px; height: 22px; fill: var(--text); flex-shrink: 0; }
+  .shared-header-brand-name { font-size: 14px; font-weight: 600; letter-spacing: -0.2px; color: var(--text); }
+  .shared-header-actions { display: flex; align-items: center; gap: 8px; }
+  .shared-theme-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: transparent; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.18s ease; color: var(--text-2);
+  }
+  .shared-theme-btn:hover { color: var(--text); background: var(--bg-inset); border-color: var(--text-3); }
+  .shared-theme-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .shared-hero {
+    padding: 32px 28px 24px; max-width: 1200px; margin: 0 auto; width: 100%;
+  }
+  .shared-hero-greeting { font-size: 13px; color: var(--text-3); font-weight: 450; letter-spacing: -0.1px; margin-bottom: 4px; }
+  .shared-hero-name { font-size: 26px; font-weight: 700; letter-spacing: -0.6px; color: var(--text); margin-bottom: 6px; }
+  .shared-hero-sub { font-size: 13px; color: var(--text-3); letter-spacing: -0.1px; }
+
+  .shared-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px; margin-top: 20px;
+  }
+  .shared-stat {
+    padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .shared-stat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .shared-stat-body { min-width: 0; }
+  .shared-stat-count { font-size: 18px; font-weight: 650; color: var(--text); letter-spacing: -0.3px; line-height: 1; }
+  .shared-stat-label { font-size: 11px; color: var(--text-3); font-weight: 500; letter-spacing: 0.1px; margin-top: 3px; text-transform: uppercase; }
+
+  .shared-toolbar {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-top: 28px; margin-bottom: 16px;
+  }
+  .shared-section-title { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; }
+  .shared-view-toggle { display: flex; gap: 2px; background: var(--bg-inset); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+  .shared-view-btn {
+    padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 500;
+    color: var(--text-3); background: transparent; border: none; cursor: pointer;
+    font-family: inherit; letter-spacing: -0.1px; transition: all 0.15s ease;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .shared-view-btn:hover { color: var(--text-2); }
+  .shared-view-btn.active { background: var(--bg-card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  [data-theme="dark"] .shared-view-btn.active { background: rgba(255,255,255,0.06); }
+  .shared-view-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .shared-body { flex: 1; padding: 0 28px 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+  /* Shared Board View */
+  .shared-board {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .shared-col {
+    background: var(--bg-inset); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .shared-col-header {
+    padding: 13px 16px; display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-3); border-bottom: 1px solid var(--border);
+  }
+  .shared-col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .shared-col-count {
+    margin-left: auto; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 100px;
+    background: var(--border); color: var(--text-2);
+  }
+  .shared-col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+  .shared-col-empty {
+    font-size: 11px; color: var(--text-3); text-align: center;
+    padding: 20px 10px; font-style: italic; opacity: 0.7;
+  }
+  .shared-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; transition: all 0.15s ease;
+  }
+  .shared-card:hover { border-color: var(--text-3); }
+  .shared-card-title {
+    font-size: 13px; font-weight: 550; color: var(--text);
+    line-height: 1.3; margin-bottom: 5px; letter-spacing: -0.1px;
+  }
+  .shared-card-date {
+    font-size: 11px; color: var(--text-2); display: flex; align-items: center;
+    gap: 5px; margin-bottom: 6px;
+  }
+  .shared-card-date svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .shared-card-notes {
+    font-size: 11px; color: var(--text-3); line-height: 1.5;
+    padding-top: 6px; border-top: 1px solid var(--border-subtle);
+    margin-top: 6px;
+  }
+
+  /* Shared List View */
+  .shared-list { display: flex; flex-direction: column; gap: 24px; }
+  .shared-list-group-header {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-3); margin-bottom: 10px; padding: 0 2px;
+  }
+  .shared-list-items { display: flex; flex-direction: column; gap: 8px; }
+  .shared-list-card {
+    display: flex; gap: 14px; padding: 14px 16px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; transition: all 0.15s ease;
+  }
+  .shared-list-card:hover { border-color: var(--text-3); }
+  .shared-list-time {
+    flex-shrink: 0; width: 64px; font-size: 12px; font-weight: 550; color: var(--text);
+    letter-spacing: -0.1px; line-height: 1.3;
+  }
+  .shared-list-time-sub { font-size: 10px; color: var(--text-3); font-weight: 450; margin-top: 2px; }
+  .shared-list-divider { width: 1px; background: var(--border); flex-shrink: 0; }
+  .shared-list-body { flex: 1; min-width: 0; }
+  .shared-list-body .shared-card-title { margin-bottom: 4px; }
+  .shared-list-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 2px 8px; border-radius: 100px; color: var(--text-2);
+    background: var(--bg-inset); border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .shared-list-status .shared-col-dot { width: 6px; height: 6px; }
+
+  /* Shared Empty */
+  .shared-empty {
+    text-align: center; padding: 80px 20px; color: var(--text-3);
+    max-width: 400px; margin: 40px auto;
+  }
+  .shared-empty-icon {
+    width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 16px;
+    background: var(--bg-inset); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+  }
+  .shared-empty-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .shared-empty-title { font-size: 16px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; letter-spacing: -0.2px; }
+  .shared-empty-sub { font-size: 13px; color: var(--text-3); line-height: 1.5; }
+
+  .shared-footer {
+    padding: 20px; text-align: center; font-size: 11px; color: var(--text-3);
+    border-top: 1px solid var(--border-subtle); background: var(--bg-card);
+  }
+  .shared-footer a { color: var(--text-2); text-decoration: none; font-weight: 500; }
+  .shared-footer a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .shared-header { padding: 14px 18px; }
+    .shared-hero { padding: 24px 18px 16px; }
+    .shared-toolbar { padding: 0 18px; }
+    .shared-body { padding: 0 18px 32px; }
+    .shared-hero-name { font-size: 22px; }
+    .shared-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .shared-stat { padding: 12px 14px; }
+    .shared-board { grid-template-columns: 1fr; gap: 12px; }
+  }
 </style>
 </head>
 <body>
 
-<div id="shared-calendar" style="display:none; min-height:100vh; background:var(--bg); color:var(--text); font-family:inherit;">
-  <div style="padding:20px 20px 0;">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
-      <svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg" style="width:28px; height:28px; fill:var(--text);"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
-      <span style="font-size:16px; font-weight:600;">Lumeria Media</span>
+<div id="shared-calendar" class="shared-view" style="display:none;">
+  <div class="shared-header">
+    <div class="shared-header-brand">
+      <svg viewBox="0 0 73 73" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
+      <span class="shared-header-brand-name">Lumeria Media</span>
     </div>
-    <h2 id="sharedCalTitle" style="font-size:18px; font-weight:600; margin-bottom:4px;">Your Shoots</h2>
-    <p id="sharedCalSub" style="font-size:13px; color:var(--text-2); margin-bottom:16px;"></p>
+    <div class="shared-header-actions">
+      <button class="shared-theme-btn" onclick="toggleSharedTheme()" title="Toggle theme" id="sharedThemeBtn">
+        <svg id="sharedThemeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
   </div>
-  <div id="sharedCalEvents"></div>
+  <div class="shared-hero">
+    <div class="shared-hero-greeting" id="sharedHeroGreeting">Welcome</div>
+    <div class="shared-hero-name" id="sharedHeroName">Your Shoots</div>
+    <div class="shared-hero-sub" id="sharedHeroSub"></div>
+    <div class="shared-stats" id="sharedStats"></div>
+  </div>
+  <div class="shared-toolbar" id="sharedToolbar" style="display:none;">
+    <div class="shared-section-title">Appointments</div>
+    <div class="shared-view-toggle">
+      <button class="shared-view-btn active" id="sharedViewBtnBoard" onclick="setSharedView('board')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="13" rx="1"/><rect x="17" y="3" width="5" height="8" rx="1"/></svg>
+        Board
+      </button>
+      <button class="shared-view-btn" id="sharedViewBtnList" onclick="setSharedView('list')">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        List
+      </button>
+    </div>
+  </div>
+  <div class="shared-body" id="sharedCalEvents"></div>
+  <div class="shared-footer">
+    Powered by <a href="#" onclick="return false;">Lumeria Media</a>
+  </div>
 </div>
 <div id="login-screen" class="login-screen">
   <div class="login-box">
@@ -1844,8 +2114,8 @@
     <h2>Lumeria Media</h2>
     <div class="login-sub">Sign in to manage your invoices</div>
     <div class="login-error" id="loginError"></div>
-    <div class="field"><div class="label">Email</div><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-    <div class="field"><div class="label">Password</div><input type="password" id="loginPassword" placeholder="Password"></div>
+    <div class="field"><div class="label">Email</div><input type="email" id="loginEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+    <div class="field"><div class="label">Password</div><input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
     <button class="btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
     <div class="login-toggle" id="loginToggle">No account? <a onclick="toggleAuthMode()">Create one</a></div>
   </div>
@@ -1871,23 +2141,26 @@
 
 <div id="app" style="display:none;">
   <div class="app-layout">
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="appSidebar">
+      <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Collapse sidebar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
       <div class="sidebar-brand" onclick="navigateTo('dashboard')">
         <svg class="sidebar-brand-logo" viewBox="0 0 73 73" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"/></svg>
         <span class="sidebar-brand-name">Lumeria Media</span>
       </div>
       <nav class="sidebar-nav">
-        <button class="sidebar-nav-link active" id="navDashboard" onclick="navigateTo('dashboard')">
+        <button class="sidebar-nav-link active" id="navDashboard" onclick="navigateTo('dashboard')" title="Dashboard">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
+          <span class="nav-link-text">Dashboard</span>
         </button>
-        <button class="sidebar-nav-link" id="navInvoicing" onclick="navigateTo('invoicing')">
+        <button class="sidebar-nav-link" id="navInvoicing" onclick="navigateTo('invoicing')" title="Invoicing">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Invoicing
+          <span class="nav-link-text">Invoicing</span>
         </button>
-        <button class="sidebar-nav-link" id="navCalendar" onclick="navigateTo('calendar')">
+        <button class="sidebar-nav-link" id="navCalendar" onclick="navigateTo('calendar')" title="Calendar">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Calendar
+          <span class="nav-link-text">Calendar</span>
         </button>
         <div class="sidebar-spacer"></div>
       </nav>
@@ -1899,13 +2172,13 @@
           </span>
           <span class="theme-toggle-pill" id="sidebarThemeTrack"><span class="toggle-knob" id="themeKnobIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg></span></span>
         </button>
-        <button class="sidebar-nav-link" id="navSettings" onclick="navigateTo('settings')">
+        <button class="sidebar-nav-link" id="navSettings" onclick="navigateTo('settings')" title="Settings">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Settings
+          <span class="nav-link-text">Settings</span>
         </button>
-        <button class="sidebar-nav-link danger" onclick="handleLogout()">
+        <button class="sidebar-nav-link danger" onclick="handleLogout()" title="Sign out">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign out
+          <span class="nav-link-text">Sign out</span>
         </button>
       </div>
       <div class="sidebar-user">
@@ -2065,7 +2338,6 @@
       <div class="field"><div class="label">Apt / Unit # (optional)</div><input type="text" id="calEvUnit" placeholder="e.g. Apt 3, Suite 200"></div>
       <div class="field"><div class="label">Date</div><input type="date" id="calEvDate"></div>
       <div class="field"><div class="label">Time</div><input type="time" id="calEvStart"></div>
-      <input type="hidden" id="calEvLocation">
       <div class="cal-contact-section">
         <div class="label" style="margin-bottom:8px;">Seller / Tenant Contact</div>
         <div class="field"><input type="text" id="calEvContactName" placeholder="Name"></div>
@@ -2131,6 +2403,16 @@ const ORIGIN={lat:45.44694,lon:-73.33318};const HERE_API_KEY='C1Z2lw2kJYt838jFC2
 const DEFAULTS={packages:[{id:'p1',name:'Interior + Exterior',price:150,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5},{id:'p2',name:'Exterior Only',price:85,extraLabel:'Extra photos',extraUnit:'photos',extraPrice:5}],addons:[{id:'a1',name:'Front Only (1 to 3 Photos)',price:65,qty:false},{id:'a2',name:'Exterior Only (3 to 7 photos)',price:85,qty:false},{id:'a3',name:'Additional Unit',price:15,qty:true},{id:'a4',name:'Virtual Staging/Room Clearing',price:10,qty:true},{id:'a5',name:'Social Media Video (AI)',price:65,qty:false},{id:'a6',name:'Drone',price:35,qty:false}],travel:{freeKm:25,ratePerKm:0.65},taxes:{gst:5,qst:9.975}};
 
 // ── Shared Calendar View ──
+let _sharedData=null;
+let _sharedViewMode=localStorage.getItem('shared_view_mode')||'board';
+const SHARED_COLS=[
+  {id:'received',label:'Received',dot:'#9e9ea7'},
+  {id:'pending',label:'Pending',dot:'#f0a0c4'},
+  {id:'scheduled',label:'Scheduled',dot:'#7cadf0'},
+  {id:'shooting',label:'Shooting',dot:'#f5c96b'},
+  {id:'editing',label:'Editing',dot:'#a78bfa'},
+  {id:'delivered',label:'Delivered',dot:'#6dd4a8'}
+];
 (function checkSharedView(){
   const params=new URLSearchParams(window.location.search);
   const token=params.get('share');
@@ -2141,68 +2423,127 @@ const DEFAULTS={packages:[{id:'p1',name:'Interior + Exterior',price:150,extraLab
     if(!uid||!realtorId)return;
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='none';
-    document.getElementById('shared-calendar').style.display='block';
+    document.getElementById('shared-calendar').style.display='flex';
     const savedTheme=localStorage.getItem('inv_theme');
     if(savedTheme==='dark')document.documentElement.setAttribute('data-theme','dark');
-    const ref=db.ref('users/'+uid+'/calEvents');
+    updateSharedThemeIcon();
+    const ref=db.ref('shared/'+token);
     ref.on('value',snap=>{
-      let events=snap.val();
-      if(!events)events=[];
-      if(!Array.isArray(events))events=Object.values(events);
-      const myEvents=events.filter(e=>e.realtorId===realtorId).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
-      const realtorRef=db.ref('users/'+uid+'/realtors');
-      realtorRef.once('value',rsnap=>{
-        let rList=rsnap.val();if(!rList)rList=[];if(!Array.isArray(rList))rList=Object.values(rList);
-        const realtor=rList.find(r=>r.id===realtorId);
-        document.getElementById('sharedCalSub').textContent=realtor?`Calendar for ${realtor.name}`:'Shared calendar';
-        const container=document.getElementById('sharedCalEvents');
-        if(myEvents.length===0){container.innerHTML='<p style="color:var(--text-3);font-size:14px;padding:0 20px;">No events scheduled yet.</p>';return;}
-        const sharedCols=[
-          {id:'received',label:'Received',dot:'#9e9ea7'},
-          {id:'pending',label:'Pending',dot:'#f0a0c4'},
-          {id:'scheduled',label:'Scheduled',dot:'#7cadf0'},
-          {id:'shooting',label:'Shooting',dot:'#f5c96b'},
-          {id:'editing',label:'Editing',dot:'#a78bfa'},
-          {id:'delivered',label:'Delivered',dot:'#6dd4a8'}
-        ];
-        const evsByStatus={};
-        sharedCols.forEach(c=>evsByStatus[c.id]=[]);
-        myEvents.forEach(ev=>{const s=ev.status||'scheduled';if(evsByStatus[s])evsByStatus[s].push(ev);else evsByStatus.scheduled.push(ev);});
-        let html=sharedCols.map(col=>{
-          const events=evsByStatus[col.id];
-          if(events.length===0)return'';
-          const cards=events.map(ev=>{
-            const dateStr=new Date(ev.date+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
-            const timeStr=ev.start?formatSharedTime(ev.start):'';
-            const loc=ev.unit?`${ev.address}, ${ev.unit}`:ev.address;
-            return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
-              <div style="font-weight:550;font-size:13px;margin-bottom:4px;">${loc||ev.title}</div>
-              <div style="font-size:11px;color:var(--text-3);">${dateStr}${timeStr?' · '+timeStr:''}</div>
-              ${ev.notes?`<div style="font-size:11px;color:var(--text-3);margin-top:4px;">${ev.notes}</div>`:''}
-            </div>`;
-          }).join('');
-          return`<div style="background:var(--bg-inset);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
-            <div style="padding:12px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);">
-              <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0;"></span>${col.label}
-              <span style="margin-left:auto;font-size:10px;padding:1px 7px;border-radius:100px;background:var(--border);color:var(--text-3);">${events.length}</span>
-            </div>
-            <div style="padding:10px;">${cards}</div>
-          </div>`;
-        }).join('');
-        container.innerHTML=`<div style="padding:0 20px 20px;">${html}</div>`;
-      });
+      _sharedData=snap.val();
+      renderSharedView();
     });
     window._isSharedView=true;
   }catch(e){console.error('Invalid share token',e);}
 })();
-function formatSharedTime(t){const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';return((h%12)||12)+':'+(m<10?'0':'')+m+' '+ampm;}
+function escSh(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function formatSharedTime(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';return((h%12)||12)+':'+(m<10?'0':'')+m+' '+ampm;}
+function formatSharedDate(iso){const d=new Date(iso+'T12:00:00');return d.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});}
+function formatSharedDateLong(iso){const d=new Date(iso+'T12:00:00');const today=new Date();const todayISO=today.toISOString().split('T')[0];const tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);const tomorrowISO=tomorrow.toISOString().split('T')[0];if(iso===todayISO)return'Today · '+d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});if(iso===tomorrowISO)return'Tomorrow · '+d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});return d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});}
+function renderSharedView(){
+  const toolbar=document.getElementById('sharedToolbar');
+  const container=document.getElementById('sharedCalEvents');
+  const statsEl=document.getElementById('sharedStats');
+  if(!_sharedData){toolbar.style.display='none';statsEl.innerHTML='';container.innerHTML=renderSharedEmpty('No appointments yet','Your photographer will share upcoming shoots here.');return;}
+  let events=_sharedData.events||[];
+  if(!Array.isArray(events))events=Object.values(events);
+  const greetingEl=document.getElementById('sharedHeroGreeting');
+  const nameEl=document.getElementById('sharedHeroName');
+  const subEl=document.getElementById('sharedHeroSub');
+  const name=_sharedData.realtorName||'';
+  const company=_sharedData.realtorCompany||'';
+  const hour=new Date().getHours();const greet=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  greetingEl.textContent=greet;
+  nameEl.textContent=name?name:'Your Shoots';
+  subEl.textContent=company?company+' · Live status from Lumeria Media':'Live status from Lumeria Media';
+  // Stats: counts per status
+  const counts={};SHARED_COLS.forEach(c=>counts[c.id]=0);
+  events.forEach(ev=>{const s=ev.status||'scheduled';if(counts[s]!=null)counts[s]++;else counts.scheduled++;});
+  const activeCol=SHARED_COLS.filter(c=>counts[c.id]>0);
+  // Highlight stats: Upcoming (received+pending+scheduled), In Progress (shooting+editing), Delivered
+  const upcoming=(counts.received||0)+(counts.pending||0)+(counts.scheduled||0);
+  const inProgress=(counts.shooting||0)+(counts.editing||0);
+  const delivered=counts.delivered||0;
+  statsEl.innerHTML=`
+    <div class="shared-stat"><span class="shared-stat-dot" style="background:#7cadf0"></span><div class="shared-stat-body"><div class="shared-stat-count">${upcoming}</div><div class="shared-stat-label">Upcoming</div></div></div>
+    <div class="shared-stat"><span class="shared-stat-dot" style="background:#f5c96b"></span><div class="shared-stat-body"><div class="shared-stat-count">${inProgress}</div><div class="shared-stat-label">In Progress</div></div></div>
+    <div class="shared-stat"><span class="shared-stat-dot" style="background:#6dd4a8"></span><div class="shared-stat-body"><div class="shared-stat-count">${delivered}</div><div class="shared-stat-label">Delivered</div></div></div>
+  `;
+  if(events.length===0){toolbar.style.display='none';container.innerHTML=renderSharedEmpty('No appointments yet','Your photographer will share upcoming shoots here.');return;}
+  toolbar.style.display='';
+  // Update toggle active state
+  document.getElementById('sharedViewBtnBoard').classList.toggle('active',_sharedViewMode==='board');
+  document.getElementById('sharedViewBtnList').classList.toggle('active',_sharedViewMode==='list');
+  if(_sharedViewMode==='board')container.innerHTML=renderSharedBoard(events);
+  else container.innerHTML=renderSharedList(events);
+}
+function renderSharedEmpty(title,sub){
+  return`<div class="shared-empty">
+    <div class="shared-empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <div class="shared-empty-title">${escSh(title)}</div>
+    <div class="shared-empty-sub">${escSh(sub)}</div>
+  </div>`;
+}
+function renderSharedBoard(events){
+  const byStatus={};SHARED_COLS.forEach(c=>byStatus[c.id]=[]);
+  events.forEach(ev=>{const s=ev.status||'scheduled';(byStatus[s]||byStatus.scheduled).push(ev);});
+  Object.values(byStatus).forEach(arr=>arr.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||'')));
+  const visibleCols=SHARED_COLS.filter(c=>byStatus[c.id].length>0);
+  if(!visibleCols.length)return renderSharedEmpty('No appointments yet','Your photographer will share upcoming shoots here.');
+  return`<div class="shared-board">${visibleCols.map(col=>{
+    const list=byStatus[col.id];
+    const cards=list.map(ev=>{
+      const loc=ev.unit?`${ev.address}, ${ev.unit}`:(ev.address||ev.title||'');
+      const timeStr=ev.start?formatSharedTime(ev.start):'';
+      return`<div class="shared-card">
+        <div class="shared-card-title">${escSh(loc)}</div>
+        <div class="shared-card-date"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${formatSharedDate(ev.date)}${timeStr?' · '+timeStr:''}</div>
+        ${ev.notes?`<div class="shared-card-notes">${escSh(ev.notes)}</div>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="shared-col">
+      <div class="shared-col-header">
+        <span class="shared-col-dot" style="background:${col.dot}"></span>${col.label}
+        <span class="shared-col-count">${list.length}</span>
+      </div>
+      <div class="shared-col-body">${cards}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+function renderSharedList(events){
+  const sorted=[...events].sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
+  const byDate={};sorted.forEach(ev=>{(byDate[ev.date]=byDate[ev.date]||[]).push(ev);});
+  const dates=Object.keys(byDate).sort();
+  if(!dates.length)return renderSharedEmpty('No appointments yet','Your photographer will share upcoming shoots here.');
+  return`<div class="shared-list">${dates.map(date=>{
+    const evs=byDate[date];
+    const items=evs.map(ev=>{
+      const loc=ev.unit?`${ev.address}, ${ev.unit}`:(ev.address||ev.title||'');
+      const timeStr=ev.start?formatSharedTime(ev.start):'—';
+      const timeSub=ev.start?'':'';
+      const col=SHARED_COLS.find(c=>c.id===(ev.status||'scheduled'))||SHARED_COLS[2];
+      return`<div class="shared-list-card">
+        <div class="shared-list-time">${timeStr}${timeSub?`<div class="shared-list-time-sub">${timeSub}</div>`:''}</div>
+        <div class="shared-list-divider"></div>
+        <div class="shared-list-body">
+          <div class="shared-card-title">${escSh(loc)}</div>
+          ${ev.notes?`<div class="shared-card-notes" style="margin-top:6px;border-top:none;padding-top:0;">${escSh(ev.notes)}</div>`:''}
+          <span class="shared-list-status"><span class="shared-col-dot" style="background:${col.dot}"></span>${col.label}</span>
+        </div>
+      </div>`;
+    }).join('');
+    return`<div><div class="shared-list-group-header">${formatSharedDateLong(date)}</div><div class="shared-list-items">${items}</div></div>`;
+  }).join('')}</div>`;
+}
+function setSharedView(mode){_sharedViewMode=mode;localStorage.setItem('shared_view_mode',mode);renderSharedView();}
+function toggleSharedTheme(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',isDark?'':'dark');localStorage.setItem('inv_theme',isDark?'light':'dark');updateSharedThemeIcon();}
+function updateSharedThemeIcon(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const icon=document.getElementById('sharedThemeIcon');if(!icon)return;icon.innerHTML=isDark?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>':'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';}
 
 function showLogin(){if(window._isSharedView)return;document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('view-invoice').style.display='none';}
 function showApp(){if(window._isSharedView)return;document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';navigateTo('dashboard');}
 function toggleAuthMode(){isSignUp=!isSignUp;document.getElementById('loginBtn').textContent=isSignUp?'Create Account':'Sign In';document.getElementById('loginToggle').innerHTML=isSignUp?'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>':'No account? <a onclick="toggleAuthMode()">Create one</a>';document.getElementById('loginError').textContent='';}
 async function handleLogin(){const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const errEl=document.getElementById('loginError');errEl.textContent='';if(!email||!password){errEl.textContent='Please enter email and password.';return;}if(password.length<6){errEl.textContent='Password must be at least 6 characters.';return;}const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent=isSignUp?'Creating account...':'Signing in...';try{if(isSignUp)await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password);}catch(e){errEl.textContent=e.message.replace('Firebase: ','').replace(/ \(auth\/.*\)/,'');btn.disabled=false;btn.textContent=isSignUp?'Create Account':'Sign In';}}
 function handleLogout(){syncListeners.forEach(fn=>fn());syncListeners=[];dbRef=null;auth.signOut();}
-auth.onAuthStateChanged(user=>{if(user){dbRef=db.ref('users/'+user.uid);initAppWithSync();showApp();startAutoSave();updateSidebarUser();updateThemeUI();}else showLogin();});
+auth.onAuthStateChanged(user=>{if(user){dbRef=db.ref('users/'+user.uid);initAppWithSync();showApp();startAutoSave();updateSidebarUser();updateThemeUI();initSidebarCollapse();}else showLogin();});
 function firebaseSave(key,data){if(!dbRef)return;dbRef.child(key).set(data);}
 function onFirebaseValue(key,callback){if(!dbRef)return;const ref=dbRef.child(key);ref.on('value',snap=>callback(snap.val()));syncListeners.push(()=>ref.off('value'));}
 
@@ -2237,7 +2578,7 @@ onFirebaseValue('config',val=>{if(!val)return;config=val;localStorage.setItem('i
 onFirebaseValue('clients',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);clients=val;localStorage.setItem('inv_clients',JSON.stringify(clients));rebuildClientDropdown();});
 onFirebaseValue('drafts',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(d=>{if(!d.items)d.items=[];else if(!Array.isArray(d.items))d.items=Object.values(d.items);d.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});drafts=val;localStorage.setItem('inv_drafts',JSON.stringify(drafts));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
 onFirebaseValue('invoices',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);val.forEach(inv=>{if(!inv.items)inv.items=[];else if(!Array.isArray(inv.items))inv.items=Object.values(inv.items);inv.items.forEach(it=>{if(!it.addons)it.addons=[];else if(!Array.isArray(it.addons))it.addons=Object.values(it.addons);});});val.forEach(inv=>{if(!inv.status)inv.status='sent';});invoices=val;localStorage.setItem('inv_invoices',JSON.stringify(invoices));if(currentView==='invoicing')renderDashboard();if(currentView==='dashboard')renderHub();});
-onFirebaseValue('calEvents',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);calEvents=val;localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));if(currentView==='calendar')renderCalendar();if(currentView==='dashboard')renderHub();});
+onFirebaseValue('calEvents',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);calEvents=val;localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));if(currentView==='calendar')renderCalendar();if(currentView==='dashboard')renderHub();syncSharedData();});
 onFirebaseValue('realtors',val=>{if(!val)val=[];if(!Array.isArray(val))val=Object.values(val);realtors=val;localStorage.setItem('inv_realtors',JSON.stringify(realtors));});
 onFirebaseValue('seq',val=>{if(val!=null&&val>invoiceSeq){invoiceSeq=val;localStorage.setItem('inv_seq',invoiceSeq);}});});renderHub();}
 
@@ -2623,9 +2964,10 @@ let calViewMode=localStorage.getItem('inv_cal_view')||'week';
 let calSelectedType='shoot';
 let calWeekStart=null; // Date object for start of week view
 const CAL_TYPES={shoot:{icon:'\u{1f4f7}',label:'Shoot'},editing:{icon:'\u{1f3a8}',label:'Editing'},meeting:{icon:'\u{1f91d}',label:'Meeting'},delivery:{icon:'\u{1f4e6}',label:'Delivery'},personal:{icon:'\u{1f3e0}',label:'Personal'}};
-const CAL_HOURS_START=7,CAL_HOURS_END=21;
+const CAL_HOURS_START=0,CAL_HOURS_END=24;
 (function(){const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();calSelectedDate=toISO(n);calWeekStart=getWeekStart(n);})();
-function saveCalEvents(){localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));firebaseSave('calEvents',calEvents);}
+function saveCalEvents(){localStorage.setItem('inv_cal_events',JSON.stringify(calEvents));firebaseSave('calEvents',calEvents);syncSharedData();}
+function syncSharedData(){if(!auth.currentUser)return;const uid=auth.currentUser.uid;const byRealtor={};calEvents.forEach(ev=>{if(ev.realtorId){if(!byRealtor[ev.realtorId])byRealtor[ev.realtorId]=[];byRealtor[ev.realtorId].push({title:ev.title,address:ev.address,unit:ev.unit,date:ev.date,start:ev.start,color:ev.color,notes:ev.notes,status:ev.status||'scheduled'});}});realtors.forEach(r=>{const token=btoa(uid+'::'+r.id).replace(/=/g,'');const events=byRealtor[r.id]||[];db.ref('shared/'+token).set({realtorName:r.name,realtorCompany:r.company||'',events:events});});}
 function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function formatTime12(t){if(!t)return'';const[h,m]=t.split(':');const hr=parseInt(h);const ampm=hr>=12?'pm':'am';const hr12=hr%12||12;return m==='00'?`${hr12}${ampm}`:`${hr12}:${m}${ampm}`;}
 function formatTimeRange(s,e){if(!s)return'All day';let r=formatTime12(s);if(e)r+=` \u2013 ${formatTime12(e)}`;return r;}
@@ -2733,7 +3075,6 @@ function buildCalDay(day,iso,outside,todayISO,dow){
 function renderCalWeek(grid,header,todayISO){
   const dates=getWeekDates(calWeekStart);
   const dayNames=['SUN','MON','TUE','WED','THU','FRI','SAT'];
-  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
   const offset=new Date().getTimezoneOffset();
   const tzH=Math.abs(Math.floor(offset/60));const tzLabel=`GMT${offset<=0?'+':'−'}${tzH}`;
 
@@ -2742,7 +3083,8 @@ function renderCalWeek(grid,header,todayISO){
   dates.forEach((d,i)=>{
     const iso=toISO(d);const isToday=iso===todayISO;
     headerCells+=`<div class="cal-week-header-cell ${isToday?'today':''}">
-      ${dayNames[i]} <span class="cal-week-header-date">${String(d.getDate()).padStart(2,'0')}</span>
+      <span>${dayNames[i]}</span>
+      <span class="cal-week-header-date">${String(d.getDate()).padStart(2,'0')}</span>
     </div>`;
   });
 
@@ -2753,13 +3095,13 @@ function renderCalWeek(grid,header,todayISO){
     const iso=toISO(d);
     const allday=calEvents.filter(e=>e.date===iso&&!e.start);
     if(allday.length)hasAllDay=true;
-    alldayCells+=`<div class="cal-week-allday-cell">${allday.map(ev=>`<div class="cal-event" style="font-size:10px;padding:1px 4px;" onclick="openCalEvent('${ev.id}')"><span class="cal-ev-dot ${ev.color||'blue'}"></span><span class="cal-ev-label">${esc(ev.title)}</span></div>`).join('')}</div>`;
+    alldayCells+=`<div class="cal-week-allday-cell">${allday.map(ev=>`<div class="cal-event ev-${ev.color||'blue'}" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)}"><span class="cal-ev-label">${esc(ev.title)}</span></div>`).join('')}</div>`;
   });
 
   // Time grid
   let gutter='';let cols='';
   for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
-    const label=h===0?'12:00am':h<12?`${h}:00am`:h===12?'12:00pm':`${h-12}:00pm`;
+    const label=h===0?'12 AM':h<12?`${h} AM`:h===12?'12 PM':`${h-12} PM`;
     gutter+=`<div class="cal-week-gutter"><span>${label}</span></div>`;
   }
 
@@ -2769,7 +3111,6 @@ function renderCalWeek(grid,header,todayISO){
 
   dates.forEach((d,di)=>{
     const iso=toISO(d);const isToday=iso===todayISO;
-    const isWeekend=di===0||di===6;
     let hours='';
     for(let h=CAL_HOURS_START;h<CAL_HOURS_END;h++){
       const ts=`${String(h).padStart(2,'0')}:00`;
@@ -2778,22 +3119,28 @@ function renderCalWeek(grid,header,todayISO){
     const timed=calEvents.filter(e=>e.date===iso&&e.start).sort((a,b)=>a.start.localeCompare(b.start));
     let eventsHtml=timed.map(ev=>{
       const startMin=timeToMinutes(ev.start)-CAL_HOURS_START*60;
-      const endMin=(timeToMinutes(ev.start)+60)-CAL_HOURS_START*60;
+      const endMinutes=ev.end?timeToMinutes(ev.end):timeToMinutes(ev.start)+60;
+      const endMin=endMinutes-CAL_HOURS_START*60;
       const top=Math.max(0,startMin);
-      const height=Math.max(20,endMin-startMin);
-      return`<div class="cal-week-event cal-ev-${ev.color||'blue'}" style="top:${top}px;height:${height}px;" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)}">
+      const height=Math.max(26,endMin-startMin);
+      const realtor=ev.realtorId?realtors.find(r=>r.id===ev.realtorId):null;
+      const timeLabel=ev.end?`${formatTime12(ev.start)} – ${formatTime12(ev.end)}`:formatTime12(ev.start);
+      const isShort=height<44;
+      const metaLine=realtor?esc(realtor.name):(ev.contactName?esc(ev.contactName):'');
+      return`<div class="cal-week-event ev-${ev.color||'blue'}" style="top:${top}px;height:${height}px;" onclick="openCalEvent('${ev.id}')" title="${esc(ev.title)} · ${timeLabel}">
         <div class="cal-week-ev-title">${esc(ev.title)}</div>
-        <div class="cal-week-ev-time">${formatTime12(ev.start)}</div>
+        ${isShort?'':`<div class="cal-week-ev-time">${timeLabel}</div>`}
+        ${isShort||!metaLine?'':`<div class="cal-week-ev-meta">${metaLine}</div>`}
       </div>`;
     }).join('');
     if(isToday){
       const nowMin=now.getHours()*60+now.getMinutes()-CAL_HOURS_START*60;
       if(nowMin>=0&&nowMin<(CAL_HOURS_END-CAL_HOURS_START)*60){
         eventsHtml+=`<div class="cal-week-now" style="top:${nowMin}px"></div>`;
-        if(di===0)eventsHtml+=`<div class="cal-week-now-label" style="top:${nowMin-7}px">${nowTimeStr}</div>`;
+        if(di===0)eventsHtml+=`<div class="cal-week-now-label" style="top:${nowMin-8}px">${nowTimeStr}</div>`;
       }
     }
-    cols+=`<div class="cal-week-col${isWeekend?' weekend':''}">${hours}${eventsHtml}</div>`;
+    cols+=`<div class="cal-week-col${isToday?' today':''}">${hours}${eventsHtml}</div>`;
   });
 
   grid.innerHTML=`${header}
@@ -2816,6 +3163,9 @@ function renderCalAgenda(grid,header,todayISO){
   const today=new Date();
   const daysToShow=30;
   let html='';let hasEvents=false;
+  const pastelDots={blue:'#7cadf0',purple:'#a78bfa',green:'#6dd4a8',amber:'#f5c96b',pink:'#f0a0c4',teal:'#5ec5c0',rose:'#f4877f',indigo:'#818cf8'};
+  const statusDots={received:'#9e9ea7',pending:'#f0a0c4',scheduled:'#7cadf0',shooting:'#f5c96b',editing:'#a78bfa',delivered:'#6dd4a8'};
+  const statusLabels={received:'Received',pending:'Pending',scheduled:'Scheduled',shooting:'Shooting',editing:'Editing',delivered:'Delivered'};
 
   for(let i=0;i<daysToShow;i++){
     const d=new Date(today);d.setDate(d.getDate()+i);
@@ -2824,34 +3174,47 @@ function renderCalAgenda(grid,header,todayISO){
     if(!dayEvents.length)continue;
     hasEvents=true;
     const isToday=i===0;
+    const isTomorrow=i===1;
     const dateLabel=d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'});
-    const relLabel=isToday?' \u2014 Today':i===1?' \u2014 Tomorrow':'';
+    const prefix=isToday?'Today · ':isTomorrow?'Tomorrow · ':'';
     html+=`<div class="cal-agenda-day">
       <div class="cal-agenda-day-header ${isToday?'today':''}">
-        <span>${dateLabel}${relLabel}</span>
-        <button class="cal-agenda-day-add" onclick="openCalEvent(null,'${iso}')" title="Add event">+</button>
-      </div>`;
+        <span>${prefix}${dateLabel}</span>
+        <button class="cal-agenda-day-add" onclick="event.stopPropagation();openCalEvent(null,'${iso}')" title="Add event">+</button>
+      </div>
+      <div class="cal-agenda-items">`;
     dayEvents.forEach(ev=>{
-      const timeStr=formatTimeRange(ev.start,ev.end);
-      const typeInfo=CAL_TYPES[ev.eventType]||null;
-      const dotColor={'coral':'#71717a','blue':'#3b82f6','purple':'#8b5cf6','green':'#10b981','amber':'#f59e0b','pink':'#ec4899','teal':'#14b8a6','red':'#ef4444'}[ev.color||'blue']||'#3b82f6';
+      const timeStr=ev.start?formatTime12(ev.start):'All day';
+      const dotColor=pastelDots[ev.color||'blue']||pastelDots.blue;
+      const status=ev.status||'scheduled';
+      const statusDot=statusDots[status]||statusDots.scheduled;
+      const statusLabel=statusLabels[status]||'Scheduled';
+      const realtor=ev.realtorId?realtors.find(r=>r.id===ev.realtorId):null;
       html+=`<div class="cal-agenda-event" onclick="openCalEvent('${ev.id}')">
-        <div class="cal-agenda-ev-color" style="background:${dotColor}"></div>
+        <div class="cal-agenda-ev-time">${timeStr}</div>
+        <div class="cal-agenda-ev-divider" style="background:${dotColor}"></div>
         <div class="cal-agenda-ev-body">
           <div class="cal-agenda-ev-title">${esc(ev.title)}</div>
-          <div class="cal-agenda-ev-time">${timeStr}</div>
-          ${ev.location?`<div class="cal-agenda-ev-loc">\u{1f4cd} ${esc(ev.location)}</div>`:''}
-          ${typeInfo?`<span class="cal-agenda-ev-type">${typeInfo.icon} ${typeInfo.label}</span>`:''}
+          <div class="cal-agenda-ev-meta">
+            ${realtor?`<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>${esc(realtor.name)}</span>`:''}
+            ${realtor&&ev.contactName?`<span style="color:var(--text-3);">·</span>`:''}
+            ${ev.contactName?`<span>${esc(ev.contactName)}</span>`:''}
+          </div>
+          ${ev.notes?`<div class="cal-agenda-ev-notes">${esc(ev.notes)}</div>`:''}
+          <span class="cal-agenda-ev-status"><span class="cal-agenda-ev-status-dot" style="background:${statusDot}"></span>${statusLabel}</span>
         </div>
       </div>`;
     });
-    html+=`</div>`;
+    html+=`</div></div>`;
   }
 
   if(!hasEvents){
     html=`<div class="cal-agenda-empty">
-      <div class="cal-agenda-empty-icon">\u{1f4c5}</div>
-      <div class="cal-agenda-empty-text">No upcoming events</div>
+      <div class="cal-agenda-empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div>
+        <div class="cal-agenda-empty-title">No upcoming events</div>
+        <div class="cal-agenda-empty-text">Click the + button on any day in the calendar to add one.</div>
+      </div>
     </div>`;
   }
 
@@ -3029,7 +3392,6 @@ function openCalEvent(id,date,time){
     document.getElementById('calEvDate').value=ev.date||'';
     document.getElementById('calEvStart').value=ev.start||'';
     document.getElementById('calEvNotes').value=ev.notes||'';
-    document.getElementById('calEvLocation').value=ev.location||'';
     document.getElementById('calEvContactName').value=ev.contactName||'';
     document.getElementById('calEvContactPhone').value=ev.contactPhone||'';
     document.getElementById('calEvContactEmail').value=ev.contactEmail||'';
@@ -3045,7 +3407,6 @@ function openCalEvent(id,date,time){
     document.getElementById('calEvDate').value=date||toISO(new Date());
     document.getElementById('calEvStart').value=time||'';
     document.getElementById('calEvNotes').value='';
-    document.getElementById('calEvLocation').value='';
     document.getElementById('calEvContactName').value='';
     document.getElementById('calEvContactPhone').value='';
     document.getElementById('calEvContactEmail').value='';
@@ -3354,6 +3715,8 @@ function startAutoSave(){/* Auto-save triggers are handled inline in renderEdita
 function updateSidebarUser(){const user=auth.currentUser;if(!user)return;const email=user.email||'';const name=user.displayName||email;let initials='';if(user.displayName){const parts=user.displayName.trim().split(/\s+/);initials=parts.length>1?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():parts[0].substring(0,2).toUpperCase();}else if(email){initials=email.substring(0,2).toUpperCase();}const av=document.getElementById('sidebarAvatar');if(av)av.textContent=initials;const nameEl=document.getElementById('sidebarUserName');if(nameEl)nameEl.textContent=user.displayName||email.split('@')[0];const emailEl=document.getElementById('sidebarUserEmail');if(emailEl)emailEl.textContent=email;}
 function updateThemeUI(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';const icon=document.getElementById('sidebarThemeIcon');const label=document.getElementById('sidebarThemeLabel');const knob=document.getElementById('themeKnobIcon');if(icon)icon.innerHTML=isDark?'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>':'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';if(label)label.textContent=isDark?'Light mode':'Dark mode';if(knob)knob.innerHTML=isDark?'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>';}
 function toggleTheme(){const isDark=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',isDark?'':'dark');localStorage.setItem('inv_theme',isDark?'light':'dark');updateThemeUI();}
+function toggleSidebarCollapse(){const sb=document.getElementById('appSidebar');if(!sb)return;const collapsed=sb.classList.toggle('collapsed');localStorage.setItem('inv_sidebar_collapsed',collapsed?'1':'0');const btn=document.getElementById('sidebarCollapseBtn');if(btn)btn.title=collapsed?'Expand sidebar':'Collapse sidebar';}
+function initSidebarCollapse(){if(localStorage.getItem('inv_sidebar_collapsed')==='1'){const sb=document.getElementById('appSidebar');if(sb)sb.classList.add('collapsed');const btn=document.getElementById('sidebarCollapseBtn');if(btn)btn.title='Expand sidebar';}}
 (function(){const saved=localStorage.getItem('inv_theme');const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;if(saved==='dark'||(!saved&&prefersDark)){document.documentElement.setAttribute('data-theme','dark');}updateThemeUI();})();
 </script>
 </body>
