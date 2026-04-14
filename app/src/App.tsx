@@ -9,6 +9,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { LoginView } from "@/views/login";
 import { DashboardView } from "@/views/dashboard";
 import { CalendarView } from "@/views/calendar";
+import { InvoicesView } from "@/views/invoices";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -29,10 +30,7 @@ export default function App() {
                 }
               >
                 <Route path="/" element={<DashboardView />} />
-                <Route
-                  path="/invoices"
-                  element={<PlaceholderView title="Invoicing" />}
-                />
+                <Route path="/invoices" element={<InvoicesView />} />
                 <Route path="/calendar" element={<CalendarView />} />
                 <Route
                   path="/realtors"
