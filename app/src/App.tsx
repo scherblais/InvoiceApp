@@ -8,6 +8,7 @@ import { AppShell } from "@/components/app-shell";
 import { RequireAuth } from "@/components/require-auth";
 import { LoginView } from "@/views/login";
 import { DashboardView } from "@/views/dashboard";
+import { CalendarView } from "@/views/calendar";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -32,10 +33,7 @@ export default function App() {
                   path="/invoices"
                   element={<PlaceholderView title="Invoicing" />}
                 />
-                <Route
-                  path="/calendar"
-                  element={<PlaceholderView title="Calendar" />}
-                />
+                <Route path="/calendar" element={<CalendarView />} />
                 <Route
                   path="/realtors"
                   element={<PlaceholderView title="Realtors" />}
