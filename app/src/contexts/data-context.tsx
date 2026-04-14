@@ -1,5 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import { useFirebaseData } from "@/hooks/use-firebase-data";
+import { useAuth } from "@/contexts/auth-context";
+import { syncSharedData } from "@/lib/shared";
 import type {
   Invoice,
   Draft,
@@ -50,6 +52,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [config, saveConfig] = useFirebaseData<Config>("config", {
     fallback: {},
   });
+
+  // Keep public `shared/<token>` entries in sync whenever calendar events or
+  // realtors change, so existing share links stay live.
+  const { user } = useAuth();
+  const lastSync = useRef<string>("");
+  useEffect(() => {
+    if (!user) return;
+    if (!realtors || !calEvents) return;
+    const fingerprint = JSON.stringify({ realtors, calEvents });
+    if (fingerprint === lastSync.current) return;
+    lastSync.current = fingerprint;
+    syncSharedData(user.uid, realtors, calEvents);
+  }, [user, realtors, calEvents]);
 
   return (
     <DataContext.Provider

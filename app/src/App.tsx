@@ -12,6 +12,7 @@ import { CalendarView } from "@/views/calendar";
 import { InvoicesView } from "@/views/invoices";
 import { RealtorsView } from "@/views/realtors";
 import { SettingsView } from "@/views/settings";
+import { SharedView } from "@/views/shared";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<LoginView />} />
+              <Route path="/shared" element={<SharedView />} />
               <Route
                 element={
                   <RequireAuth>

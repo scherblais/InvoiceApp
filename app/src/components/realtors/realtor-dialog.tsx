@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Copy, Link as LinkIcon } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/auth-context";
+import { realtorShareLink } from "@/lib/shared";
 import type { Realtor } from "@/lib/types";
 
 interface RealtorDialogProps {
@@ -28,12 +32,26 @@ export function RealtorDialog({
   onSave,
   onDelete,
 }: RealtorDialogProps) {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const shareLink =
+    initial && user ? realtorShareLink(user.uid, initial.id) : "";
+
+  const handleCopyLink = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      toast.success("Share link copied");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -136,6 +154,28 @@ export function RealtorDialog({
           {error ? (
             <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
+            </div>
+          ) : null}
+          {shareLink ? (
+            <div className="flex flex-col gap-1.5 border-t pt-3">
+              <Label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                <LinkIcon className="h-3 w-3" />
+                Share link
+              </Label>
+              <div className="flex gap-2">
+                <Input readOnly value={shareLink} className="font-mono text-xs" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyLink}
+                  aria-label="Copy share link"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Public link showing live status of this realtor's shoots.
+              </p>
             </div>
           ) : null}
         </div>
