@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import { toast } from "sonner";
 import { useFirebaseData } from "@/hooks/use-firebase-data";
 import { useAuth } from "@/contexts/auth-context";
 import { syncSharedData } from "@/lib/shared";
+import { db, ref, get } from "@/lib/firebase";
+import { commitMigration } from "@/lib/migration";
 import type {
   Invoice,
   Draft,
@@ -50,6 +53,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // clients change, so existing share links stay live.
   const { user } = useAuth();
   const lastSync = useRef<string>("");
+
+  // One-shot auto-migration: merges any legacy `realtors/` list into
+  // `clients/` the first time a signed-in user loads the new app. Idempotent —
+  // once `realtors/` is empty, this becomes a no-op.
+  const migrationRan = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    if (migrationRan.current === user.uid) return;
+    migrationRan.current = user.uid;
+    (async () => {
+      try {
+        const snap = await get(ref(db, `users/${user.uid}/realtors`));
+        const val = snap.val();
+        const hasLegacy =
+          (Array.isArray(val) && val.filter(Boolean).length > 0) ||
+          (val && typeof val === "object" && Object.keys(val).length > 0);
+        if (!hasLegacy) return;
+        const plan = await commitMigration(user.uid);
+        toast.success("Merged realtors into Clients", {
+          description: `${plan.mergedPairs.length} paired, ${plan.standaloneRealtors} kept, ${plan.eventsRewrites} events updated.`,
+        });
+      } catch (err) {
+        /* eslint-disable-next-line no-console */
+        console.error("[lumeria migration] auto-run failed", err);
+      }
+    })();
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     if (!clients || !calEvents) return;
