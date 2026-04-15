@@ -18,17 +18,18 @@ export function DashboardView() {
 
   return (
     <div className="flex flex-col">
-      <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            {getGreeting()}
-          </h1>
-          <p className="text-xs text-muted-foreground">{formatLongDate()}</p>
-        </div>
-        <Weather />
+      <header className="app-header flex flex-col justify-center border-b px-6 py-4 md:px-8">
+        <h1 className="text-lg font-semibold tracking-tight">
+          {getGreeting()}
+        </h1>
+        <p className="text-xs text-muted-foreground">{formatLongDate()}</p>
       </header>
 
       <div className="flex flex-col gap-6 p-6 md:p-8">
+        <div className="flex justify-end">
+          <Weather />
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="This Month"
