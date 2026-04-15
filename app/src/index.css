@@ -132,11 +132,27 @@
 
 /* Shared height for the sidebar header and every view's top header so their
    bottom borders line up regardless of content. Tweak one variable to shift
-   them all. */
+   them all. The class uses !important so it always wins against default
+   SidebarHeader padding / flex rules. */
 :root {
   --app-header-h: 4.75rem;
 }
 
 .app-header {
-  min-height: var(--app-header-h);
+  height: var(--app-header-h) !important;
+  min-height: var(--app-header-h) !important;
+  max-height: var(--app-header-h) !important;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  /* On mobile some headers stack content vertically (flex-col) and need room
+     for wrapped buttons, so release the max-height cap there. The sidebar is
+     hidden in a drawer on mobile anyway, so alignment with view headers isn't
+     visible. */
+  .app-header {
+    max-height: none !important;
+    height: auto !important;
+    min-height: var(--app-header-h) !important;
+  }
 }
