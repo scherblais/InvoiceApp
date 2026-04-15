@@ -223,7 +223,7 @@ export function RevenueChart({
           {/* Tooltip */}
           {active && activeGeom && (
             <div
-              className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2 py-1.5 text-xs text-popover-foreground shadow-md"
+              className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2 py-1.5 text-xs text-popover-foreground"
               style={{
                 left: `${tooltipLeft}px`,
                 top: `${activeGeom.y - 4}px`,

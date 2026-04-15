@@ -103,7 +103,7 @@ export function KanbanView({
                       onDragEnd={() => setDraggingId(null)}
                       onClick={() => onEventClick(ev.id)}
                       className={cn(
-                        "group flex flex-col gap-1.5 rounded-md border bg-background p-2.5 text-left shadow-sm transition-all hover:border-foreground/20",
+                        "group flex flex-col gap-1.5 rounded-md border bg-background p-2.5 text-left transition-all hover:border-foreground/20",
                         draggingId === ev.id && "opacity-40"
                       )}
                     >
