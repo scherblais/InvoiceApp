@@ -15,7 +15,7 @@ export function SettingsView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="border-b px-6 py-4 md:px-8">
+      <header className="app-header flex flex-col justify-center border-b px-6 py-4 md:px-8">
         <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
         <p className="text-xs text-muted-foreground">
           Default pricing and account.

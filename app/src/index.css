@@ -129,3 +129,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Shared height for the sidebar header and every view's top header so their
+   bottom borders line up regardless of content. Tweak one variable to shift
+   them all. */
+:root {
+  --app-header-h: 4.75rem;
+}
+
+.app-header {
+  min-height: var(--app-header-h);
+}

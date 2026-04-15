@@ -91,7 +91,7 @@ export function InvoiceList({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-col gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+      <header className="app-header flex flex-col justify-center gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <h1 className="text-xl font-semibold tracking-tight">Invoices</h1>
         <Button size="sm" onClick={onNew} className="gap-1.5">
           <Plus className="h-4 w-4" />

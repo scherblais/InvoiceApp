@@ -47,7 +47,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b px-4 py-4">
+      <SidebarHeader className="app-header justify-center border-b px-4 py-0">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <LumeriaLogo className="h-4 w-4" />

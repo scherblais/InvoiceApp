@@ -18,7 +18,7 @@ export function DashboardView() {
 
   return (
     <div className="flex flex-col">
-      <header className="flex flex-col gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+      <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
             {getGreeting()}
