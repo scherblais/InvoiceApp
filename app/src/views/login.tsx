@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { LumeriaLogo } from "@/components/lumeria-logo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -50,7 +51,7 @@ export function LoginView() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Sparkles className="h-5 w-5" />
+            <LumeriaLogo className="h-5 w-5" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight">

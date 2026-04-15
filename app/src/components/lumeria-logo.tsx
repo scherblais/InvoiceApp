@@ -1,0 +1,27 @@
+import type { SVGProps } from "react";
+import { cn } from "@/lib/utils";
+
+/**
+ * Lumeria Media wordmark glyph — a four-point sparkle. Draws with
+ * currentColor so the logo inherits the surrounding text color.
+ */
+export function LumeriaLogo({
+  className,
+  ...props
+}: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 73 73"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className={cn("shrink-0", className)}
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M35.2527 0.515788C35.3916 -0.171914 36.6758 -0.171914 36.8148 0.515788C38.122 6.98508 41.2224 18.8213 47.2343 24.8332C53.2462 30.8451 65.0824 33.9455 71.5517 35.2527C72.2394 35.3917 72.2394 36.6758 71.5517 36.8148C65.0824 38.122 53.2462 41.2224 47.2343 47.2343C41.2224 53.2462 38.122 65.0824 36.8148 71.5517C36.6758 72.2394 35.3916 72.2394 35.2527 71.5517C33.9454 65.0824 30.8451 53.2462 24.8332 47.2343C18.8213 41.2224 6.98507 38.122 0.515772 36.8148C-0.171929 36.6758 -0.171929 35.3917 0.515772 35.2527C6.98507 33.9455 18.8213 30.8451 24.8332 24.8332C30.8451 18.8213 33.9454 6.98508 35.2527 0.515788Z"
+      />
+    </svg>
+  );
+}

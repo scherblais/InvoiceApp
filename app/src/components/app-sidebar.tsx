@@ -5,10 +5,10 @@ import {
   Users,
   Settings,
   LogOut,
-  Sparkles,
   Moon,
   Sun,
 } from "lucide-react";
+import { LumeriaLogo } from "@/components/lumeria-logo";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -50,7 +50,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Sparkles className="h-4 w-4" />
+            <LumeriaLogo className="h-4 w-4" />
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-semibold leading-tight">

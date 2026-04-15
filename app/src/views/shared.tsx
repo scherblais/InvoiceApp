@@ -4,6 +4,7 @@ import { Calendar, List, Loader2, Moon, Sun } from "lucide-react";
 import { ref, onValue, off, db } from "@/lib/firebase";
 import { useTheme } from "@/contexts/theme-context";
 import { Button } from "@/components/ui/button";
+import { LumeriaLogo } from "@/components/lumeria-logo";
 import { COLOR_DOT, type EventColor } from "@/lib/calendar";
 import type { SharedData, SharedEvent } from "@/lib/shared";
 
@@ -322,7 +323,8 @@ export function SharedView() {
     <div className="min-h-svh bg-background">
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="text-sm font-semibold tracking-tight">
+          <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+            <LumeriaLogo className="h-4 w-4 text-primary" />
             Lumeria Media
           </div>
           <Button
