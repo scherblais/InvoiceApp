@@ -94,6 +94,26 @@ export function RevenueChart({
   const active = hover != null ? points[hover] : null;
   const activeGeom = hover != null ? barFor(hover, points[hover].revenue) : null;
 
+  // One continuous hit region across all bars — prevents the mouseleave /
+  // mouseenter flicker you get when each bar owns its own <rect>.
+  const handleMove = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const clientX =
+      "touches" in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
+    const x = clientX - rect.left;
+    if (x < PAD_L || x > W - PAD_R) {
+      setHover(null);
+      return;
+    }
+    const idx = Math.floor((x - PAD_L) / barSlot);
+    if (idx < 0 || idx >= points.length) {
+      setHover(null);
+      return;
+    }
+    if (idx !== hover) setHover(idx);
+  };
+
   // Tooltip positioning: clamp horizontally so it never overflows the card.
   const tooltipLeft = activeGeom
     ? Math.max(60, Math.min(W - 60, activeGeom.x + barW / 2))
@@ -120,6 +140,11 @@ export function RevenueChart({
             className="block"
             role="img"
             aria-label={`Monthly revenue for the last ${points.length} months`}
+            onMouseMove={handleMove}
+            onMouseLeave={() => setHover(null)}
+            onTouchStart={handleMove}
+            onTouchMove={handleMove}
+            onTouchEnd={() => setHover(null)}
           >
             {/* Y-axis grid + labels */}
             {tickValues.map((v, i) => {
@@ -166,18 +191,7 @@ export function RevenueChart({
               const isActive = hover === i;
               const isEmpty = p.revenue === 0;
               return (
-                <g key={p.key}>
-                  {/* Wider invisible hit area for hover/touch */}
-                  <rect
-                    x={PAD_L + barSlot * i}
-                    y={PAD_T}
-                    width={barSlot}
-                    height={innerH}
-                    fill="transparent"
-                    onMouseEnter={() => setHover(i)}
-                    onMouseLeave={() => setHover(null)}
-                    onTouchStart={() => setHover(i)}
-                  />
+                <g key={p.key} style={{ pointerEvents: "none" }}>
                   <rect
                     x={x}
                     y={isEmpty ? PAD_T + innerH - 2 : y}
