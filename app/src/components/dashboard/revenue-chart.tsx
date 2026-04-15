@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { computeMonthlyRevenue } from "@/lib/stats";
@@ -32,30 +32,54 @@ export function RevenueChart({
   drafts,
   months = 12,
 }: RevenueChartProps) {
-  const points = useMemo(
+  const allPoints = useMemo(
     () => computeMonthlyRevenue(invoices, drafts, months),
     [invoices, drafts, months]
   );
+
+  // Measure the container so we can render in real pixels. This keeps text
+  // and bar widths constant-sized across breakpoints instead of scaling with
+  // a fixed viewBox.
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [width, setWidth] = useState(720);
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    const el = wrapRef.current;
+    const update = () => setWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const [hover, setHover] = useState<number | null>(null);
+
+  // Mobile shrinks the window to 6 months so bars stay readable. The summary
+  // (avg / total) still reflects the full 12-month window so the numbers line
+  // up with the stat cards above.
+  const compact = width < 520;
+  const points = compact ? allPoints.slice(-6) : allPoints;
 
   const maxRevenue = Math.max(...points.map((p) => p.revenue), 0);
   const yMax = niceMax(maxRevenue);
-  const total = points.reduce((sum, p) => sum + p.revenue, 0);
-  const avg = total / points.length;
+  const windowTotal = points.reduce((sum, p) => sum + p.revenue, 0);
+  const windowAvg = windowTotal / points.length;
 
-  // Layout (viewBox — the SVG scales to its container).
-  const W = 720;
-  const H = 220;
-  const PAD_L = 48;
-  const PAD_R = 12;
+  const H = compact ? 180 : 240;
+  const PAD_L = compact ? 38 : 48;
+  const PAD_R = 8;
   const PAD_T = 12;
-  const PAD_B = 32;
+  const PAD_B = 28;
+  const W = Math.max(width, 240);
   const innerW = W - PAD_L - PAD_R;
   const innerH = H - PAD_T - PAD_B;
   const barSlot = innerW / points.length;
-  const barW = Math.max(8, Math.min(42, barSlot * 0.6));
+  const barW = Math.max(
+    compact ? 10 : 12,
+    Math.min(compact ? 28 : 42, barSlot * 0.62)
+  );
 
-  const yTicks = 4;
+  const yTicks = compact ? 3 : 4;
   const tickValues = Array.from({ length: yTicks + 1 }, (_, i) =>
     Math.round((yMax / yTicks) * i)
   );
@@ -70,25 +94,32 @@ export function RevenueChart({
   const active = hover != null ? points[hover] : null;
   const activeGeom = hover != null ? barFor(hover, points[hover].revenue) : null;
 
+  // Tooltip positioning: clamp horizontally so it never overflows the card.
+  const tooltipLeft = activeGeom
+    ? Math.max(60, Math.min(W - 60, activeGeom.x + barW / 2))
+    : 0;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div>
           <CardTitle className="text-sm font-semibold">
-            Revenue — last {months} months
+            Revenue — last {compact ? 6 : months} months
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            Avg {formatCurrency(avg)} · Total {formatCurrency(total)}
+            Avg {formatCurrency(windowAvg)} · Total{" "}
+            {formatCurrency(windowTotal)}
           </p>
         </div>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="relative">
+        <div ref={wrapRef} className="relative w-full">
           <svg
-            viewBox={`0 0 ${W} ${H}`}
-            className="h-[240px] w-full"
+            width={W}
+            height={H}
+            className="block"
             role="img"
-            aria-label={`Monthly revenue for the last ${months} months`}
+            aria-label={`Monthly revenue for the last ${points.length} months`}
           >
             {/* Y-axis grid + labels */}
             {tickValues.map((v, i) => {
@@ -107,7 +138,8 @@ export function RevenueChart({
                     x={PAD_L - 6}
                     y={y + 3}
                     textAnchor="end"
-                    className="fill-muted-foreground text-[10px]"
+                    className="fill-muted-foreground"
+                    fontSize={10}
                   >
                     {shortCurrency(v)}
                   </text>
@@ -116,12 +148,12 @@ export function RevenueChart({
             })}
 
             {/* Average line */}
-            {avg > 0 && yMax > 0 && (
+            {windowAvg > 0 && yMax > 0 && (
               <line
                 x1={PAD_L}
                 x2={W - PAD_R}
-                y1={PAD_T + innerH - (avg / yMax) * innerH}
-                y2={PAD_T + innerH - (avg / yMax) * innerH}
+                y1={PAD_T + innerH - (windowAvg / yMax) * innerH}
+                y2={PAD_T + innerH - (windowAvg / yMax) * innerH}
                 className="stroke-muted-foreground/40"
                 strokeWidth={1}
                 strokeDasharray="4 4"
@@ -135,7 +167,7 @@ export function RevenueChart({
               const isEmpty = p.revenue === 0;
               return (
                 <g key={p.key}>
-                  {/* Wider invisible hit area for hover */}
+                  {/* Wider invisible hit area for hover/touch */}
                   <rect
                     x={PAD_L + barSlot * i}
                     y={PAD_T}
@@ -144,6 +176,7 @@ export function RevenueChart({
                     fill="transparent"
                     onMouseEnter={() => setHover(i)}
                     onMouseLeave={() => setHover(null)}
+                    onTouchStart={() => setHover(i)}
                   />
                   <rect
                     x={x}
@@ -161,9 +194,10 @@ export function RevenueChart({
                   />
                   <text
                     x={x + barW / 2}
-                    y={H - 12}
+                    y={H - 10}
                     textAnchor="middle"
-                    className="fill-muted-foreground text-[10px]"
+                    className="fill-muted-foreground"
+                    fontSize={10}
                   >
                     {p.label}
                   </text>
@@ -177,8 +211,8 @@ export function RevenueChart({
             <div
               className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2 py-1.5 text-xs text-popover-foreground shadow-md"
               style={{
-                left: `${((activeGeom.x + 21) / W) * 100}%`,
-                top: `${(activeGeom.y / H) * 100}%`,
+                left: `${tooltipLeft}px`,
+                top: `${activeGeom.y - 4}px`,
               }}
             >
               <div className="font-medium">
