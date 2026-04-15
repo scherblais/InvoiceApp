@@ -47,14 +47,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b px-4 py-3">
+      <SidebarHeader className="border-b px-4 py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <LumeriaLogo className="h-4 w-4" />
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold leading-tight">
+            <span className="text-sm font-semibold leading-tight tracking-tight">
               Lumeria Media
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Invoicing
             </span>
           </div>
         </div>

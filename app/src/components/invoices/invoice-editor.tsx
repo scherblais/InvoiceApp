@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Plus, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Plus, Send, Trash2 } from "lucide-react";
+import { InvoiceDocument } from "@/components/invoices/invoice-document";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -196,19 +197,22 @@ export function InvoiceEditor({
     items.length > 0 &&
     items.every((i) => !!i.pkg && !!i.address?.trim());
 
-  const handleSend = () => {
-    if (!canSend) return;
+  const [reviewing, setReviewing] = useState(false);
+
+  // Build the same invoice shape the `onSend` callback expects. Used both for
+  // the review preview (so the user sees exactly what will be committed) and
+  // the actual send call. Discount is snapshotted so historical records stay
+  // correct even if the client's configured discount later changes.
+  const buildInvoice = useCallback((): Invoice & {
+    items?: InvoiceItem[];
+    notes?: string;
+    issueDate?: string;
+    monthName?: string;
+    discount?: number;
+    discountInfo?: { type: "%" | "$"; value: number };
+  } => {
     const now = Date.now();
-    // Snapshot the discount into the invoice so historical records stay
-    // correct even if the client's configured discount later changes.
-    const invoice: Invoice & {
-      items?: InvoiceItem[];
-      notes?: string;
-      issueDate?: string;
-      monthName?: string;
-      discount?: number;
-      discountInfo?: { type: "%" | "$"; value: number };
-    } = {
+    return {
       id: isEditingIssued ? (source as Invoice).id : `inv_${now}`,
       number,
       clientId,
@@ -231,7 +235,25 @@ export function InvoiceEditor({
           }
         : {}),
     };
-    onSend(invoice);
+  }, [
+    clientId,
+    client,
+    items,
+    month,
+    notes,
+    number,
+    totals,
+    isEditingIssued,
+    source,
+  ]);
+
+  const handleReview = () => {
+    if (!canSend) return;
+    setReviewing(true);
+  };
+
+  const handleConfirmSend = () => {
+    onSend(buildInvoice());
   };
 
   const handleDeleteDraft = () => {
@@ -240,6 +262,55 @@ export function InvoiceEditor({
       onDeleteDraft(source.id);
     }
   };
+
+  if (reviewing) {
+    const previewInvoice = buildInvoice();
+    return (
+      <div className="flex h-full flex-col">
+        <header className="flex flex-col gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setReviewing(false)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">
+                Review invoice
+              </h1>
+              <div className="text-xs text-muted-foreground">
+                This is exactly what the client will see. Nothing has been
+                sent yet.
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setReviewing(false)}
+            >
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              Back to edit
+            </Button>
+            <Button size="sm" onClick={handleConfirmSend}>
+              <Send className="mr-1.5 h-4 w-4" />
+              {isEditingIssued ? "Save invoice" : "Confirm & send"}
+            </Button>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto bg-muted/30 p-6">
+          <InvoiceDocument
+            invoice={previewInvoice}
+            client={client}
+            draft={!isEditingIssued}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -271,9 +342,9 @@ export function InvoiceEditor({
               Delete draft
             </Button>
           ) : null}
-          <Button size="sm" onClick={handleSend} disabled={!canSend}>
-            <Send className="mr-1.5 h-4 w-4" />
-            {isEditingIssued ? "Save invoice" : "Send invoice"}
+          <Button size="sm" onClick={handleReview} disabled={!canSend}>
+            <Eye className="mr-1.5 h-4 w-4" />
+            {isEditingIssued ? "Review changes" : "Review & send"}
           </Button>
         </div>
       </header>
