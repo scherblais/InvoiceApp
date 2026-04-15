@@ -18,6 +18,7 @@ export function InvoicesView() {
     invoices,
     drafts,
     clients,
+    config,
     saveInvoices,
     saveDrafts,
     saveClients,
@@ -151,6 +152,7 @@ export function InvoicesView() {
           isDraft={false}
           clients={clients}
           invoices={invoices}
+          config={config}
           onBack={() => setMode({ kind: "view", invoiceId: mode.invoiceId })}
           onSaveDraft={handleSaveDraft}
           onSend={handleSendInvoice}
@@ -178,6 +180,7 @@ export function InvoicesView() {
         isDraft={true}
         clients={clients}
         invoices={invoices}
+        config={config}
         onBack={goList}
         onSaveDraft={handleSaveDraft}
         onDeleteDraft={handleDeleteDraft}

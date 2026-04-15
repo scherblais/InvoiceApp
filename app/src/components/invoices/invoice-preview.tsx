@@ -223,11 +223,25 @@ export function InvoicePreview({
                 <dt>Subtotal</dt>
                 <dd className="tabular-nums">
                   {formatCurrency(
-                    items.reduce((s, i) => s + (i.subtotal ?? 0), 0),
+                    invoice.subtotal ??
+                      items.reduce((s, i) => s + (i.subtotal ?? 0), 0),
                     2
                   )}
                 </dd>
               </div>
+              {invoice.discount && invoice.discount > 0 ? (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>
+                    Discount
+                    {invoice.discountInfo
+                      ? ` (${invoice.discountInfo.value}${invoice.discountInfo.type})`
+                      : ""}
+                  </dt>
+                  <dd className="tabular-nums">
+                    −{formatCurrency(invoice.discount, 2)}
+                  </dd>
+                </div>
+              ) : null}
               <div className="flex justify-between text-muted-foreground">
                 <dt>GST (5%)</dt>
                 <dd className="tabular-nums">

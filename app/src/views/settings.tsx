@@ -34,7 +34,11 @@ export function SettingsView() {
               <PricingTab config={config} onSave={saveConfig} />
             </TabsContent>
             <TabsContent value="clients" className="mt-6">
-              <ClientsTab clients={clients} onSave={saveClients} />
+              <ClientsTab
+                clients={clients}
+                config={config}
+                onSave={saveClients}
+              />
             </TabsContent>
             <TabsContent value="account" className="mt-6">
               <AccountTab />

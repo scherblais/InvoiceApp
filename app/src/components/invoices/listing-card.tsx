@@ -10,10 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DEFAULT_ADDONS,
-  DEFAULT_PACKAGES,
   computeItemTotals,
+  type Addon,
   type InvoiceItem,
+  type Package,
 } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 interface ListingCardProps {
   item: InvoiceItem;
   index: number;
+  packages: Package[];
+  addons: Addon[];
   onChange: (item: InvoiceItem) => void;
   onRemove: () => void;
 }
@@ -28,6 +30,8 @@ interface ListingCardProps {
 export function ListingCard({
   item,
   index,
+  packages,
+  addons,
   onChange,
   onRemove,
 }: ListingCardProps) {
@@ -41,12 +45,12 @@ export function ListingCard({
   };
 
   const setPackage = (id: string) => {
-    const pkg = DEFAULT_PACKAGES.find((p) => p.id === id);
+    const pkg = packages.find((p) => p.id === id);
     if (pkg) onChange({ ...item, pkg });
   };
 
   const toggleAddon = (addonId: string) => {
-    const baseAddon = DEFAULT_ADDONS.find((a) => a.id === addonId);
+    const baseAddon = addons.find((a) => a.id === addonId);
     if (!baseAddon) return;
     const existing = (item.addons ?? []).find((a) => a.id === addonId);
     if (existing) {
@@ -70,12 +74,12 @@ export function ListingCard({
   };
 
   const setAddonCount = (addonId: string, count: number) => {
-    const addons = (item.addons ?? []).map((a) =>
+    const nextAddons = (item.addons ?? []).map((a) =>
       a.id === addonId
         ? { ...a, count, totalPrice: Math.round(a.price * count * 100) / 100 }
         : a
     );
-    onChange({ ...item, addons });
+    onChange({ ...item, addons: nextAddons });
   };
 
   const currentAddonIds = new Set((item.addons ?? []).map((a) => a.id));
@@ -125,7 +129,7 @@ export function ListingCard({
               <SelectValue placeholder="Choose package" />
             </SelectTrigger>
             <SelectContent>
-              {DEFAULT_PACKAGES.map((p) => (
+              {packages.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {p.name} · {formatCurrency(p.price, 0)}
                 </SelectItem>
@@ -152,7 +156,7 @@ export function ListingCard({
       <div className="mt-4">
         <Label className="mb-2 block">Add-ons</Label>
         <div className="flex flex-col gap-1">
-          {DEFAULT_ADDONS.map((a) => {
+          {addons.map((a) => {
             const active = currentAddonIds.has(a.id);
             const current = (item.addons ?? []).find((x) => x.id === a.id);
             return (
@@ -190,25 +194,11 @@ export function ListingCard({
         </div>
       </div>
 
-      <div className="mt-4 border-t pt-3 text-sm">
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span>Subtotal</span>
-          <span className="tabular-nums">
-            {formatCurrency(totals.subtotal ?? 0, 2)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span>Taxes</span>
-          <span className="tabular-nums">
-            {formatCurrency((totals.gst ?? 0) + (totals.qst ?? 0), 2)}
-          </span>
-        </div>
-        <div className="mt-1 flex items-center justify-between font-semibold">
-          <span>Total</span>
-          <span className="tabular-nums">
-            {formatCurrency(totals.total ?? 0, 2)}
-          </span>
-        </div>
+      <div className="mt-4 flex items-center justify-between border-t pt-3 text-sm">
+        <span className="text-muted-foreground">Listing subtotal</span>
+        <span className="font-semibold tabular-nums">
+          {formatCurrency(totals.subtotal ?? 0, 2)}
+        </span>
       </div>
     </div>
   );

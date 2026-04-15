@@ -13,13 +13,19 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import {
+  DEFAULT_ADDONS,
+  DEFAULT_PACKAGES,
   autoInvoiceNumber,
   clientLabel,
   computeInvoiceTotals,
   computeItemTotals,
+  resolveAddonPrice,
+  resolveAddons,
+  resolvePackagePrice,
+  resolvePackages,
   type InvoiceItem,
 } from "@/lib/invoice";
-import type { Client, Draft, Invoice } from "@/lib/types";
+import type { Client, Config, Draft, Invoice } from "@/lib/types";
 import { ListingCard } from "@/components/invoices/listing-card";
 
 type SourceRecord = (Invoice | Draft) & {
@@ -33,6 +39,7 @@ interface InvoiceEditorProps {
   isDraft?: boolean; // true if source is a draft or brand-new
   clients: Client[];
   invoices: Invoice[];
+  config: Config;
   onBack: () => void;
   onSaveDraft: (draft: Draft) => void;
   onDeleteDraft?: (id: string) => void;
@@ -50,6 +57,7 @@ export function InvoiceEditor({
   isDraft = true,
   clients,
   invoices,
+  config,
   onBack,
   onSaveDraft,
   onDeleteDraft,
@@ -71,6 +79,60 @@ export function InvoiceEditor({
 
   const client = clients.find((c) => c.id === clientId) ?? null;
 
+  // Resolve packages/addons against the current client's overrides so the
+  // listing UI, dropdowns, and snapshot prices match what will actually be
+  // charged.
+  const basePackages = config.packages?.length
+    ? config.packages
+    : DEFAULT_PACKAGES;
+  const baseAddons = config.addons?.length ? config.addons : DEFAULT_ADDONS;
+  const resolvedPackages = useMemo(
+    () => resolvePackages(basePackages, client),
+    [basePackages, client]
+  );
+  const resolvedAddons = useMemo(
+    () => resolveAddons(baseAddons, client),
+    [baseAddons, client]
+  );
+
+  // When the selected client changes, re-snapshot item prices so packages and
+  // add-ons reflect the new client's overrides. Keeps quantity/selections but
+  // refreshes prices.
+  useEffect(() => {
+    setItems((prev) =>
+      prev.map((it) => {
+        let next: InvoiceItem = it;
+        if (it.pkg) {
+          const base = basePackages.find((p) => p.id === it.pkg!.id);
+          if (base) {
+            next = {
+              ...next,
+              pkg: { ...it.pkg, price: resolvePackagePrice(base, client) },
+            };
+          }
+        }
+        if (it.addons?.length) {
+          next = {
+            ...next,
+            addons: it.addons.map((a) => {
+              const base = baseAddons.find((x) => x.id === a.id);
+              if (!base) return a;
+              const price = resolveAddonPrice(base, client);
+              const count = a.count ?? 1;
+              return {
+                ...a,
+                price,
+                totalPrice: Math.round(price * count * 100) / 100,
+              };
+            }),
+          };
+        }
+        return computeItemTotals(next);
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId]);
+
   // Auto invoice number when client/month change (unless user edited manually
   // or we're editing an already-issued invoice).
   const isEditingIssued = !isDraft && !!(source as Invoice)?.number;
@@ -80,7 +142,10 @@ export function InvoiceEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, month]);
 
-  const totals = useMemo(() => computeInvoiceTotals(items), [items]);
+  const totals = useMemo(
+    () => computeInvoiceTotals(items, client),
+    [items, client]
+  );
 
   // Autosave draft (debounced)
   useEffect(() => {
@@ -117,7 +182,9 @@ export function InvoiceEditor({
   }, []);
 
   const updateItem = (idx: number, next: InvoiceItem) => {
-    setItems((prev) => prev.map((it, i) => (i === idx ? computeItemTotals(next) : it)));
+    setItems((prev) =>
+      prev.map((it, i) => (i === idx ? computeItemTotals(next) : it))
+    );
   };
 
   const removeItem = (idx: number) => {
@@ -125,20 +192,24 @@ export function InvoiceEditor({
   };
 
   const canSend =
-    !!clientId && items.length > 0 && items.every((i) => !!i.pkg && !!i.address?.trim());
+    !!clientId &&
+    items.length > 0 &&
+    items.every((i) => !!i.pkg && !!i.address?.trim());
 
   const handleSend = () => {
     if (!canSend) return;
     const now = Date.now();
+    // Snapshot the discount into the invoice so historical records stay
+    // correct even if the client's configured discount later changes.
     const invoice: Invoice & {
       items?: InvoiceItem[];
       notes?: string;
       issueDate?: string;
       monthName?: string;
+      discount?: number;
+      discountInfo?: { type: "%" | "$"; value: number };
     } = {
-      id: isEditingIssued
-        ? (source as Invoice).id
-        : `inv_${now}`,
+      id: isEditingIssued ? (source as Invoice).id : `inv_${now}`,
       number,
       clientId,
       clientName: clientLabel(client),
@@ -149,7 +220,16 @@ export function InvoiceEditor({
       createdAt: (source as Invoice)?.createdAt ?? now,
       items: items.map(computeItemTotals),
       notes,
-      ...totals,
+      subtotal: totals.subtotal,
+      totalGst: totals.totalGst,
+      totalQst: totals.totalQst,
+      total: totals.total,
+      ...(totals.discount > 0
+        ? {
+            discount: totals.discount,
+            discountInfo: totals.discountInfo,
+          }
+        : {}),
     };
     onSend(invoice);
   };
@@ -232,6 +312,14 @@ export function InvoiceEditor({
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
+              {client?.overrides || (client?.discount && client.discount.value > 0) ? (
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Custom pricing applies
+                  {client?.discount && client.discount.value > 0
+                    ? ` · ${client.discount.value}${client.discount.type} discount`
+                    : ""}
+                </div>
+              ) : null}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="invoice-month">Billing month</Label>
@@ -275,6 +363,8 @@ export function InvoiceEditor({
                     key={idx}
                     item={item}
                     index={idx}
+                    packages={resolvedPackages}
+                    addons={resolvedAddons}
                     onChange={(next) => updateItem(idx, next)}
                     onRemove={() => removeItem(idx)}
                   />
@@ -304,6 +394,19 @@ export function InvoiceEditor({
                   {formatCurrency(totals.subtotal, 2)}
                 </dd>
               </div>
+              {totals.discount > 0 ? (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>
+                    Discount
+                    {totals.discountInfo
+                      ? ` (${totals.discountInfo.value}${totals.discountInfo.type})`
+                      : ""}
+                  </dt>
+                  <dd className="tabular-nums">
+                    −{formatCurrency(totals.discount, 2)}
+                  </dd>
+                </div>
+              ) : null}
               <div className="flex justify-between text-muted-foreground">
                 <dt>GST (5%)</dt>
                 <dd className="tabular-nums">

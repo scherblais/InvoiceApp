@@ -14,9 +14,12 @@ export interface Invoice {
   clientId?: string;
   clientName?: string;
   status?: "sent" | "paid" | string;
+  subtotal?: number;
   total?: number;
   totalGst?: number;
   totalQst?: number;
+  discount?: number;
+  discountInfo?: ClientDiscount;
   month?: string; // YYYY-MM
   createdAt?: number;
   items?: InvoiceItem[];
@@ -31,11 +34,24 @@ export interface Draft {
   updatedAt?: number;
 }
 
+export interface ClientDiscount {
+  type: "%" | "$";
+  value: number;
+}
+
+export interface ClientOverrides {
+  // Map of package/addon id → custom price for this client
+  packages?: Record<string, number>;
+  addons?: Record<string, number>;
+}
+
 export interface Client {
   id: string;
   name?: string;
   company?: string;
   email?: string;
+  overrides?: ClientOverrides;
+  discount?: ClientDiscount;
 }
 
 export interface CalEvent {

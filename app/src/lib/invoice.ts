@@ -1,4 +1,4 @@
-import type { Invoice, Draft, Client } from "@/lib/types";
+import type { Invoice, Draft, Client, ClientDiscount } from "@/lib/types";
 
 // --- Types for items ---
 export interface Package {
@@ -97,27 +97,99 @@ export function computeItemTotals(item: InvoiceItem): InvoiceItem {
 
 export interface InvoiceTotals {
   subtotal: number;
+  discount: number;
+  discountInfo?: ClientDiscount;
+  taxableSubtotal: number;
   totalGst: number;
   totalQst: number;
   total: number;
 }
 
-export function computeInvoiceTotals(items: InvoiceItem[]): InvoiceTotals {
+/**
+ * Compute the absolute discount amount applied to the pre-tax subtotal for a
+ * given client. Percentages are clamped to [0, 100]; flat amounts are clamped
+ * to [0, subtotal] so we never produce a negative taxable subtotal.
+ */
+export function computeDiscountAmount(
+  subtotal: number,
+  discount: ClientDiscount | undefined | null
+): number {
+  if (!discount || !discount.value || discount.value <= 0) return 0;
+  if (discount.type === "%") {
+    const pct = Math.min(100, Math.max(0, discount.value));
+    return round2((subtotal * pct) / 100);
+  }
+  return round2(Math.min(subtotal, Math.max(0, discount.value)));
+}
+
+export function computeInvoiceTotals(
+  items: InvoiceItem[],
+  client?: Client | null
+): InvoiceTotals {
   let subtotal = 0;
-  let totalGst = 0;
-  let totalQst = 0;
   for (const raw of items) {
     const it = computeItemTotals(raw);
     subtotal += it.subtotal ?? 0;
-    totalGst += it.gst ?? 0;
-    totalQst += it.qst ?? 0;
   }
+  subtotal = round2(subtotal);
+  const discount = computeDiscountAmount(subtotal, client?.discount);
+  const taxableSubtotal = round2(subtotal - discount);
+  const totalGst = round2((taxableSubtotal * TAX_GST) / 100);
+  const totalQst = round2((taxableSubtotal * TAX_QST) / 100);
+  const total = round2(taxableSubtotal + totalGst + totalQst);
   return {
-    subtotal: round2(subtotal),
-    totalGst: round2(totalGst),
-    totalQst: round2(totalQst),
-    total: round2(subtotal + totalGst + totalQst),
+    subtotal,
+    discount,
+    discountInfo: discount > 0 ? client?.discount : undefined,
+    taxableSubtotal,
+    totalGst,
+    totalQst,
+    total,
   };
+}
+
+// --- Client-specific pricing resolution ---
+
+/**
+ * Return the price for a package after applying any per-client override.
+ * Falls back to the default (config) price when no override is set.
+ */
+export function resolvePackagePrice(
+  pkg: Package,
+  client?: Client | null
+): number {
+  const override = client?.overrides?.packages?.[pkg.id];
+  return typeof override === "number" && Number.isFinite(override)
+    ? override
+    : pkg.price;
+}
+
+export function resolveAddonPrice(
+  addon: Addon,
+  client?: Client | null
+): number {
+  const override = client?.overrides?.addons?.[addon.id];
+  return typeof override === "number" && Number.isFinite(override)
+    ? override
+    : addon.price;
+}
+
+/**
+ * Apply per-client overrides to a list of packages. Returns a new array
+ * where each package carries its client-resolved price.
+ */
+export function resolvePackages(
+  packages: Package[],
+  client?: Client | null
+): Package[] {
+  return packages.map((p) => ({ ...p, price: resolvePackagePrice(p, client) }));
+}
+
+export function resolveAddons(
+  addons: Addon[],
+  client?: Client | null
+): Addon[] {
+  return addons.map((a) => ({ ...a, price: resolveAddonPrice(a, client) }));
 }
 
 // --- Numbering ---
