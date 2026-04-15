@@ -6,6 +6,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { AttentionPanel } from "@/components/dashboard/attention-panel";
 import { UpcomingPanel } from "@/components/dashboard/upcoming-panel";
 import { PlatformsPanel } from "@/components/dashboard/platforms-panel";
+import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { Weather } from "@/components/dashboard/weather";
 
 export function DashboardView() {
@@ -65,6 +66,8 @@ export function DashboardView() {
             subValue={`YTD ${formatCurrency(stats.ytdTax)}`}
           />
         </div>
+
+        <RevenueChart invoices={invoices} drafts={drafts} />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
           <AttentionPanel

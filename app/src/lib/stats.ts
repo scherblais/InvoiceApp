@@ -1,6 +1,14 @@
 import type { Invoice, Draft } from "@/lib/types";
 import { monthKey } from "@/lib/format";
 
+export interface MonthlyRevenuePoint {
+  key: string; // "YYYY-MM"
+  label: string; // "Jan"
+  year: number;
+  revenue: number; // gross total for the month (matches the stat cards)
+  tax: number;
+}
+
 export interface DashboardStats {
   monthRevenue: number;
   lastMonthRevenue: number;
@@ -117,4 +125,61 @@ export function computeDashboardStats(
     revBadgeText,
     revBadgeKind,
   };
+}
+
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/**
+ * Rolling monthly revenue series ending at `now`. Aggregates invoice + draft
+ * totals into the `months` most recent calendar buckets.
+ */
+export function computeMonthlyRevenue(
+  invoices: Invoice[],
+  drafts: Draft[],
+  months = 12,
+  now: Date = new Date()
+): MonthlyRevenuePoint[] {
+  const buckets = new Map<string, MonthlyRevenuePoint>();
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = monthKey(d);
+    buckets.set(key, {
+      key,
+      label: MONTH_LABELS[d.getMonth()],
+      year: d.getFullYear(),
+      revenue: 0,
+      tax: 0,
+    });
+  }
+
+  for (const inv of invoices) {
+    const im = invoiceMonth(inv);
+    const b = buckets.get(im);
+    if (!b) continue;
+    b.revenue += inv.total ?? 0;
+    b.tax += (inv.totalGst ?? 0) + (inv.totalQst ?? 0);
+  }
+
+  for (const d of drafts) {
+    const b = d.month ? buckets.get(d.month) : undefined;
+    if (!b) continue;
+    const { total, tax } = sumItems(d.items);
+    b.revenue += total;
+    b.tax += tax;
+  }
+
+  return Array.from(buckets.values());
 }
