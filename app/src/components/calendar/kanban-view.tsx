@@ -9,30 +9,30 @@ import {
   type EventStatus,
 } from "@/lib/calendar";
 import { formatShortDate, formatTime12 } from "@/lib/format";
-import type { CalEvent, Realtor } from "@/lib/types";
+import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface KanbanViewProps {
   events: CalEvent[];
-  realtors: Realtor[];
+  clients: Client[];
   onEventClick: (id: string) => void;
   onStatusChange: (id: string, status: EventStatus) => void;
 }
 
 export function KanbanView({
   events,
-  realtors,
+  clients,
   onEventClick,
   onStatusChange,
 }: KanbanViewProps) {
   const [dragOver, setDragOver] = useState<EventStatus | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const realtorById = useMemo(() => {
-    const m = new Map<string, Realtor>();
-    for (const r of realtors) m.set(r.id, r);
+  const clientById = useMemo(() => {
+    const m = new Map<string, Client>();
+    for (const c of clients) m.set(c.id, c);
     return m;
-  }, [realtors]);
+  }, [clients]);
 
   const columns = useMemo(() => {
     const buckets = new Map<EventStatus, CalEvent[]>();
@@ -88,9 +88,8 @@ export function KanbanView({
               <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
                 {items.map((ev) => {
                   const color = eventColor(ev);
-                  const realtor = ev.realtorId
-                    ? realtorById.get(ev.realtorId)
-                    : null;
+                  const cid = eventClientId(ev);
+                  const client = cid ? clientById.get(cid) : null;
                   return (
                     <button
                       key={ev.id}
@@ -127,9 +126,9 @@ export function KanbanView({
                           </span>
                         ) : null}
                       </div>
-                      {realtor ? (
+                      {client ? (
                         <div className="truncate text-xs text-muted-foreground">
-                          {realtor.name}
+                          {client.name || client.company}
                         </div>
                       ) : null}
                     </button>

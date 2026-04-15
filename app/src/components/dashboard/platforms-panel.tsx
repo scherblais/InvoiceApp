@@ -45,9 +45,9 @@ export function PlatformsPanel({
     },
     {
       icon: Users,
-      label: "Realtors",
-      meta: "Shared calendars",
-      to: "/realtors",
+      label: "Clients",
+      meta: "Contacts & shared calendars",
+      to: "/clients",
       disabled: false,
     },
   ];

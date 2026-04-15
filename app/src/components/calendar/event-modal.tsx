@@ -28,7 +28,7 @@ import {
   type EventColor,
   type EventStatus,
 } from "@/lib/calendar";
-import type { CalEvent, Realtor } from "@/lib/types";
+import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface EventModalProps {
@@ -37,7 +37,7 @@ interface EventModalProps {
   event: CalEvent | null; // null = new event
   defaultDate?: string;
   defaultTime?: string;
-  realtors: Realtor[];
+  clients: Client[];
   onSave: (ev: CalEvent) => void;
   onDelete?: (id: string) => void;
 }
@@ -50,7 +50,7 @@ interface FormState {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
-  realtorId: string;
+  clientId: string;
   status: EventStatus;
   color: EventColor;
   notes: string;
@@ -65,7 +65,7 @@ function emptyForm(defaultDate: string, defaultTime = ""): FormState {
     contactName: "",
     contactPhone: "",
     contactEmail: "",
-    realtorId: "",
+    clientId: "",
     status: "scheduled",
     color: "blue",
     notes: "",
@@ -90,7 +90,7 @@ function eventToForm(ev: CalEvent): FormState {
     contactName: ev.contactName ?? "",
     contactPhone: (ev as { contactPhone?: string }).contactPhone ?? "",
     contactEmail: (ev as { contactEmail?: string }).contactEmail ?? "",
-    realtorId: ev.realtorId ?? "",
+    clientId: eventClientId(ev) ?? "",
     status: normalizeStatus(ev.status),
     color: (EVENT_COLORS.includes((ev.color ?? "") as EventColor)
       ? ev.color
@@ -105,7 +105,7 @@ export function EventModal({
   event,
   defaultDate,
   defaultTime,
-  realtors,
+  clients,
   onSave,
   onDelete,
 }: EventModalProps) {
@@ -130,15 +130,20 @@ export function EventModal({
     const title = form.unit.trim()
       ? `${form.address.trim()}, Apt ${form.unit.trim()}`
       : form.address.trim();
+    // Strip the deprecated `realtorId` field on save so new writes only carry
+    // `clientId`. The legacy field is still tolerated on reads via
+    // `eventClientId`.
+    const { realtorId: _drop, ...base } = event ?? { id: `ev_${Date.now()}` };
+    void _drop;
     const merged: CalEvent = {
-      ...(event ?? { id: `ev_${Date.now()}` }),
+      ...base,
       title,
       address: form.address.trim(),
       unit: form.unit.trim(),
       date: form.date,
       start: form.start || undefined,
       contactName: form.contactName.trim(),
-      realtorId: form.realtorId || undefined,
+      clientId: form.clientId || undefined,
       status: form.status,
       color: form.color,
       notes: form.notes.trim(),
@@ -159,7 +164,7 @@ export function EventModal({
     }
   };
 
-  const activeRealtors = realtors.filter((r) => r.name?.trim());
+  const activeClients = clients.filter((c) => (c.name || c.company)?.trim());
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -256,22 +261,22 @@ export function EventModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
-              <Label>Realtor</Label>
+              <Label>Client</Label>
               <Select
-                value={form.realtorId || "none"}
+                value={form.clientId || "none"}
                 onValueChange={(v) =>
-                  setForm((f) => ({ ...f, realtorId: v === "none" ? "" : v }))
+                  setForm((f) => ({ ...f, clientId: v === "none" ? "" : v }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="No realtor" />
+                  <SelectValue placeholder="No client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No realtor</SelectItem>
-                  {activeRealtors.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.name}
-                      {r.company ? ` — ${r.company}` : ""}
+                  <SelectItem value="none">No client</SelectItem>
+                  {activeClients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name || c.company}
+                      {c.name && c.company ? ` — ${c.company}` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>

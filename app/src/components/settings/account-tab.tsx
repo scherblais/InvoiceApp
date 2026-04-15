@@ -14,13 +14,11 @@ export function AccountTab() {
     drafts,
     clients,
     calEvents,
-    realtors,
     config,
     saveInvoices,
     saveDrafts,
     saveClients,
     saveCalEvents,
-    saveRealtors,
     saveConfig,
   } = useData();
   const fileInput = useRef<HTMLInputElement | null>(null);
@@ -28,8 +26,8 @@ export function AccountTab() {
   const handleExport = () => {
     const payload = {
       exportedAt: new Date().toISOString(),
-      version: 1,
-      data: { invoices, drafts, clients, calEvents, realtors, config },
+      version: 2,
+      data: { invoices, drafts, clients, calEvents, config },
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
@@ -68,9 +66,17 @@ export function AccountTab() {
         }
         if (Array.isArray(data.invoices)) saveInvoices(data.invoices);
         if (Array.isArray(data.drafts)) saveDrafts(data.drafts);
-        if (Array.isArray(data.clients)) saveClients(data.clients);
+        // Merge legacy `realtors` list (from pre-unification backups) into the
+        // clients list on import so older exports keep working.
+        const importedClients = Array.isArray(data.clients) ? data.clients : [];
+        const legacyRealtors = Array.isArray(data.realtors) ? data.realtors : [];
+        if (importedClients.length || legacyRealtors.length) {
+          const byId = new Map();
+          for (const c of importedClients) if (c?.id) byId.set(c.id, c);
+          for (const r of legacyRealtors) if (r?.id && !byId.has(r.id)) byId.set(r.id, r);
+          saveClients(Array.from(byId.values()));
+        }
         if (Array.isArray(data.calEvents)) saveCalEvents(data.calEvents);
-        if (Array.isArray(data.realtors)) saveRealtors(data.realtors);
         if (data.config && typeof data.config === "object")
           saveConfig(data.config);
         toast.success("Backup restored");
@@ -91,11 +97,7 @@ export function AccountTab() {
   };
 
   const totalRecords =
-    invoices.length +
-    drafts.length +
-    clients.length +
-    calEvents.length +
-    realtors.length;
+    invoices.length + drafts.length + clients.length + calEvents.length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -162,10 +164,6 @@ export function AccountTab() {
           <div>
             <dt className="text-xs text-muted-foreground">Calendar events</dt>
             <dd className="tabular-nums">{calEvents.length}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Realtors</dt>
-            <dd className="tabular-nums">{realtors.length}</dd>
           </div>
           <div>
             <dt className="text-xs text-muted-foreground">Total records</dt>

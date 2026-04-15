@@ -10,7 +10,7 @@ import { LoginView } from "@/views/login";
 import { DashboardView } from "@/views/dashboard";
 import { CalendarView } from "@/views/calendar";
 import { InvoicesView } from "@/views/invoices";
-import { RealtorsView } from "@/views/realtors";
+import { ClientsView } from "@/views/clients";
 import { SettingsView } from "@/views/settings";
 import { SharedView } from "@/views/shared";
 import { PlaceholderView } from "@/views/placeholder";
@@ -36,7 +36,9 @@ export default function App() {
                 <Route path="/" element={<DashboardView />} />
                 <Route path="/invoices" element={<InvoicesView />} />
                 <Route path="/calendar" element={<CalendarView />} />
-                <Route path="/realtors" element={<RealtorsView />} />
+                <Route path="/clients" element={<ClientsView />} />
+                {/* Redirect legacy /realtors path to /clients */}
+                <Route path="/realtors" element={<ClientsView />} />
                 <Route path="/settings" element={<SettingsView />} />
               </Route>
               <Route

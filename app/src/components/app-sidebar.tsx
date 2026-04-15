@@ -33,7 +33,7 @@ const nav = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/" },
   { label: "Invoicing", icon: FileText, to: "/invoices" },
   { label: "Calendar", icon: Calendar, to: "/calendar" },
-  { label: "Realtors", icon: Users, to: "/realtors" },
+  { label: "Clients", icon: Users, to: "/clients" },
 ];
 
 export function AppSidebar() {

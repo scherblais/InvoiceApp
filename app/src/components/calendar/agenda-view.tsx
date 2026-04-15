@@ -10,21 +10,21 @@ import {
   toISODate,
 } from "@/lib/calendar";
 import { formatTime12 } from "@/lib/format";
-import type { CalEvent, Realtor } from "@/lib/types";
+import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface AgendaViewProps {
   events: CalEvent[];
-  realtors: Realtor[];
+  clients: Client[];
   onEventClick: (id: string) => void;
 }
 
-export function AgendaView({ events, realtors, onEventClick }: AgendaViewProps) {
-  const realtorById = useMemo(() => {
-    const m = new Map<string, Realtor>();
-    for (const r of realtors) m.set(r.id, r);
+export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
+  const clientById = useMemo(() => {
+    const m = new Map<string, Client>();
+    for (const c of clients) m.set(c.id, c);
     return m;
-  }, [realtors]);
+  }, [clients]);
 
   const groups = useMemo(() => {
     const today = new Date();
@@ -79,9 +79,8 @@ export function AgendaView({ events, realtors, onEventClick }: AgendaViewProps) 
                 {dayEvents.map((ev) => {
                   const color = eventColor(ev);
                   const status = normalizeStatus(ev.status);
-                  const realtor = ev.realtorId
-                    ? realtorById.get(ev.realtorId)
-                    : null;
+                  const cid = eventClientId(ev);
+                  const client = cid ? clientById.get(cid) : null;
                   return (
                     <li key={ev.id}>
                       <button
@@ -105,8 +104,10 @@ export function AgendaView({ events, realtors, onEventClick }: AgendaViewProps) 
                             ) : (
                               <span>All day</span>
                             )}
-                            {realtor ? (
-                              <span className="truncate">· {realtor.name}</span>
+                            {client ? (
+                              <span className="truncate">
+                                · {client.name || client.company}
+                              </span>
                             ) : null}
                             {ev.contactName ? (
                               <span className="truncate">

@@ -8,6 +8,33 @@ export interface InvoiceItem {
   addons?: unknown[];
 }
 
+export interface ClientDiscount {
+  type: "%" | "$";
+  value: number;
+}
+
+export interface ClientOverrides {
+  // Map of package/addon id → custom price for this client
+  packages?: Record<string, number>;
+  addons?: Record<string, number>;
+}
+
+/**
+ * A Client is the single unified contact entity — the person or agency we
+ * invoice AND schedule shoots for. (Legacy builds kept "realtors" and
+ * "clients" as separate lists; they have since been merged.)
+ */
+export interface Client {
+  id: string;
+  name?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+  overrides?: ClientOverrides;
+  discount?: ClientDiscount;
+}
+
 export interface Invoice {
   id: string;
   number?: string;
@@ -34,26 +61,6 @@ export interface Draft {
   updatedAt?: number;
 }
 
-export interface ClientDiscount {
-  type: "%" | "$";
-  value: number;
-}
-
-export interface ClientOverrides {
-  // Map of package/addon id → custom price for this client
-  packages?: Record<string, number>;
-  addons?: Record<string, number>;
-}
-
-export interface Client {
-  id: string;
-  name?: string;
-  company?: string;
-  email?: string;
-  overrides?: ClientOverrides;
-  discount?: ClientDiscount;
-}
-
 export interface CalEvent {
   id: string;
   title?: string;
@@ -68,16 +75,22 @@ export interface CalEvent {
   unit?: string;
   notes?: string;
   contactName?: string;
+  /** Unified client reference. */
+  clientId?: string;
+  /**
+   * @deprecated Legacy field from when realtors and clients were split. New
+   * events write `clientId`; reads fall back to this. Removed once all events
+   * are migrated via `migrateRealtorsToClients`.
+   */
   realtorId?: string;
 }
 
-export interface Realtor {
-  id: string;
-  name: string;
-  company?: string;
-  email?: string;
-  phone?: string;
-  notes?: string;
+/**
+ * Returns the effective client id for a calendar event, tolerating both the
+ * new `clientId` field and the legacy `realtorId` field during migration.
+ */
+export function eventClientId(ev: CalEvent): string | undefined {
+  return ev.clientId ?? ev.realtorId ?? undefined;
 }
 
 export interface ConfigPackage {

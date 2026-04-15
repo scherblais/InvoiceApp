@@ -1,5 +1,5 @@
 import { ref, set, db } from "@/lib/firebase";
-import type { CalEvent, Realtor } from "@/lib/types";
+import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 
 export interface SharedEvent {
   title?: string;
@@ -13,18 +13,26 @@ export interface SharedEvent {
 }
 
 export interface SharedData {
+  /** Display name of the client this share belongs to. */
   realtorName: string;
+  /** Display company. Kept as `realtorCompany` on the wire for legacy
+   *  compatibility with existing `shared/<token>` entries already in Firebase
+   *  and with the public viewer URL. */
   realtorCompany: string;
   events: SharedEvent[];
 }
 
-export function realtorShareToken(uid: string, realtorId: string): string {
-  // Legacy format: base64(uid::realtorId) with '=' padding stripped
-  return btoa(`${uid}::${realtorId}`).replace(/=/g, "");
+/**
+ * Share tokens are `base64(uid::clientId)` with padding stripped. The format
+ * is unchanged from the legacy realtor-scoped build, so any existing public
+ * share links remain valid after the realtor → client unification.
+ */
+export function clientShareToken(uid: string, clientId: string): string {
+  return btoa(`${uid}::${clientId}`).replace(/=/g, "");
 }
 
-export function realtorShareLink(uid: string, realtorId: string): string {
-  const token = realtorShareToken(uid, realtorId);
+export function clientShareLink(uid: string, clientId: string): string {
+  const token = clientShareToken(uid, clientId);
   const origin = window.location.origin;
   return `${origin}/shared?share=${token}`;
 }
@@ -43,29 +51,29 @@ function eventToShared(ev: CalEvent): SharedEvent {
 }
 
 /**
- * Mirrors the calendar events for each realtor into `shared/<token>` so the
- * public status page can read them without auth. Matches the legacy
- * index.html `syncSharedData` shape so existing share links keep working.
+ * Mirrors calendar events for each client into `shared/<token>` so the public
+ * status page can read them without auth.
  */
 export function syncSharedData(
   uid: string,
-  realtors: Realtor[],
+  clients: Client[],
   calEvents: CalEvent[]
 ): void {
   if (!uid) return;
-  const byRealtor = new Map<string, SharedEvent[]>();
+  const byClient = new Map<string, SharedEvent[]>();
   for (const ev of calEvents) {
-    if (!ev.realtorId) continue;
-    const list = byRealtor.get(ev.realtorId) ?? [];
+    const cid = eventClientId(ev);
+    if (!cid) continue;
+    const list = byClient.get(cid) ?? [];
     list.push(eventToShared(ev));
-    byRealtor.set(ev.realtorId, list);
+    byClient.set(cid, list);
   }
-  for (const r of realtors) {
-    const token = realtorShareToken(uid, r.id);
+  for (const c of clients) {
+    const token = clientShareToken(uid, c.id);
     const payload: SharedData = {
-      realtorName: r.name || "",
-      realtorCompany: r.company || "",
-      events: byRealtor.get(r.id) ?? [],
+      realtorName: c.name || c.company || "",
+      realtorCompany: c.company || "",
+      events: byClient.get(c.id) ?? [],
     };
     void set(ref(db, `shared/${token}`), payload);
   }

@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, Mail, Percent, Plus, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { ChevronDown, Copy, Link as LinkIcon, Percent } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -10,31 +9,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Client, ClientOverrides, Config } from "@/lib/types";
-import {
-  DEFAULT_ADDONS,
-  DEFAULT_PACKAGES,
-  clientInitials,
-} from "@/lib/invoice";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/auth-context";
+import { clientShareLink } from "@/lib/shared";
+import { DEFAULT_ADDONS, DEFAULT_PACKAGES } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/format";
+import type { Client, ClientOverrides, Config } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-interface ClientsTabProps {
-  clients: Client[];
-  config: Config;
-  onSave: (next: Client[]) => void;
-}
-
-interface DialogState {
+interface ClientDialogProps {
   open: boolean;
-  initial: Client | null;
+  onOpenChange: (open: boolean) => void;
+  initial?: Client | null;
+  config: Config;
+  onSave: (client: Client) => void;
+  onDelete?: (id: string) => void;
 }
 
-/**
- * Parse the raw string from an override input. Empty / whitespace / non-numeric
- * means "use default"; anything else becomes a finite non-negative number.
- */
 function parseOverride(raw: string): number | undefined {
   const trimmed = raw.trim();
   if (!trimmed) return undefined;
@@ -43,68 +37,85 @@ function parseOverride(raw: string): number | undefined {
   return Math.round(n * 100) / 100;
 }
 
-function ClientFormDialog({
-  state,
-  config,
+export function ClientDialog({
+  open,
   onOpenChange,
+  initial,
+  config,
   onSave,
   onDelete,
-}: {
-  state: DialogState;
-  config: Config;
-  onOpenChange: (open: boolean) => void;
-  onSave: (c: Client) => void;
-  onDelete?: (id: string) => void;
-}) {
-  const initial = state.initial;
+}: ClientDialogProps) {
+  const { user } = useAuth();
   const packages = config.packages?.length ? config.packages : DEFAULT_PACKAGES;
   const addons = config.addons?.length ? config.addons : DEFAULT_ADDONS;
 
-  const [name, setName] = useState(initial?.name ?? "");
-  const [company, setCompany] = useState(initial?.company ?? "");
-  const [email, setEmail] = useState(initial?.email ?? "");
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [pkgOverrides, setPkgOverrides] = useState<Record<string, string>>({});
+  const [addonOverrides, setAddonOverrides] = useState<Record<string, string>>(
+    {}
+  );
+  const [discountType, setDiscountType] = useState<"%" | "$">("%");
+  const [discountValue, setDiscountValue] = useState<string>("");
+  const [pricingOpen, setPricingOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [pkgOverrides, setPkgOverrides] = useState<Record<string, string>>(
-    () => {
-      const out: Record<string, string> = {};
-      const src = initial?.overrides?.packages ?? {};
-      for (const [id, price] of Object.entries(src)) {
-        out[id] = String(price);
-      }
-      return out;
-    }
-  );
-  const [addonOverrides, setAddonOverrides] = useState<Record<string, string>>(
-    () => {
-      const out: Record<string, string> = {};
-      const src = initial?.overrides?.addons ?? {};
-      for (const [id, price] of Object.entries(src)) {
-        out[id] = String(price);
-      }
-      return out;
-    }
-  );
+  // Rehydrate form every time the dialog opens or target client changes.
+  useEffect(() => {
+    if (!open) return;
+    setName(initial?.name ?? "");
+    setCompany(initial?.company ?? "");
+    setEmail(initial?.email ?? "");
+    setPhone(initial?.phone ?? "");
+    setNotes(initial?.notes ?? "");
 
-  const [discountType, setDiscountType] = useState<"%" | "$">(
-    initial?.discount?.type ?? "%"
-  );
-  const [discountValue, setDiscountValue] = useState<string>(
-    initial?.discount?.value ? String(initial.discount.value) : ""
-  );
+    const pkgs: Record<string, string> = {};
+    for (const [id, price] of Object.entries(initial?.overrides?.packages ?? {})) {
+      pkgs[id] = String(price);
+    }
+    setPkgOverrides(pkgs);
 
-  const hasCustom =
-    Object.keys(pkgOverrides).length > 0 ||
-    Object.keys(addonOverrides).length > 0 ||
-    !!discountValue.trim();
-  const [pricingOpen, setPricingOpen] = useState(hasCustom);
+    const adds: Record<string, string> = {};
+    for (const [id, price] of Object.entries(initial?.overrides?.addons ?? {})) {
+      adds[id] = String(price);
+    }
+    setAddonOverrides(adds);
+
+    setDiscountType(initial?.discount?.type ?? "%");
+    setDiscountValue(
+      initial?.discount?.value ? String(initial.discount.value) : ""
+    );
+
+    const hasCustom =
+      Object.keys(pkgs).length > 0 ||
+      Object.keys(adds).length > 0 ||
+      !!(initial?.discount?.value && initial.discount.value > 0);
+    setPricingOpen(hasCustom);
+
+    setError(null);
+  }, [open, initial]);
+
+  const shareLink =
+    initial && user ? clientShareLink(user.uid, initial.id) : "";
+
+  const handleCopyLink = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      toast.success("Share link copied");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
 
   const handleSave = () => {
     if (!name.trim() && !company.trim()) {
       setError("Enter a name or company");
       return;
     }
-
     const packagesOut: Record<string, number> = {};
     for (const [id, raw] of Object.entries(pkgOverrides)) {
       const n = parseOverride(raw);
@@ -130,6 +141,8 @@ function ClientFormDialog({
       name: name.trim(),
       company: company.trim(),
       email: email.trim(),
+      phone: phone.trim(),
+      notes: notes.trim(),
       ...(Object.keys(overrides).length ? { overrides } : {}),
       ...(hasDiscount
         ? {
@@ -144,21 +157,41 @@ function ClientFormDialog({
     onOpenChange(false);
   };
 
+  const handleDelete = () => {
+    if (!initial?.id || !onDelete) return;
+    const label = initial.company || initial.name || "this client";
+    if (
+      window.confirm(
+        `Delete ${label}? Existing invoices and events are kept.`
+      )
+    ) {
+      onDelete(initial.id);
+      onOpenChange(false);
+    }
+  };
+
+  const hasCustom =
+    Object.keys(pkgOverrides).length > 0 ||
+    Object.keys(addonOverrides).length > 0 ||
+    !!discountValue.trim();
+
   return (
-    <Dialog open={state.open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit client" : "New client"}</DialogTitle>
           <DialogDescription>
-            Use company for agencies/brokerages, or name for individuals.
+            Clients are the people and agencies you invoice and schedule shoots
+            for.
           </DialogDescription>
         </DialogHeader>
+
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ct-name">Name</Label>
+              <Label htmlFor="cd-name">Name</Label>
               <Input
-                id="ct-name"
+                id="cd-name"
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -166,23 +199,45 @@ function ClientFormDialog({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ct-company">Company</Label>
+              <Label htmlFor="cd-company">Company</Label>
               <Input
-                id="ct-company"
+                id="cd-company"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="Press Realty"
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="cd-email">Email</Label>
+              <Input
+                id="cd-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jane@example.com"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="cd-phone">Phone</Label>
+              <Input
+                id="cd-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(514) 555-0123"
+              />
+            </div>
+          </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ct-email">Email</Label>
-            <Input
-              id="ct-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="jane@example.com"
+            <Label htmlFor="cd-notes">Notes</Label>
+            <Textarea
+              id="cd-notes"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Preferences, referral source, etc."
             />
           </div>
 
@@ -216,8 +271,8 @@ function ClientFormDialog({
                     Discount
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Applied to the pre-tax subtotal. Taxes are then computed on
-                    the discounted amount.
+                    Applied to the pre-tax subtotal. Taxes compute on the
+                    discounted amount.
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="inline-flex overflow-hidden rounded-md border">
@@ -276,9 +331,7 @@ function ClientFormDialog({
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-muted-foreground">
-                            $
-                          </span>
+                          <span className="text-xs text-muted-foreground">$</span>
                           <Input
                             type="number"
                             min="0"
@@ -320,9 +373,7 @@ function ClientFormDialog({
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-muted-foreground">
-                            $
-                          </span>
+                          <span className="text-xs text-muted-foreground">$</span>
                           <Input
                             type="number"
                             min="0"
@@ -349,30 +400,46 @@ function ClientFormDialog({
             ) : null}
           </div>
 
+          {shareLink ? (
+            <div className="flex flex-col gap-1.5 border-t pt-3">
+              <Label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                <LinkIcon className="h-3 w-3" />
+                Share link
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={shareLink}
+                  className="font-mono text-xs"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyLink}
+                  aria-label="Copy share link"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Public page showing live status of this client's shoots.
+              </p>
+            </div>
+          ) : null}
+
           {error ? (
             <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           ) : null}
         </div>
+
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-between">
           <div>
             {initial && onDelete ? (
               <Button
                 variant="ghost"
-                onClick={() => {
-                  if (!initial) return;
-                  if (
-                    window.confirm(
-                      `Delete ${
-                        initial.company || initial.name || "this client"
-                      }? Existing invoices are kept.`
-                    )
-                  ) {
-                    onDelete(initial.id);
-                    onOpenChange(false);
-                  }
-                }}
+                onClick={handleDelete}
                 className="text-destructive hover:text-destructive"
               >
                 Delete
@@ -390,128 +457,5 @@ function ClientFormDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-export function ClientsTab({ clients, config, onSave }: ClientsTabProps) {
-  const [query, setQuery] = useState("");
-  const [dialog, setDialog] = useState<DialogState>({
-    open: false,
-    initial: null,
-  });
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const sorted = [...clients].sort((a, b) =>
-      (a.company || a.name || "").localeCompare(b.company || b.name || "")
-    );
-    if (!q) return sorted;
-    return sorted.filter((c) =>
-      [c.name, c.company, c.email]
-        .filter(Boolean)
-        .some((v) => (v as string).toLowerCase().includes(q))
-    );
-  }, [clients, query]);
-
-  const handleSave = (next: Client) => {
-    const idx = clients.findIndex((c) => c.id === next.id);
-    if (idx >= 0) {
-      onSave(clients.map((c) => (c.id === next.id ? next : c)));
-    } else {
-      onSave([...clients, next]);
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    onSave(clients.filter((c) => c.id !== id));
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search clients"
-            className="pl-8"
-          />
-        </div>
-        <Button
-          size="sm"
-          onClick={() => setDialog({ open: true, initial: null })}
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          New client
-        </Button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-          {query ? "No clients match your search." : "No clients yet."}
-        </div>
-      ) : (
-        <div className="rounded-lg border bg-card">
-          <ul className="divide-y">
-            {filtered.map((c) => {
-              const hasCustom =
-                !!c.overrides?.packages ||
-                !!c.overrides?.addons ||
-                (!!c.discount && c.discount.value > 0);
-              return (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    onClick={() => setDialog({ open: true, initial: c })}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50"
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-                      {clientInitials(c)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <div className="truncate text-sm font-medium">
-                          {c.company || c.name || "Unnamed"}
-                        </div>
-                        {hasCustom ? (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                            Custom pricing
-                          </span>
-                        ) : null}
-                      </div>
-                      {c.company && c.name ? (
-                        <div className="truncate text-xs text-muted-foreground">
-                          {c.name}
-                        </div>
-                      ) : null}
-                    </div>
-                    {c.email ? (
-                      <div className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-                        <Mail className="h-3 w-3" />
-                        <span className="truncate">{c.email}</span>
-                      </div>
-                    ) : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {dialog.open ? (
-        <ClientFormDialog
-          key={dialog.initial?.id ?? "new"}
-          state={dialog}
-          config={config}
-          onOpenChange={(open) =>
-            setDialog(open ? dialog : { open: false, initial: null })
-          }
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
-      ) : null}
-    </div>
   );
 }

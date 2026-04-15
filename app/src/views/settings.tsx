@@ -7,11 +7,10 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { PricingTab } from "@/components/settings/pricing-tab";
-import { ClientsTab } from "@/components/settings/clients-tab";
 import { AccountTab } from "@/components/settings/account-tab";
 
 export function SettingsView() {
-  const { config, saveConfig, clients, saveClients } = useData();
+  const { config, saveConfig } = useData();
   const [tab, setTab] = useState("pricing");
 
   return (
@@ -19,7 +18,7 @@ export function SettingsView() {
       <header className="border-b px-6 py-4 md:px-8">
         <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
         <p className="text-xs text-muted-foreground">
-          Manage pricing, clients, and your account.
+          Default pricing and account.
         </p>
       </header>
       <div className="flex-1 overflow-y-auto p-6 md:p-8">
@@ -27,18 +26,10 @@ export function SettingsView() {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
               <TabsTrigger value="pricing">Pricing</TabsTrigger>
-              <TabsTrigger value="clients">Clients</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
             <TabsContent value="pricing" className="mt-6">
               <PricingTab config={config} onSave={saveConfig} />
-            </TabsContent>
-            <TabsContent value="clients" className="mt-6">
-              <ClientsTab
-                clients={clients}
-                config={config}
-                onSave={saveClients}
-              />
             </TabsContent>
             <TabsContent value="account" className="mt-6">
               <AccountTab />

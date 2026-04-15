@@ -12,6 +12,7 @@ import {
   ref,
   get,
   set,
+  remove,
   onValue,
   off,
   type DatabaseReference,
@@ -39,6 +40,7 @@ export {
   ref,
   get,
   set,
+  remove,
   onValue,
   off,
 };

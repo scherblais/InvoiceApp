@@ -19,7 +19,7 @@ import type { CalendarViewMode } from "@/components/calendar/types";
 const VIEW_KEY = "lumeria_cal_view";
 
 export function CalendarView() {
-  const { calEvents, realtors, saveCalEvents } = useData();
+  const { calEvents, clients, saveCalEvents } = useData();
 
   const [view, setView] = useState<CalendarViewMode>(() => {
     const saved = localStorage.getItem(VIEW_KEY) as CalendarViewMode | null;
@@ -191,7 +191,7 @@ export function CalendarView() {
       {view === "agenda" ? (
         <AgendaView
           events={calEvents}
-          realtors={realtors}
+          clients={clients}
           onEventClick={openEdit}
         />
       ) : null}
@@ -199,7 +199,7 @@ export function CalendarView() {
       {view === "kanban" ? (
         <KanbanView
           events={calEvents}
-          realtors={realtors}
+          clients={clients}
           onEventClick={openEdit}
           onStatusChange={handleStatusChange}
         />
@@ -211,7 +211,7 @@ export function CalendarView() {
         event={editingEvent}
         defaultDate={defaultDate}
         defaultTime={defaultTime}
-        realtors={realtors}
+        clients={clients}
         onSave={handleSave}
         onDelete={handleDelete}
       />
