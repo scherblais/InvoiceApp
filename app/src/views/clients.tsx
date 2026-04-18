@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
 import { clientColor, COLOR_DOT } from "@/lib/calendar";
@@ -97,22 +98,20 @@ export function ClientsView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Clients</h1>
-          <p className="text-xs text-muted-foreground">
-            {activeCount} {activeCount === 1 ? "client" : "clients"}
-          </p>
-        </div>
-        <Button
-          size="sm"
-          onClick={() => setDialog({ open: true, initial: null })}
-          className="w-full md:w-auto"
-        >
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden />
-          New client
-        </Button>
-      </header>
+      <PageHeader
+        title="Clients"
+        subtitle={`${activeCount} ${activeCount === 1 ? "client" : "clients"}`}
+        actions={
+          <Button
+            size="sm"
+            onClick={() => setDialog({ open: true, initial: null })}
+            className="w-full md:w-auto"
+          >
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden />
+            New client
+          </Button>
+        }
+      />
 
       <div className="flex items-center border-b px-6 py-3 md:px-8">
         <div className="relative w-full md:max-w-sm">

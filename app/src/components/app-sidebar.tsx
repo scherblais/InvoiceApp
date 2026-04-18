@@ -63,10 +63,10 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="gap-0">
+        <SidebarGroup className="py-3">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {nav.map((item) => (
                 <SidebarMenuItem key={item.to}>
                   <NavLink to={item.to} end={item.to === "/"}>
@@ -74,6 +74,7 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         isActive={isActive}
                         tooltip={item.label}
+                        className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground group-data-[collapsible=icon]:data-[active=true]:before:hidden"
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -87,10 +88,14 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t">
-        <SidebarMenu>
+      <SidebarFooter className="gap-1 border-t py-2">
+        <SidebarMenu className="gap-0.5">
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={toggleTheme} tooltip="Toggle theme">
+            <SidebarMenuButton
+              onClick={toggleTheme}
+              tooltip="Toggle theme"
+              className="h-9 text-[13px] font-medium"
+            >
               {theme === "dark" ? (
                 <Sun className="h-4 w-4" />
               ) : (
@@ -102,34 +107,28 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <NavLink to="/settings">
               {({ isActive }) => (
-                <SidebarMenuButton isActive={isActive} tooltip="Settings">
+                <SidebarMenuButton
+                  isActive={isActive}
+                  tooltip="Settings"
+                  className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground group-data-[collapsible=icon]:data-[active=true]:before:hidden"
+                >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
                 </SidebarMenuButton>
               )}
             </NavLink>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={async () => {
-                await logout();
-                navigate("/login");
-              }}
-              tooltip="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sign out</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
 
-        <div className="flex items-center gap-2 px-2 py-2 group-data-[collapsible=icon]:hidden">
+        <div className="mx-2 mt-1 flex items-center gap-2 rounded-md border bg-card/50 px-2 py-2 group-data-[collapsible=icon]:hidden">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-muted text-xs">
+            <AvatarFallback
+              className="bg-muted text-[11px] font-semibold"
+            >
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-1 flex-col min-w-0">
+          <div className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-xs font-medium">
               {user?.displayName ?? user?.email?.split("@")[0] ?? "Account"}
             </span>
@@ -140,7 +139,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
             aria-label="Sign out"
             onClick={async () => {
               await logout();

@@ -53,7 +53,7 @@ export function PlatformsPanel({
   ];
 
   return (
-    <Card className="gap-0 shadow-none">
+    <Card className="gap-0">
       <CardHeader className="py-4 border-b">
         <CardTitle className="text-sm font-medium">Platforms</CardTitle>
       </CardHeader>

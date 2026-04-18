@@ -120,7 +120,7 @@ export function RevenueChart({
     : 0;
 
   return (
-    <Card className="shadow-none gap-3">
+    <Card className="gap-3">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
         <div>
           <CardTitle className="text-sm font-medium">

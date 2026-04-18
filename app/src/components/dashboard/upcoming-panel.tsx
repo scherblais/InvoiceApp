@@ -22,7 +22,7 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
     .slice(0, 6);
 
   return (
-    <Card className="gap-0 shadow-none">
+    <Card className="gap-0">
       <CardHeader className="flex flex-row items-center justify-between py-4 border-b">
         <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
         {upcoming.length > 0 ? (

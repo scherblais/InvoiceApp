@@ -6,6 +6,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/ui/page-header";
 import { PricingTab } from "@/components/settings/pricing-tab";
 import { AccountTab } from "@/components/settings/account-tab";
 
@@ -15,12 +16,7 @@ export function SettingsView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="app-header flex flex-col justify-center border-b px-6 py-4 md:px-8">
-        <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
-        <p className="text-xs text-muted-foreground">
-          Default pricing and account.
-        </p>
-      </header>
+      <PageHeader title="Settings" subtitle="Default pricing and account." />
       <div className="flex-1 overflow-y-auto p-6 md:p-8">
         <div className="mx-auto max-w-4xl">
           <Tabs value={tab} onValueChange={setTab}>

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import {
   clientLabel,
@@ -91,19 +92,16 @@ export function InvoiceList({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Invoices</h1>
-          <p className="text-xs text-muted-foreground">
-            {counts.all} total · {counts.sent} unpaid · {counts.drafts} draft
-            {counts.drafts === 1 ? "" : "s"}
-          </p>
-        </div>
-        <Button size="sm" onClick={onNew} className="gap-1.5">
-          <Plus className="h-4 w-4" aria-hidden />
-          New invoice
-        </Button>
-      </header>
+      <PageHeader
+        title="Invoices"
+        subtitle={`${counts.all} total · ${counts.sent} unpaid · ${counts.drafts} draft${counts.drafts === 1 ? "" : "s"}`}
+        actions={
+          <Button size="sm" onClick={onNew} className="gap-1.5">
+            <Plus className="h-4 w-4" aria-hidden />
+            New invoice
+          </Button>
+        }
+      />
 
       <div className="flex flex-col gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
