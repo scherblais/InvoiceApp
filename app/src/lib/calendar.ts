@@ -165,7 +165,9 @@ export function minutesFromHHMM(t: string): number {
 }
 
 export function compareEvents(a: CalEvent, b: CalEvent): number {
-  if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+  const ad = a.date ?? "";
+  const bd = b.date ?? "";
+  if (ad !== bd) return ad < bd ? -1 : 1;
   const as = a.start ?? "";
   const bs = b.start ?? "";
   if (as === bs) return 0;

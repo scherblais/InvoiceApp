@@ -65,6 +65,7 @@ export function WeekView({
       map.set(toISODate(d), { allDay: [], timed: [] });
     }
     for (const ev of events) {
+      if (!ev.date) continue;
       const bucket = map.get(ev.date);
       if (!bucket) continue;
       if (ev.start) bucket.timed.push(ev);

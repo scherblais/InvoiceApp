@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useData } from "@/contexts/data-context";
 import {
   MONTH_NAMES,
@@ -35,6 +36,23 @@ export function CalendarView() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultDate, setDefaultDate] = useState<string>("");
   const [defaultTime, setDefaultTime] = useState<string>("");
+
+  // Deep-link support: dashboard panels (To Schedule, Attention) pass
+  // ?event=<id> so we can open the event directly from a cross-link.
+  // Remove the param once we've honored it so subsequent navigations
+  // don't loop the modal back open.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const eid = searchParams.get("event");
+    if (!eid) return;
+    const found = calEvents.find((e) => e.id === eid);
+    if (!found) return;
+    setEditingId(eid);
+    setModalOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("event");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, calEvents, setSearchParams]);
 
   const editingEvent = useMemo(
     () => (editingId ? calEvents.find((e) => e.id === editingId) ?? null : null),

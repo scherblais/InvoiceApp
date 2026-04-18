@@ -85,11 +85,14 @@ function fileToShared(f: EventFile): SharedFile {
 }
 
 function eventToShared(ev: CalEvent): SharedEvent {
+  // Caller guarantees a date (syncSharedData filters dateless events
+  // out) but we default to empty string defensively in case of
+  // unexpected upstream data.
   const shared: SharedEvent = {
     title: ev.title,
     address: ev.address,
     unit: ev.unit,
-    date: ev.date,
+    date: ev.date ?? "",
     start: ev.start,
     color: ev.color,
     notes: ev.notes,
@@ -158,6 +161,10 @@ export function syncSharedData(
   for (const ev of calEvents) {
     const cid = eventClientId(ev);
     if (!cid) continue;
+    // Skip events without a committed date — they're on the
+    // photographer's "to schedule" list, not yet something clients
+    // should see on their public status page.
+    if (!ev.date) continue;
     const list = byClient.get(cid) ?? [];
     list.push(eventToShared(ev));
     byClient.set(cid, list);

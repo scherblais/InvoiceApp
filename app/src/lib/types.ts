@@ -90,7 +90,13 @@ export interface CalEvent {
   id: string;
   title?: string;
   type?: string;
-  date: string; // YYYY-MM-DD
+  /**
+   * Event date in YYYY-MM-DD form. Empty string / undefined means
+   * "to be scheduled" — the shoot is known but hasn't been booked
+   * onto a specific day yet. The calendar views silently skip
+   * dateless entries; the dashboard ToSchedulePanel surfaces them.
+   */
+  date?: string;
   start?: string; // HH:mm
   end?: string; // HH:mm
   startTime?: string; // legacy

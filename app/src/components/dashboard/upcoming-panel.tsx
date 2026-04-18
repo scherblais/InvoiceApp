@@ -34,7 +34,10 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
   const upcoming = useMemo(() => {
     const end = endDate.toISOString().slice(0, 10);
     return calEvents
-      .filter((e) => e.date > iso && e.date <= end)
+      .filter(
+        (e): e is CalEvent & { date: string } =>
+          !!e.date && e.date > iso && e.date <= end
+      )
       .sort(compareEvents);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calEvents, iso]);

@@ -42,6 +42,15 @@ interface EventModalProps {
   onDelete?: (id: string) => void;
 }
 
+/** YYYY-MM-DD for today — used when a user un-TBDs a dateless event
+ *  and we need to seed the date input with something valid. */
+function todayDateString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+}
+
 interface FormState {
   address: string;
   unit: string;
@@ -83,7 +92,7 @@ function eventToForm(ev: CalEvent): FormState {
   return {
     address,
     unit,
-    date: ev.date,
+    date: ev.date ?? "",
     start: ev.start ?? "",
     contactName: ev.contactName ?? "",
     contactPhone: (ev as { contactPhone?: string }).contactPhone ?? "",
@@ -138,7 +147,7 @@ export function EventModal({
       title,
       address: form.address.trim(),
       unit: form.unit.trim(),
-      date: form.date,
+      date: form.date || undefined,
       start: form.start || undefined,
       contactName: form.contactName.trim(),
       clientId: form.clientId || undefined,
@@ -208,7 +217,27 @@ export function EventModal({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="ev-date">Date</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ev-date">Date</Label>
+                {/* TBD toggle lets the photographer save an event
+                    without committing to a day — the shoot then
+                    lives in the To Schedule panel on the dashboard
+                    until it's booked. */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      date: f.date ? "" : todayDateString(),
+                      start: f.date ? "" : f.start,
+                    }))
+                  }
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                  aria-pressed={!form.date}
+                >
+                  {form.date ? "Mark as TBD" : "Set a date"}
+                </button>
+              </div>
               <Input
                 id="ev-date"
                 type="date"
@@ -216,6 +245,7 @@ export function EventModal({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, date: e.target.value }))
                 }
+                placeholder="TBD"
               />
             </div>
             <div className="flex flex-col gap-2">

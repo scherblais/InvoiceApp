@@ -29,6 +29,10 @@ export function MonthView({
   const byDate = useMemo(() => {
     const map = new Map<string, CalEvent[]>();
     for (const ev of events) {
+      // Dateless events live on the dashboard's To Schedule panel —
+      // we skip them here so they don't silently drop into the
+      // month grid's first bucket.
+      if (!ev.date) continue;
       const arr = map.get(ev.date) ?? [];
       arr.push(ev);
       map.set(ev.date, arr);

@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttentionPanel } from "@/components/dashboard/attention-panel";
 import { UpcomingPanel } from "@/components/dashboard/upcoming-panel";
-import { ActivityPanel } from "@/components/dashboard/activity-panel";
+import { ToSchedulePanel } from "@/components/dashboard/to-schedule-panel";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { TodaySection } from "@/components/dashboard/today-section";
 import { Weather } from "@/components/dashboard/weather";
@@ -78,13 +78,13 @@ export function DashboardView() {
         <RevenueChart invoices={invoices} drafts={drafts} />
 
         <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
+          <ToSchedulePanel />
+          <UpcomingPanel calEvents={calEvents} />
           <AttentionPanel
             invoices={invoices}
             drafts={drafts}
             clients={clients}
           />
-          <UpcomingPanel calEvents={calEvents} />
-          <ActivityPanel />
         </div>
       </div>
     </div>

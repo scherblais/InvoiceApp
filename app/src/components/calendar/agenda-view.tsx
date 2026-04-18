@@ -31,7 +31,10 @@ export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
     const todayISO = toISODate(today);
     const endISO = toISODate(addDays(today, 30));
     const upcoming = events
-      .filter((e) => e.date >= todayISO && e.date <= endISO)
+      .filter(
+        (e): e is CalEvent & { date: string } =>
+          !!e.date && e.date >= todayISO && e.date <= endISO
+      )
       .sort(compareEvents);
     const byDate = new Map<string, CalEvent[]>();
     for (const ev of upcoming) {
