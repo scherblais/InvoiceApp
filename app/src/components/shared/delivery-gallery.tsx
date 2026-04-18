@@ -178,7 +178,7 @@ export function DeliveryGallery({
       role="dialog"
       aria-modal="true"
       aria-label={`Media delivery for ${title}`}
-      className="fixed inset-0 z-40 flex flex-col bg-background"
+      className="fixed inset-0 z-40 flex flex-col bg-background animate-in fade-in-0 slide-in-from-bottom-2 duration-200 ease-out motion-reduce:animate-none"
     >
       {/* Header */}
       <header className="flex items-start justify-between gap-3 border-b px-4 py-3 md:px-6">

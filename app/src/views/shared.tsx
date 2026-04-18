@@ -582,6 +582,10 @@ export function SharedView() {
           </button>
         </div>
 
+        <div
+          key={tab}
+          className="animate-in fade-in-0 duration-150 ease-out motion-reduce:animate-none"
+        >
         {tab === "appointments" ? (
           data && events.length > 0 ? (
             <>
@@ -663,6 +667,7 @@ export function SharedView() {
         ) : null}
 
         {tab === "pricing" && data ? <SharedPricingView data={data} /> : null}
+        </div>
       </div>
 
       {galleryEvent ? (

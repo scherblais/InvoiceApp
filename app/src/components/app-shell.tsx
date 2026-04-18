@@ -1,9 +1,14 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
 
 export function AppShell() {
+  // Keying the outlet wrapper by pathname forces a remount on every
+  // navigation, which in turn replays the animate-in classes below
+  // so each view fades into place instead of appearing instantly.
+  const location = useLocation();
+
   return (
     <SidebarProvider className="h-svh min-h-svh">
       <AppSidebar />
@@ -14,7 +19,12 @@ export function AppShell() {
           <span className="text-sm font-semibold">Lumeria Media</span>
         </header>
         <main className="flex-1 overflow-auto">
-          <Outlet />
+          <div
+            key={location.pathname}
+            className="h-full animate-in fade-in-0 slide-in-from-bottom-1 duration-200 ease-out motion-reduce:animate-none"
+          >
+            <Outlet />
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

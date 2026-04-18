@@ -61,7 +61,7 @@ export function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label="Photo preview"
-      className="fixed inset-0 z-50 flex flex-col bg-black/95 text-white"
+      className="fixed inset-0 z-50 flex flex-col bg-black/95 text-white animate-in fade-in-0 duration-150 ease-out motion-reduce:animate-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -130,7 +130,7 @@ export function Lightbox({
           key={current.id}
           src={previewUrl}
           alt={current.name}
-          className="max-h-full max-w-full object-contain"
+          className="max-h-full max-w-full object-contain animate-in fade-in-0 duration-150 ease-out motion-reduce:animate-none"
           onClick={(e) => e.stopPropagation()}
         />
         {photos.length > 1 ? (
