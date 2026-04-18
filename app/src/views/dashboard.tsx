@@ -30,13 +30,10 @@ export function DashboardView() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title={getGreeting()}
-        subtitle={formatLongDate()}
-        actions={<Weather />}
-      />
+      <PageHeader title={getGreeting()} subtitle={formatLongDate()} />
 
       <div className="flex flex-col gap-8 p-6 md:gap-10 md:p-10">
+        <Weather />
         <TodaySection />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
