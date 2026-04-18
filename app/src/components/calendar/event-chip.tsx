@@ -1,4 +1,5 @@
 import { useTheme } from "@/contexts/theme-context";
+import { useData } from "@/contexts/data-context";
 import {
   COLOR_CHIP_DARK,
   COLOR_CHIP_LIGHT,
@@ -17,7 +18,8 @@ interface EventChipProps {
 
 export function EventChip({ event, onClick, compact }: EventChipProps) {
   const { theme } = useTheme();
-  const color: EventColor = eventColor(event);
+  const { clientsById } = useData();
+  const color: EventColor = eventColor(event, clientsById);
   const chip = theme === "dark" ? COLOR_CHIP_DARK[color] : COLOR_CHIP_LIGHT[color];
   const label = event.title || event.address || "Untitled";
   const time = formatTime12(event.start);

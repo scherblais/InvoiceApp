@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
+import { clientColor, COLOR_DOT } from "@/lib/calendar";
 import { formatCurrency } from "@/lib/format";
 
 function clientInitials(c: Client): string {
@@ -178,7 +179,12 @@ export function ClientsView() {
                     className="group flex w-full items-center gap-4 px-6 py-3.5 text-left transition-colors hover:bg-muted/40 md:px-8"
                   >
                     <Avatar className="h-9 w-9 shrink-0">
-                      <AvatarFallback className="bg-muted text-[11px] font-semibold">
+                      <AvatarFallback
+                        className="text-[11px] font-semibold text-foreground/90"
+                        style={{
+                          backgroundColor: `${COLOR_DOT[clientColor(c)]}33`,
+                        }}
+                      >
                         {clientInitials(c)}
                       </AvatarFallback>
                     </Avatar>

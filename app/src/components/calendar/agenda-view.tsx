@@ -77,7 +77,7 @@ export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
               </header>
               <ul className="flex flex-col divide-y">
                 {dayEvents.map((ev) => {
-                  const color = eventColor(ev);
+                  const color = eventColor(ev, clientById);
                   const status = normalizeStatus(ev.status);
                   const cid = eventClientId(ev);
                   const client = cid ? clientById.get(cid) : null;

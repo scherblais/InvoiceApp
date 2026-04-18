@@ -2,12 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useData } from "@/contexts/data-context";
 import { formatTime12, todayISO } from "@/lib/format";
 import { COLOR_DOT, eventColor } from "@/lib/calendar";
 import type { CalEvent } from "@/lib/types";
 
 export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
   const navigate = useNavigate();
+  const { clientsById } = useData();
   const iso = todayISO();
 
   const upcoming = calEvents
@@ -51,7 +53,7 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
                     day: "numeric",
                   });
               const time = formatTime12(ev.start ?? ev.startTime ?? "");
-              const dotColor = COLOR_DOT[eventColor(ev)];
+              const dotColor = COLOR_DOT[eventColor(ev, clientsById)];
               return (
                 <li key={ev.id}>
                   <button

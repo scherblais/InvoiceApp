@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 import { useFirebaseData } from "@/hooks/use-firebase-data";
 import { useAuth } from "@/contexts/auth-context";
@@ -17,6 +17,12 @@ interface DataContextValue {
   invoices: Invoice[];
   drafts: Draft[];
   clients: Client[];
+  /**
+   * Memoized lookup of clients keyed by id. Consumers use this for
+   * cheap per-event color resolution without rebuilding the map on
+   * every render.
+   */
+  clientsById: Map<string, Client>;
   calEvents: CalEvent[];
   config: Config;
   saveInvoices: (v: Invoice[]) => void;
@@ -90,12 +96,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     syncSharedData(user.uid, clients, calEvents);
   }, [user, clients, calEvents]);
 
+  const clientsById = useMemo(() => {
+    const m = new Map<string, Client>();
+    for (const c of clients ?? []) {
+      if (c?.id) m.set(c.id, c);
+    }
+    return m;
+  }, [clients]);
+
   return (
     <DataContext.Provider
       value={{
         invoices: invoices ?? [],
         drafts: drafts ?? [],
         clients: clients ?? [],
+        clientsById,
         calEvents: calEvents ?? [],
         config: config ?? {},
         saveInvoices,

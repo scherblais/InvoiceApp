@@ -1,4 +1,4 @@
-import type { CalEvent } from "@/lib/types";
+import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 import { todayISO } from "@/lib/format";
 
 export type EventColor =
@@ -57,7 +57,38 @@ export const COLOR_CHIP_DARK: Record<EventColor, { bg: string; fg: string }> = {
   indigo: { bg: "rgba(129,140,248,0.22)", fg: "#adb3f7" },
 };
 
-export function eventColor(ev: CalEvent): EventColor {
+/**
+ * Deterministic color for a given client id. The id is hashed into the
+ * existing event-color palette so the assignment is stable across
+ * sessions, devices, and reloads — no field to store, nothing to
+ * migrate, and every event for the same client picks up the same hue.
+ */
+export function clientColor(client: Client | null | undefined): EventColor {
+  const id = client?.id;
+  if (!id) return "blue";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return EVENT_COLORS[Math.abs(hash) % EVENT_COLORS.length];
+}
+
+/**
+ * Resolve the display color for an event. When the event has a client
+ * and the clients map carries them, the client's auto-assigned color
+ * wins — this keeps every event for the same client visually uniform
+ * across the calendar, agenda, board, and dashboard. Events without a
+ * client fall back to their own `color` field, and then to "blue".
+ */
+export function eventColor(
+  ev: CalEvent,
+  clientsById?: Map<string, Client> | null
+): EventColor {
+  const cid = eventClientId(ev);
+  if (cid && clientsById) {
+    const client = clientsById.get(cid);
+    if (client) return clientColor(client);
+  }
   const c = (ev.color as EventColor) || "blue";
   return EVENT_COLORS.includes(c) ? c : "blue";
 }

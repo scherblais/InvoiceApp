@@ -87,7 +87,7 @@ export function KanbanView({
               </header>
               <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
                 {items.map((ev) => {
-                  const color = eventColor(ev);
+                  const color = eventColor(ev, clientById);
                   const cid = eventClientId(ev);
                   const client = cid ? clientById.get(cid) : null;
                   return (

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/contexts/theme-context";
+import { useData } from "@/contexts/data-context";
 import {
   COLOR_CHIP_DARK,
   COLOR_CHIP_LIGHT,
@@ -31,6 +32,7 @@ export function WeekView({
   onSlotClick,
 }: WeekViewProps) {
   const { theme } = useTheme();
+  const { clientsById } = useData();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [nowMinutes, setNowMinutes] = useState(() => {
     const n = new Date();
@@ -119,7 +121,7 @@ export function WeekView({
               className="min-h-6 border-l p-0.5"
             >
               {bucket?.allDay.map((ev) => {
-                const color = eventColor(ev);
+                const color = eventColor(ev, clientsById);
                 const chip =
                   theme === "dark"
                     ? COLOR_CHIP_DARK[color]
@@ -188,7 +190,7 @@ export function WeekView({
                 ))}
                 {/* Timed events */}
                 {bucket?.timed.map((ev) => {
-                  const color = eventColor(ev);
+                  const color = eventColor(ev, clientsById);
                   const chip =
                     theme === "dark"
                       ? COLOR_CHIP_DARK[color]

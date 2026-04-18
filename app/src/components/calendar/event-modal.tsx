@@ -26,6 +26,7 @@ import {
   EVENT_COLORS,
   STATUS_ORDER,
   STATUS_META,
+  clientColor,
   normalizeStatus,
   type EventColor,
   type EventStatus,
@@ -315,32 +316,57 @@ export function EventModal({
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Color</Label>
-            <div
-              role="radiogroup"
-              aria-label="Event color"
-              className="flex gap-1.5"
-            >
-              {EVENT_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={form.color === c}
-                  onClick={() => setForm((f) => ({ ...f, color: c }))}
-                  style={{ backgroundColor: COLOR_DOT[c] }}
-                  className={cn(
-                    "h-7 w-7 rounded-full border-2 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    form.color === c
-                      ? "border-foreground scale-110"
-                      : "border-transparent"
-                  )}
-                  aria-label={`Color: ${c}`}
+          {form.clientId ? (
+            <div className="flex flex-col gap-2">
+              <Label>Color</Label>
+              <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor:
+                      COLOR_DOT[
+                        clientColor(
+                          clients.find((c) => c.id === form.clientId)
+                        )
+                      ],
+                  }}
+                  aria-hidden
                 />
-              ))}
+                <span>Auto-assigned from client</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Label>Color</Label>
+              <div
+                role="radiogroup"
+                aria-label="Event color"
+                className="flex gap-1.5"
+              >
+                {EVENT_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    role="radio"
+                    aria-checked={form.color === c}
+                    onClick={() => setForm((f) => ({ ...f, color: c }))}
+                    style={{ backgroundColor: COLOR_DOT[c] }}
+                    className={cn(
+                      "h-7 w-7 rounded-full border-2 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      form.color === c
+                        ? "border-foreground scale-110"
+                        : "border-transparent"
+                    )}
+                    aria-label={`Color: ${c}`}
+                  />
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Events attached to a client pick up the client's color
+                automatically.
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="ev-notes">Notes</Label>
