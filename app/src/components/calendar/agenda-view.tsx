@@ -55,7 +55,7 @@ export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
   const tomorrowISO = toISODate(addDays(new Date(), 1));
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 md:p-8">
+    <div className="flex-1 overflow-y-auto p-6 md:p-10">
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
         {groups.map(([date, dayEvents]) => {
           const d = new Date(`${date}T12:00:00`);

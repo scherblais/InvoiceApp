@@ -506,7 +506,7 @@ export function SharedView() {
   return (
     <div className="min-h-svh bg-background">
       <header className="border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-10">
           <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
             <LumeriaLogo className="h-4 w-4 text-primary" aria-hidden />
             Lumeria Media
@@ -526,9 +526,9 @@ export function SharedView() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-6 py-8">
+      <div className="mx-auto max-w-5xl px-6 py-10 md:px-10">
         {/* Hero */}
-        <div className="mb-6">
+        <div className="mb-10">
           <div className="text-sm text-muted-foreground">{greet}</div>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">
             {name || "Your Shoots"}
@@ -541,7 +541,7 @@ export function SharedView() {
         </div>
 
         {/* Top-level tabs */}
-        <div className="mb-6 flex gap-1 border-b">
+        <div className="mb-8 flex gap-1 border-b">
           <button
             type="button"
             onClick={() => setTab("appointments")}
@@ -590,7 +590,7 @@ export function SharedView() {
           data && events.length > 0 ? (
             <>
               {/* Stats */}
-              <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
                 <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
                   <span
                     className="h-2.5 w-2.5 rounded-full"

@@ -29,7 +29,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "app-header flex flex-col justify-center gap-3 border-b bg-background/60 px-6 py-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between md:px-8",
+        "app-header flex flex-col justify-center gap-3 border-b bg-background/60 px-6 py-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between md:px-10",
         className
       )}
     >

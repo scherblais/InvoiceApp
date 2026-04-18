@@ -23,7 +23,7 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
 
   return (
     <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between py-4 border-b">
+      <CardHeader className="flex flex-row items-center justify-between border-b py-5">
         <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
         {upcoming.length > 0 ? (
           <Badge variant="secondary" className="rounded-full">
@@ -59,7 +59,7 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
                   <button
                     type="button"
                     onClick={() => navigate("/calendar")}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+                    className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors hover:bg-muted/40"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span

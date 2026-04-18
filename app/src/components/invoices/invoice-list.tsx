@@ -103,7 +103,7 @@ export function InvoiceList({
         }
       />
 
-      <div className="flex flex-col gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+      <div className="flex flex-col gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-10">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
           <TabsList>
             <TabsTrigger value="all">
@@ -156,7 +156,7 @@ export function InvoiceList({
           <div className="divide-y">
             {visibleDrafts.length > 0 ? (
               <section aria-label="Drafts">
-                <h2 className="bg-muted/40 px-6 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
+                <h2 className="bg-muted/40 px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-10">
                   Drafts · {visibleDrafts.length}
                 </h2>
                 <ul className="divide-y">
@@ -170,7 +170,7 @@ export function InvoiceList({
                         <button
                           type="button"
                           onClick={() => onOpenDraft(d.id)}
-                          className="flex w-full items-center gap-4 px-6 py-3 text-left transition-colors hover:bg-muted/40 md:px-8"
+                          className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 md:px-10"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-medium">
@@ -205,7 +205,7 @@ export function InvoiceList({
 
             {visibleInvoices.length > 0 ? (
               <section aria-label="Invoices">
-                <h2 className="bg-muted/40 px-6 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
+                <h2 className="bg-muted/40 px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-10">
                   Invoices · {visibleInvoices.length}
                 </h2>
                 <ul className="divide-y">
@@ -216,7 +216,7 @@ export function InvoiceList({
                         <button
                           type="button"
                           onClick={() => onOpenInvoice(inv.id)}
-                          className="flex w-full items-center gap-4 px-6 py-3 text-left transition-colors hover:bg-muted/40 md:px-8"
+                          className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 md:px-10"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-baseline gap-2">

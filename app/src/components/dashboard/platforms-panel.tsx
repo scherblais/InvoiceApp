@@ -54,7 +54,7 @@ export function PlatformsPanel({
 
   return (
     <Card className="gap-0">
-      <CardHeader className="py-4 border-b">
+      <CardHeader className="border-b py-5">
         <CardTitle className="text-sm font-medium">Platforms</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -66,7 +66,7 @@ export function PlatformsPanel({
                 onClick={() => !row.disabled && navigate(row.to)}
                 disabled={row.disabled}
                 className={cn(
-                  "group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
+                  "group flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors",
                   row.disabled
                     ? "opacity-50"
                     : "hover:bg-muted/40 cursor-pointer"

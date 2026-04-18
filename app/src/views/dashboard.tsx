@@ -25,9 +25,8 @@ export function DashboardView() {
         actions={<Weather />}
       />
 
-      <div className="flex flex-col gap-6 p-6 md:p-8">
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="flex flex-col gap-8 p-6 md:gap-10 md:p-10">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
           <StatCard
             label="This Month"
             value={formatCurrency(stats.monthRevenue)}
@@ -65,7 +64,7 @@ export function DashboardView() {
 
         <RevenueChart invoices={invoices} drafts={drafts} />
 
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
           <AttentionPanel
             invoices={invoices}
             drafts={drafts}

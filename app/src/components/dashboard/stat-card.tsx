@@ -38,7 +38,7 @@ export function StatCard({
 }: StatCardProps) {
   if (loading) {
     return (
-      <Card className="gap-4 p-5">
+      <Card className="gap-4 p-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-8 rounded-lg" />
           <Skeleton className="h-5 w-14 rounded-full" />
@@ -53,7 +53,7 @@ export function StatCard({
   }
 
   return (
-    <Card className="group gap-4 p-5 transition-all duration-200 hover:shadow-sm">
+    <Card className="group gap-4 p-6 transition-all duration-200 hover:shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <Icon className="h-4 w-4" aria-hidden />

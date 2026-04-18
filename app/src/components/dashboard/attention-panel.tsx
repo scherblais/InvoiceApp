@@ -69,7 +69,7 @@ export function AttentionPanel({
 
   return (
     <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between py-4 border-b">
+      <CardHeader className="flex flex-row items-center justify-between border-b py-5">
         <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
         {items.length > 0 ? (
           <Badge variant="secondary" className="rounded-full">
@@ -93,7 +93,7 @@ export function AttentionPanel({
                 <button
                   type="button"
                   onClick={item.onSelect}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+                  className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors hover:bg-muted/40"
                 >
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">
