@@ -1,21 +1,32 @@
 import { DollarSign, TrendingUp, Clock, Receipt } from "lucide-react";
 import { useData } from "@/contexts/data-context";
 import { computeDashboardStats } from "@/lib/stats";
-import { formatCurrency, formatLongDate, getGreeting, todayISO } from "@/lib/format";
+import { formatCurrency, formatLongDate, getGreeting } from "@/lib/format";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttentionPanel } from "@/components/dashboard/attention-panel";
 import { UpcomingPanel } from "@/components/dashboard/upcoming-panel";
-import { PlatformsPanel } from "@/components/dashboard/platforms-panel";
+import { ActivityPanel } from "@/components/dashboard/activity-panel";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
+import { TodaySection } from "@/components/dashboard/today-section";
 import { Weather } from "@/components/dashboard/weather";
 
+/**
+ * Dashboard layout:
+ *
+ *   Today   — the hero. Answers "what am I shooting today?" first.
+ *   Stats   — four money-at-a-glance cards, compact.
+ *   Revenue — twelve-month trend anchoring the page's midline.
+ *   Panels  — Attention (urgent), Upcoming (next 7 days), Activity
+ *             (recent admin). Three columns because each tells a
+ *             different story and they shouldn't compete.
+ *
+ * The old Platforms panel was sidebar navigation dressed up as a
+ * dashboard card. Dropped it — the sidebar does that job.
+ */
 export function DashboardView() {
   const { invoices, drafts, clients, calEvents } = useData();
   const stats = computeDashboardStats(invoices, drafts);
-  const iso = todayISO();
-  const upcomingCount = calEvents.filter((e) => e.date >= iso).length;
-  const todayCount = calEvents.filter((e) => e.date === iso).length;
 
   return (
     <div className="flex flex-col">
@@ -26,6 +37,8 @@ export function DashboardView() {
       />
 
       <div className="flex flex-col gap-8 p-6 md:gap-10 md:p-10">
+        <TodaySection />
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
           <StatCard
             label="This Month"
@@ -71,13 +84,7 @@ export function DashboardView() {
             clients={clients}
           />
           <UpcomingPanel calEvents={calEvents} />
-          <PlatformsPanel
-            invoicesCount={invoices.length}
-            unpaidCount={stats.pendingCount}
-            draftCount={stats.draftCount}
-            upcomingCount={upcomingCount}
-            todayCount={todayCount}
-          />
+          <ActivityPanel />
         </div>
       </div>
     </div>
