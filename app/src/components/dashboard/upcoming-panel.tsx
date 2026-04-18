@@ -55,8 +55,8 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
   const dates = Array.from(byDate.keys());
 
   return (
-    <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between border-b py-5">
+    <Card className="gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
         <CardTitle className="text-sm font-medium">Upcoming week</CardTitle>
         {upcoming.length > 0 ? (
           <Badge variant="secondary" className="rounded-full">

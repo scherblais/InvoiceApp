@@ -47,8 +47,8 @@ export function ActivityPanel() {
   const visible = items.slice(0, 6);
 
   return (
-    <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between border-b py-5">
+    <Card className="gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
         <CardTitle className="text-sm font-medium">Recent activity</CardTitle>
       </CardHeader>
       <CardContent className="p-0">

@@ -68,8 +68,8 @@ export function AttentionPanel({
   const visible = items.slice(0, 6);
 
   return (
-    <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between border-b py-5">
+    <Card className="gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
         <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
         {items.length > 0 ? (
           <Badge variant="secondary" className="rounded-full">

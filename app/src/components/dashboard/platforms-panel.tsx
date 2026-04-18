@@ -53,8 +53,8 @@ export function PlatformsPanel({
   ];
 
   return (
-    <Card className="gap-0">
-      <CardHeader className="border-b py-5">
+    <Card className="gap-0 py-0">
+      <CardHeader className="border-b py-5 pb-5">
         <CardTitle className="text-sm font-medium">Platforms</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
