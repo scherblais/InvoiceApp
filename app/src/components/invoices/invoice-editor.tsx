@@ -429,32 +429,41 @@ export function InvoiceEditor({
 
           {/* Items */}
           <section className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Listings</h2>
-              <Button variant="outline" size="sm" onClick={addItem}>
-                <Plus className="mr-1.5 h-4 w-4" />
-                Add listing
-              </Button>
-            </div>
+            <h2 className="text-sm font-semibold">Listings</h2>
             {items.length === 0 ? (
-              <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-                No listings yet. Click “Add listing” to get started.
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                <span>No listings yet.</span>
+                <Button variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden />
+                  Add your first listing
+                </Button>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                {items.map((item, idx) => (
-                  <ListingCard
-                    key={idx}
-                    item={item}
-                    index={idx}
-                    packages={resolvedPackages}
-                    addons={resolvedAddons}
-                    travel={config.travel}
-                    onChange={(next) => updateItem(idx, next)}
-                    onRemove={() => removeItem(idx)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="flex flex-col gap-3">
+                  {items.map((item, idx) => (
+                    <ListingCard
+                      key={idx}
+                      item={item}
+                      index={idx}
+                      packages={resolvedPackages}
+                      addons={resolvedAddons}
+                      travel={config.travel}
+                      onChange={(next) => updateItem(idx, next)}
+                      onRemove={() => removeItem(idx)}
+                    />
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addItem}
+                  className="self-start"
+                >
+                  <Plus className="mr-1.5 h-4 w-4" aria-hidden />
+                  Add another listing
+                </Button>
+              </>
             )}
           </section>
 
