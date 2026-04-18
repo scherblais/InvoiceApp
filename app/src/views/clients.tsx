@@ -1,5 +1,14 @@
 import { useMemo, useState } from "react";
-import { FileText, Mail, Phone, Plus, Search, Users } from "lucide-react";
+import {
+  Calendar,
+  FileText,
+  Mail,
+  Phone,
+  Plus,
+  Search,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useData } from "@/contexts/data-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +17,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 function clientInitials(c: Client): string {
   const source = c.name || c.company || "";
@@ -22,6 +32,30 @@ interface ClientStats {
   invoiceCount: number;
   unpaidCount: number;
   totalBilled: number;
+}
+
+/**
+ * Stable pseudo-random accent color per client id, drawn from the same
+ * palette as the calendar event dots so the whole app feels coherent.
+ * Used as a tiny strip on the avatar wrapper so every card is visually
+ * distinct without being loud.
+ */
+const ACCENT_COLORS = [
+  "#7cadf0",
+  "#a78bfa",
+  "#6dd4a8",
+  "#f5c96b",
+  "#f0a0c4",
+  "#5ec5c0",
+  "#f4877f",
+  "#818cf8",
+];
+function accentFor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return ACCENT_COLORS[Math.abs(hash) % ACCENT_COLORS.length];
 }
 
 export function ClientsView() {
@@ -95,7 +129,10 @@ export function ClientsView() {
         </div>
         <div className="flex items-center gap-2">
           <div className="relative flex-1 md:w-64 md:flex-none">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -107,20 +144,20 @@ export function ClientsView() {
             size="sm"
             onClick={() => setDialog({ open: true, initial: null })}
           >
-            <Plus className="mr-1.5 h-4 w-4" />
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden />
             New client
           </Button>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-6 md:p-8">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-16 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-muted/40 text-muted-foreground">
-                <Users className="h-5 w-5" />
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed p-16 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-muted/40 text-muted-foreground">
+                <Users className="h-6 w-6" aria-hidden />
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">
                   {query ? "No clients match your search" : "No clients yet"}
                 </p>
@@ -133,16 +170,15 @@ export function ClientsView() {
               {!query ? (
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => setDialog({ open: true, initial: null })}
                 >
-                  <Plus className="mr-1.5 h-4 w-4" />
+                  <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
                   Add your first client
                 </Button>
               ) : null}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filtered.map((c) => {
                 const stats = statsById.get(c.id) ?? {
                   eventCount: 0,
@@ -154,71 +190,122 @@ export function ClientsView() {
                   !!c.overrides?.packages ||
                   !!c.overrides?.addons ||
                   (!!c.discount && c.discount.value > 0);
+                const accent = accentFor(c.id);
+                const displayName = c.name || c.company || "Unnamed";
+                const hasContact = !!c.email || !!c.phone;
+
                 return (
                   <button
                     key={c.id}
                     type="button"
                     onClick={() => setDialog({ open: true, initial: c })}
-                    className="group flex flex-col gap-3 rounded-lg border bg-card p-4 text-left transition-colors hover:border-foreground/20 hover:bg-accent/50"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-xl border bg-card text-left transition-all hover:border-foreground/20 hover:bg-accent/30"
                   >
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-muted text-xs font-semibold">
-                          {clientInitials(c)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <div className="truncate text-sm font-semibold">
-                            {c.name || c.company || "Unnamed"}
+                    {/* Colored accent strip anchors the card to a per-client hue. */}
+                    <div
+                      aria-hidden
+                      className="absolute inset-x-0 top-0 h-0.5"
+                      style={{ backgroundColor: accent }}
+                    />
+
+                    <div className="flex flex-col gap-4 p-5">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-11 w-11 shrink-0">
+                          <AvatarFallback
+                            className="text-sm font-semibold text-foreground/90"
+                            style={{ backgroundColor: `${accent}22` }}
+                          >
+                            {clientInitials(c)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate text-sm font-semibold leading-tight">
+                            {displayName}
+                          </div>
+                          <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {c.company && c.name
+                              ? c.company
+                              : c.name && !c.company
+                                ? "Individual"
+                                : c.company
+                                  ? "Company"
+                                  : "Unnamed"}
                           </div>
                         </div>
-                        {c.company && c.name ? (
-                          <div className="truncate text-xs text-muted-foreground">
-                            {c.company}
-                          </div>
-                        ) : null}
+                        {hasCustom ? <StatusBadge kind="custom" /> : null}
                       </div>
-                      {hasCustom ? <StatusBadge kind="custom" /> : null}
-                    </div>
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                      {c.email ? (
-                        <div className="flex items-center gap-1.5">
-                          <Mail className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{c.email}</span>
+
+                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                        <div
+                          className={cn(
+                            "flex items-center gap-1.5",
+                            !c.email && "opacity-40"
+                          )}
+                        >
+                          <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span className="truncate">
+                            {c.email || "No email"}
+                          </span>
                         </div>
-                      ) : null}
-                      {c.phone ? (
-                        <div className="flex items-center gap-1.5">
-                          <Phone className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{c.phone}</span>
+                        <div
+                          className={cn(
+                            "flex items-center gap-1.5",
+                            !c.phone && "opacity-40"
+                          )}
+                        >
+                          <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span className="truncate">
+                            {c.phone || "No phone"}
+                          </span>
                         </div>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
-                      <div className="flex items-center gap-3">
-                        <span>
-                          {stats.eventCount}{" "}
-                          {stats.eventCount === 1 ? "event" : "events"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <FileText className="h-3 w-3" />
-                          {stats.invoiceCount}
-                          {stats.unpaidCount > 0
-                            ? ` · ${stats.unpaidCount} unpaid`
-                            : ""}
-                        </span>
                       </div>
-                      {stats.totalBilled > 0 ? (
-                        <span className="tabular-nums font-medium">
-                          {formatCurrency(stats.totalBilled, 0)}
-                        </span>
-                      ) : (
-                        <span className="opacity-0 transition-opacity group-hover:opacity-100">
-                          Edit →
-                        </span>
-                      )}
                     </div>
+
+                    <div className="mt-auto grid grid-cols-3 divide-x border-t bg-muted/20 text-center text-[11px] text-muted-foreground">
+                      <div className="flex flex-col items-center gap-0.5 py-2.5">
+                        <div className="flex items-center gap-1 text-xs font-medium text-foreground">
+                          <Calendar
+                            className="h-3 w-3 text-muted-foreground"
+                            aria-hidden
+                          />
+                          <span className="tabular-nums">
+                            {stats.eventCount}
+                          </span>
+                        </div>
+                        <div className="uppercase tracking-wide">
+                          {stats.eventCount === 1 ? "Event" : "Events"}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center gap-0.5 py-2.5">
+                        <div className="flex items-center gap-1 text-xs font-medium text-foreground">
+                          <FileText
+                            className="h-3 w-3 text-muted-foreground"
+                            aria-hidden
+                          />
+                          <span className="tabular-nums">
+                            {stats.invoiceCount}
+                          </span>
+                          {stats.unpaidCount > 0 ? (
+                            <span className="text-amber-600 dark:text-amber-400 tabular-nums">
+                              · {stats.unpaidCount}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="uppercase tracking-wide">
+                          {stats.unpaidCount > 0 ? "Unpaid" : "Invoices"}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center gap-0.5 py-2.5">
+                        <div className="text-xs font-medium text-foreground tabular-nums">
+                          {stats.totalBilled > 0
+                            ? formatCurrency(stats.totalBilled, 0)
+                            : "—"}
+                        </div>
+                        <div className="uppercase tracking-wide">Billed</div>
+                      </div>
+                    </div>
+
+                    {!hasContact && config ? null : null}
                   </button>
                 );
               })}
