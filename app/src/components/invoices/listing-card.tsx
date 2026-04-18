@@ -1,7 +1,9 @@
-import { Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Car, Loader2, RotateCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import {
   Select,
   SelectContent,
@@ -15,7 +17,15 @@ import {
   type InvoiceItem,
   type Package,
 } from "@/lib/invoice";
+import {
+  DEFAULT_TRAVEL_ORIGIN,
+  computeDrivingDistanceKm,
+  computeTravelFee,
+  hasMapsApiKey,
+  type PickedPlace,
+} from "@/lib/maps";
 import { formatCurrency } from "@/lib/format";
+import type { ConfigTravel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface ListingCardProps {
@@ -23,6 +33,7 @@ interface ListingCardProps {
   index: number;
   packages: Package[];
   addons: Addon[];
+  travel?: ConfigTravel;
   onChange: (item: InvoiceItem) => void;
   onRemove: () => void;
 }
@@ -32,10 +43,21 @@ export function ListingCard({
   index,
   packages,
   addons,
+  travel,
   onChange,
   onRemove,
 }: ListingCardProps) {
   const totals = computeItemTotals(item);
+  const [calcState, setCalcState] = useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "error"; message: string }
+  >({ status: "idle" });
+  // Mirror the latest item into a ref so async travel-fee callbacks use
+  // the current item (with the address / package the user just typed)
+  // rather than the stale snapshot from when the request began.
+  const itemRef = useRef(item);
+  itemRef.current = item;
 
   const setField = <K extends keyof InvoiceItem>(
     key: K,
@@ -83,6 +105,68 @@ export function ListingCard({
   };
 
   const currentAddonIds = new Set((item.addons ?? []).map((a) => a.id));
+  const mapsEnabled = hasMapsApiKey();
+  const freeKm = travel?.freeKm ?? 25;
+  const ratePerKm = travel?.ratePerKm ?? 0.65;
+  const origin = travel?.origin || DEFAULT_TRAVEL_ORIGIN;
+
+  /**
+   * Compute the travel fee for a given destination (either a LatLng from
+   * a picked place, or a raw address string as a fallback). We cache the
+   * distance + fee on the item so re-renders don't re-hit the API.
+   */
+  const calcTravelFor = async (
+    destination: google.maps.LatLngLiteral | string
+  ) => {
+    if (!mapsEnabled) return;
+    setCalcState({ status: "loading" });
+    try {
+      const km = await computeDrivingDistanceKm(origin, destination);
+      if (km == null) {
+        setCalcState({
+          status: "error",
+          message: "Couldn't reach Google Maps — enter travel manually.",
+        });
+        return;
+      }
+      const distance = Math.round(km * 10) / 10;
+      const fee = computeTravelFee({
+        distanceKm: distance,
+        freeKm,
+        ratePerKm,
+      });
+      onChange({
+        ...itemRef.current,
+        travel: { distance, fee, calculated: true },
+      });
+      setCalcState({ status: "idle" });
+    } catch (err) {
+      setCalcState({
+        status: "error",
+        message: err instanceof Error ? err.message : "Distance lookup failed.",
+      });
+    }
+  };
+
+  const handlePlacePicked = (picked: PickedPlace) => {
+    void calcTravelFor(picked.location);
+  };
+
+  const handleRecalculate = () => {
+    if (!item.address?.trim()) return;
+    void calcTravelFor(item.address);
+  };
+
+  const handleClearTravel = () => {
+    onChange({ ...item, travel: undefined });
+    setCalcState({ status: "idle" });
+  };
+
+  const travelInfo = item.travel;
+  const billableKm =
+    travelInfo && travelInfo.distance > freeKm
+      ? Math.round((travelInfo.distance - freeKm) * 10) / 10
+      : 0;
 
   return (
     <div className="rounded-lg border bg-card p-4">
@@ -104,10 +188,11 @@ export function ListingCard({
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_140px]">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`addr-${index}`}>Address</Label>
-          <Input
+          <AddressAutocomplete
             id={`addr-${index}`}
             value={item.address ?? ""}
-            onChange={(e) => setField("address", e.target.value)}
+            onChange={(v) => setField("address", v)}
+            onPlacePicked={handlePlacePicked}
             placeholder="123 Main St"
           />
         </div>
@@ -193,6 +278,143 @@ export function ListingCard({
             );
           })}
         </div>
+      </div>
+
+      {/* Travel */}
+      <div className="mt-4 rounded-md border bg-muted/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <Car
+              className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+            <div className="flex flex-col gap-0.5">
+              <div className="text-sm font-medium">Travel</div>
+              {travelInfo ? (
+                travelInfo.fee > 0 ? (
+                  <div className="text-xs text-muted-foreground">
+                    {travelInfo.distance.toFixed(1)} km
+                    {billableKm > 0 ? (
+                      <>
+                        {" "}
+                        · {billableKm.toFixed(1)} km billable × {formatCurrency(
+                          ratePerKm,
+                          2
+                        )}
+                      </>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    {travelInfo.distance.toFixed(1)} km · within {freeKm} km
+                    free radius
+                  </div>
+                )
+              ) : (
+                <div className="text-xs text-muted-foreground">
+                  {mapsEnabled
+                    ? "Pick an address to auto-calculate."
+                    : `$${ratePerKm.toFixed(2)}/km beyond ${freeKm} km. Enter manually.`}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-semibold tabular-nums">
+              {formatCurrency(travelInfo?.fee ?? 0, 2)}
+            </div>
+            {mapsEnabled && item.address?.trim() ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleRecalculate}
+                disabled={calcState.status === "loading"}
+                aria-label="Recalculate travel distance"
+                className="h-7 w-7"
+              >
+                {calcState.status === "loading" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                ) : (
+                  <RotateCw className="h-3.5 w-3.5" aria-hidden />
+                )}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+        {/* Manual override row — shown when no key or when user wants to
+            override the computed value. */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1">
+            <Label
+              htmlFor={`travel-dist-${index}`}
+              className="text-[11px] text-muted-foreground"
+            >
+              Distance (km)
+            </Label>
+            <Input
+              id={`travel-dist-${index}`}
+              type="number"
+              min="0"
+              step="0.1"
+              value={travelInfo?.distance ?? ""}
+              onChange={(e) => {
+                const distance = Math.max(0, Number(e.target.value) || 0);
+                const fee = computeTravelFee({
+                  distanceKm: distance,
+                  freeKm,
+                  ratePerKm,
+                });
+                onChange({
+                  ...item,
+                  travel: { distance, fee, calculated: false },
+                });
+              }}
+              placeholder="0.0"
+              className="h-8"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label
+              htmlFor={`travel-fee-${index}`}
+              className="text-[11px] text-muted-foreground"
+            >
+              Fee ($)
+            </Label>
+            <Input
+              id={`travel-fee-${index}`}
+              type="number"
+              min="0"
+              step="0.01"
+              value={travelInfo?.fee ?? ""}
+              onChange={(e) => {
+                const fee = Math.max(0, Number(e.target.value) || 0);
+                onChange({
+                  ...item,
+                  travel: {
+                    distance: travelInfo?.distance ?? 0,
+                    fee,
+                    calculated: false,
+                  },
+                });
+              }}
+              placeholder="0.00"
+              className="h-8"
+            />
+          </div>
+        </div>
+        {calcState.status === "error" ? (
+          <p className="mt-2 text-xs text-destructive">{calcState.message}</p>
+        ) : null}
+        {travelInfo && !travelInfo.calculated && mapsEnabled ? (
+          <button
+            type="button"
+            onClick={handleClearTravel}
+            className="mt-2 text-[11px] text-muted-foreground underline hover:text-foreground"
+          >
+            Clear manual entry
+          </button>
+        ) : null}
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t pt-3 text-sm">

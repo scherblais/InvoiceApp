@@ -449,6 +449,7 @@ export function InvoiceEditor({
                     index={idx}
                     packages={resolvedPackages}
                     addons={resolvedAddons}
+                    travel={config.travel}
                     onChange={(next) => updateItem(idx, next)}
                     onRemove={() => removeItem(idx)}
                   />

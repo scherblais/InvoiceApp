@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import {
   Select,
   SelectContent,
@@ -189,13 +190,11 @@ export function EventModal({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="ev-address">Address</Label>
-            <Input
+            <AddressAutocomplete
               id="ev-address"
               autoFocus
               value={form.address}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, address: e.target.value }))
-              }
+              onChange={(v) => setForm((f) => ({ ...f, address: v }))}
               placeholder="123 Main St"
             />
           </div>

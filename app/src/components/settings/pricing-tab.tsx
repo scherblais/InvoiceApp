@@ -3,8 +3,10 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import { toast } from "sonner";
 import { DEFAULT_ADDONS, DEFAULT_PACKAGES } from "@/lib/invoice";
+import { DEFAULT_TRAVEL_ORIGIN, hasMapsApiKey } from "@/lib/maps";
 import type {
   Config,
   ConfigAddon,
@@ -18,7 +20,11 @@ interface PricingTabProps {
   onSave: (next: Config) => void;
 }
 
-const DEFAULT_TRAVEL: ConfigTravel = { freeKm: 25, ratePerKm: 0.65 };
+const DEFAULT_TRAVEL: ConfigTravel = {
+  freeKm: 25,
+  ratePerKm: 0.65,
+  origin: DEFAULT_TRAVEL_ORIGIN,
+};
 const DEFAULT_TAXES: ConfigTaxes = { gst: 5, qst: 9.975 };
 
 export function PricingTab({ config, onSave }: PricingTabProps) {
@@ -229,12 +235,34 @@ export function PricingTab({ config, onSave }: PricingTabProps) {
 
       {/* Travel */}
       <section className="rounded-lg border bg-card p-5">
-        <h3 className="mb-3 text-sm font-semibold">Travel</h3>
+        <h3 className="mb-1 text-sm font-semibold">Travel</h3>
+        <p className="mb-3 text-xs text-muted-foreground">
+          {hasMapsApiKey()
+            ? "Travel fees are auto-calculated from driving distance. Listings inside the free radius are free; the rest bill at the per-km rate."
+            : "Set VITE_GOOGLE_MAPS_API_KEY to auto-calculate driving distance. Without a key, travel fees stay manual."}
+        </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <Label htmlFor="travel-origin">Origin address</Label>
+            <AddressAutocomplete
+              id="travel-origin"
+              value={travel.origin ?? DEFAULT_TRAVEL_ORIGIN}
+              onChange={(v) => setTravel((t) => ({ ...t, origin: v }))}
+              placeholder={DEFAULT_TRAVEL_ORIGIN}
+              ariaLabel="Origin address"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Where you drive from. Distance is measured from here to each
+              listing address.
+            </p>
+          </div>
           <div className="flex flex-col gap-1.5">
-            <Label>Free kilometers</Label>
+            <Label htmlFor="travel-free">Free radius (km)</Label>
             <Input
+              id="travel-free"
               type="number"
+              min="0"
+              step="1"
               value={travel.freeKm}
               onChange={(e) =>
                 setTravel((t) => ({ ...t, freeKm: Number(e.target.value) }))
@@ -242,9 +270,11 @@ export function PricingTab({ config, onSave }: PricingTabProps) {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label>Rate per km ($)</Label>
+            <Label htmlFor="travel-rate">Rate per km ($)</Label>
             <Input
+              id="travel-rate"
               type="number"
+              min="0"
               step="0.01"
               value={travel.ratePerKm}
               onChange={(e) =>

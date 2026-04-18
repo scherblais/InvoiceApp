@@ -112,6 +112,12 @@ export interface ConfigAddon {
 export interface ConfigTravel {
   freeKm: number;
   ratePerKm: number;
+  /**
+   * Origin address for travel fee calculations. When undefined, the
+   * photographer's default (Carignan, QC) is used. Free-form string —
+   * whatever Google's Distance Matrix can geocode.
+   */
+  origin?: string;
 }
 
 export interface ConfigTaxes {
