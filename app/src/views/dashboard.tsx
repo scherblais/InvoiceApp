@@ -36,6 +36,18 @@ export function DashboardView() {
         <Weather />
         <TodaySection />
 
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
+          <ToSchedulePanel />
+          <UpcomingPanel calEvents={calEvents} />
+          <AttentionPanel
+            invoices={invoices}
+            drafts={drafts}
+            clients={clients}
+          />
+        </div>
+
+        {/* Money / admin section — lives at the bottom so the top of
+            the dashboard stays focused on scheduling and action items. */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4">
           <StatCard
             label="This Month"
@@ -73,16 +85,6 @@ export function DashboardView() {
         </div>
 
         <RevenueChart invoices={invoices} drafts={drafts} />
-
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 xl:grid-cols-3">
-          <ToSchedulePanel />
-          <UpcomingPanel calEvents={calEvents} />
-          <AttentionPanel
-            invoices={invoices}
-            drafts={drafts}
-            clients={clients}
-          />
-        </div>
       </div>
     </div>
   );
