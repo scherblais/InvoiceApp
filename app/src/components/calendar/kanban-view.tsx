@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Paperclip } from "lucide-react";
 import {
   COLOR_DOT,
   STATUS_META,
@@ -123,6 +124,15 @@ export function KanbanView({
                         {ev.start ? (
                           <span className="tabular-nums">
                             · {formatTime12(ev.start)}
+                          </span>
+                        ) : null}
+                        {ev.files?.length ? (
+                          <span
+                            className="ml-auto inline-flex items-center gap-1 tabular-nums"
+                            title={`${ev.files.length} file${ev.files.length === 1 ? "" : "s"} attached`}
+                          >
+                            <Paperclip className="h-3 w-3" aria-hidden />
+                            {ev.files.length}
                           </span>
                         ) : null}
                       </div>

@@ -61,6 +61,31 @@ export interface Draft {
   updatedAt?: number;
 }
 
+/**
+ * A single deliverable attached to a shoot. Photos carry both an
+ * `original` and an `compressed` (MLS-ready) variant; videos only have
+ * the original. Stored inline on the event record so the shared page
+ * can render download links without a second read.
+ */
+export interface EventFileVariant {
+  path: string;
+  url: string;
+  size: number;
+  width?: number;
+  height?: number;
+}
+
+export interface EventFile {
+  id: string;
+  name: string;
+  kind: "photo" | "video" | "other";
+  mimeType: string;
+  uploadedAt: number;
+  original: EventFileVariant;
+  /** Only photos have a compressed variant. */
+  compressed?: EventFileVariant;
+}
+
 export interface CalEvent {
   id: string;
   title?: string;
@@ -83,6 +108,8 @@ export interface CalEvent {
    * are migrated via `migrateRealtorsToClients`.
    */
   realtorId?: string;
+  /** Photographer-uploaded deliverables. */
+  files?: EventFile[];
 }
 
 /**

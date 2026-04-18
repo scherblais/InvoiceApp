@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "https://db.lumeriamedia.com",
+      "https://lumeria-invoicing.web.app",
+      "https://lumeria-invoicing.firebaseapp.com",
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ],
+    "method": ["GET"],
+    "responseHeader": ["Content-Type", "Content-Disposition"],
+    "maxAgeSeconds": 3600
+  }
+]

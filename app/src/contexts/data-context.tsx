@@ -90,11 +90,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
     if (!clients || !calEvents) return;
-    const fingerprint = JSON.stringify({ clients, calEvents });
+    const fingerprint = JSON.stringify({ clients, calEvents, config });
     if (fingerprint === lastSync.current) return;
     lastSync.current = fingerprint;
-    syncSharedData(user.uid, clients, calEvents);
-  }, [user, clients, calEvents]);
+    syncSharedData(user.uid, clients, calEvents, config ?? {});
+  }, [user, clients, calEvents, config]);
 
   const clientsById = useMemo(() => {
     const m = new Map<string, Client>();

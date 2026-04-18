@@ -17,6 +17,7 @@ import {
   off,
   type DatabaseReference,
 } from "firebase/database";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCWG9eoXnEkhN5srPvi4vtNzNkaonebjP8",
@@ -31,6 +32,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
+export const storage = getStorage(app);
 
 export {
   onAuthStateChanged,

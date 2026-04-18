@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { EventFiles } from "@/components/calendar/event-files";
+import { useAuth } from "@/contexts/auth-context";
 import {
   Select,
   SelectContent,
@@ -102,6 +104,7 @@ export function EventModal({
   onSave,
   onDelete,
 }: EventModalProps) {
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>(() =>
     event ? eventToForm(event) : emptyForm(defaultDate ?? "", defaultTime)
   );
@@ -321,6 +324,38 @@ export function EventModal({
               }
               placeholder="Access codes, gate info, etc."
             />
+          </div>
+
+          {/* Deliverables — only for saved events so uploads are tied to a
+              stable eventId. For brand-new events we show a hint and
+              surface the section once the event is saved. */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <Label>Deliverables</Label>
+              {event && event.files?.length ? (
+                <span className="text-[11px] text-muted-foreground tabular-nums">
+                  {event.files.length}
+                  {event.files.length === 1 ? " file" : " files"}
+                </span>
+              ) : null}
+            </div>
+            {event && user ? (
+              <EventFiles
+                uid={user.uid}
+                eventId={event.id}
+                files={event.files ?? []}
+                onChange={(next) => {
+                  // Persist immediately so uploads survive cancels. The
+                  // rest of the form still saves via the Save button.
+                  onSave({ ...event, files: next });
+                }}
+              />
+            ) : (
+              <p className="rounded-md border border-dashed px-3 py-3 text-xs text-muted-foreground">
+                Save the event first, then reopen it to attach photos
+                and videos for the client.
+              </p>
+            )}
           </div>
 
           {error ? (
