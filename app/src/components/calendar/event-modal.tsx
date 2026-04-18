@@ -174,8 +174,8 @@ export function EventModal({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[92svh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="shrink-0 border-b px-6 py-4">
           <DialogTitle>{event ? "Edit event" : "New event"}</DialogTitle>
           <DialogDescription>
             {event
@@ -184,7 +184,7 @@ export function EventModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="ev-address">Address</Label>
             <AddressAutocomplete
@@ -365,7 +365,7 @@ export function EventModal({
           ) : null}
         </div>
 
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="shrink-0 border-t bg-background px-6 py-3 sm:justify-between">
           <div>
             {event && onDelete ? (
               <Button

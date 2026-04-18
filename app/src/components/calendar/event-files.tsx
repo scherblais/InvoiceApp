@@ -316,21 +316,23 @@ export function EventFiles({
             return (
               <li
                 key={f.id}
-                className="flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-xs"
+                className="flex flex-col gap-2 rounded-md border bg-card px-3 py-2 text-xs sm:flex-row sm:items-center sm:gap-3"
               >
-                <Icon
-                  className="h-4 w-4 shrink-0 text-muted-foreground"
-                  aria-hidden
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{f.name}</div>
-                  <div className="text-muted-foreground">
-                    {f.kind === "photo" && f.compressed
-                      ? `Original ${formatBytes(f.original.size)} · MLS ${formatBytes(f.compressed.size)}`
-                      : formatBytes(f.original.size)}
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <Icon
+                    className="h-4 w-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{f.name}</div>
+                    <div className="truncate text-muted-foreground">
+                      {f.kind === "photo" && f.compressed
+                        ? `Original ${formatBytes(f.original.size)} · MLS ${formatBytes(f.compressed.size)}`
+                        : formatBytes(f.original.size)}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
                   {f.compressed ? (
                     <Button
                       variant="ghost"
