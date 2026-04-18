@@ -3,23 +3,22 @@ import { useSearchParams } from "react-router-dom";
 import {
   Calendar,
   DollarSign,
-  Download,
   Image as ImageIcon,
+  Images,
   List,
   Loader2,
   Moon,
   Package as PackageIcon,
   Sun,
-  Video,
 } from "lucide-react";
 import { ref, onValue, off, db } from "@/lib/firebase";
 import { useTheme } from "@/contexts/theme-context";
 import { Button } from "@/components/ui/button";
 import { LumeriaLogo } from "@/components/lumeria-logo";
+import { DeliveryGallery } from "@/components/shared/delivery-gallery";
 import { COLOR_DOT, type EventColor } from "@/lib/calendar";
-import type { SharedData, SharedEvent, SharedFile } from "@/lib/shared";
+import type { SharedData, SharedEvent } from "@/lib/shared";
 import { cn } from "@/lib/utils";
-import { formatBytes } from "@/lib/storage";
 
 const SHARED_COLS: { id: string; label: string; dot: string }[] = [
   { id: "received", label: "Received", dot: COLOR_DOT.rose },
@@ -113,130 +112,49 @@ function Empty({ title, sub }: { title: string; sub: string }) {
 }
 
 /**
- * Per-event download block. Groups MLS-ready and original variants so
- * clients know which to grab for each use. Hidden entirely when the
- * event has no files.
+ * Compact summary + "View & download" button shown inline on each
+ * event card. The actual gallery opens in a full-screen modal so the
+ * client can browse thumbnails, preview in a lightbox, and grab
+ * everything as a zip.
  */
-function FileDownloads({
+function FilesBadge({
   files,
-  addressHint,
+  onOpen,
 }: {
-  files: SharedFile[];
-  addressHint?: string;
+  files: SharedEvent["files"];
+  onOpen: () => void;
 }) {
-  if (!files.length) return null;
-  const photos = files.filter((f) => f.kind === "photo");
-  const videos = files.filter((f) => f.kind === "video");
-  const other = files.filter((f) => f.kind !== "photo" && f.kind !== "video");
-
-  const mlsCount = photos.filter((f) => f.compressed).length;
-  const totalOriginal = files.reduce((s, f) => s + f.original.size, 0);
-
-  const baseName = (addressHint || "delivery").replace(/[^a-zA-Z0-9-]+/g, "-");
-
+  if (!files || !files.length) return null;
+  const photos = files.filter((f) => f.kind === "photo").length;
+  const videos = files.filter((f) => f.kind === "video").length;
+  const parts: string[] = [];
+  if (photos) parts.push(`${photos} ${photos === 1 ? "photo" : "photos"}`);
+  if (videos) parts.push(`${videos} ${videos === 1 ? "video" : "videos"}`);
   return (
-    <div className="mt-3 rounded-md border bg-muted/30 p-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs font-medium">
-          <Download className="h-3.5 w-3.5" aria-hidden />
-          <span>
-            Deliverables · {files.length}{" "}
-            {files.length === 1 ? "file" : "files"}
-          </span>
-        </div>
-        <span className="text-[11px] text-muted-foreground">
-          {formatBytes(totalOriginal)}
+    <button
+      type="button"
+      onClick={onOpen}
+      className="mt-3 flex w-full items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-left text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Images className="h-4 w-4 shrink-0" aria-hidden />
+      <span className="min-w-0 flex-1">
+        View &amp; download
+        <span className="ml-1 font-normal text-muted-foreground">
+          · {parts.join(" · ")}
         </span>
-      </div>
-
-      {mlsCount > 0 ? (
-        <div className="mb-2 flex flex-wrap items-center gap-1.5 rounded-md border bg-background/60 p-2 text-[11px]">
-          <ImageIcon
-            className="h-3 w-3 shrink-0 text-muted-foreground"
-            aria-hidden
-          />
-          <span className="font-medium">MLS-ready</span>
-          <span className="text-muted-foreground">
-            · {mlsCount} compressed {mlsCount === 1 ? "photo" : "photos"}
-          </span>
-          <div className="ml-auto flex flex-wrap gap-1">
-            {photos
-              .filter((p) => p.compressed)
-              .map((p, i) => (
-                <Button
-                  key={p.id}
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="h-6 px-1.5 text-[10px]"
-                >
-                  <a
-                    href={p.compressed!.url}
-                    download={`${baseName}-mls-${String(i + 1).padStart(2, "0")}.jpg`}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </a>
-                </Button>
-              ))}
-          </div>
-        </div>
-      ) : null}
-
-      <ul className="flex flex-col gap-1">
-        {[...photos, ...videos, ...other].map((f) => {
-          const Icon =
-            f.kind === "photo"
-              ? ImageIcon
-              : f.kind === "video"
-                ? Video
-                : Download;
-          return (
-            <li
-              key={f.id}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] hover:bg-background/60"
-            >
-              <Icon
-                className="h-3 w-3 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
-              <span className="min-w-0 flex-1 truncate">{f.name}</span>
-              <span className="shrink-0 text-muted-foreground tabular-nums">
-                {formatBytes(f.original.size)}
-              </span>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-[10px]"
-              >
-                <a href={f.original.url} download={f.name}>
-                  Original
-                </a>
-              </Button>
-              {f.compressed ? (
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-[10px]"
-                >
-                  <a
-                    href={f.compressed.url}
-                    download={f.name.replace(/\.[^.]+$/, "") + "-mls.jpg"}
-                  >
-                    MLS
-                  </a>
-                </Button>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+      </span>
+      <span className="shrink-0 text-muted-foreground">→</span>
+    </button>
   );
 }
 
-function SharedBoard({ events }: { events: SharedEvent[] }) {
+function SharedBoard({
+  events,
+  onOpenGallery,
+}: {
+  events: SharedEvent[];
+  onOpenGallery: (ev: SharedEvent) => void;
+}) {
   const byStatus = useMemo(() => {
     const map = new Map<string, SharedEvent[]>();
     for (const col of SHARED_COLS) map.set(col.id, []);
@@ -300,24 +218,16 @@ function SharedBoard({ events }: { events: SharedEvent[] }) {
                         {formatSharedDate(ev.date)}
                         {timeStr ? ` · ${timeStr}` : ""}
                       </span>
-                      {ev.files?.length ? (
-                        <span className="ml-auto inline-flex items-center gap-0.5 tabular-nums">
-                          <Download className="h-3 w-3" aria-hidden />
-                          {ev.files.length}
-                        </span>
-                      ) : null}
                     </div>
                     {ev.notes ? (
                       <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
                         {ev.notes}
                       </div>
                     ) : null}
-                    {ev.files?.length ? (
-                      <FileDownloads
-                        files={ev.files}
-                        addressHint={ev.address}
-                      />
-                    ) : null}
+                    <FilesBadge
+                      files={ev.files}
+                      onOpen={() => onOpenGallery(ev)}
+                    />
                   </div>
                 );
               })}
@@ -329,7 +239,13 @@ function SharedBoard({ events }: { events: SharedEvent[] }) {
   );
 }
 
-function SharedList({ events }: { events: SharedEvent[] }) {
+function SharedList({
+  events,
+  onOpenGallery,
+}: {
+  events: SharedEvent[];
+  onOpenGallery: (ev: SharedEvent) => void;
+}) {
   const sorted = useMemo(
     () =>
       [...events].sort(
@@ -398,12 +314,10 @@ function SharedList({ events }: { events: SharedEvent[] }) {
                         />
                         <span>{col.label}</span>
                       </div>
-                      {ev.files?.length ? (
-                        <FileDownloads
-                          files={ev.files}
-                          addressHint={ev.address}
-                        />
-                      ) : null}
+                      <FilesBadge
+                        files={ev.files}
+                        onOpen={() => onOpenGallery(ev)}
+                      />
                     </div>
                   </div>
                 );
@@ -526,6 +440,7 @@ export function SharedView() {
     (localStorage.getItem("shared_view_mode") as ViewMode) || "board"
   );
   const [tab, setTab] = useState<Tab>("appointments");
+  const [galleryEvent, setGalleryEvent] = useState<SharedEvent | null>(null);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -697,7 +612,7 @@ export function SharedView() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-                  <Download className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  <Images className="h-4 w-4 text-muted-foreground" aria-hidden />
                   <div>
                     <div className="text-xl font-semibold tabular-nums">
                       {counts.files}
@@ -728,9 +643,15 @@ export function SharedView() {
               </div>
 
               {mode === "board" ? (
-                <SharedBoard events={events} />
+                <SharedBoard
+                  events={events}
+                  onOpenGallery={setGalleryEvent}
+                />
               ) : (
-                <SharedList events={events} />
+                <SharedList
+                  events={events}
+                  onOpenGallery={setGalleryEvent}
+                />
               )}
             </>
           ) : (
@@ -743,6 +664,20 @@ export function SharedView() {
 
         {tab === "pricing" && data ? <SharedPricingView data={data} /> : null}
       </div>
+
+      {galleryEvent ? (
+        <DeliveryGallery
+          title={
+            galleryEvent.unit
+              ? `${galleryEvent.address ?? galleryEvent.title}, ${galleryEvent.unit}`
+              : galleryEvent.address ?? galleryEvent.title ?? "Delivery"
+          }
+          subtitle={formatSharedDateLong(galleryEvent.date)}
+          files={galleryEvent.files ?? []}
+          addressHint={galleryEvent.address}
+          onClose={() => setGalleryEvent(null)}
+        />
+      ) : null}
     </div>
   );
 }
