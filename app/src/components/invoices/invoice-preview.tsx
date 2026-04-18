@@ -27,15 +27,20 @@ export function InvoicePreview({
   return (
     <div className="flex h-full flex-col">
       <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8 print:hidden">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            aria-label="Back to invoices"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
           </Button>
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold tracking-tight">
               {invoice.number}
             </h1>
-            <div className="text-xs text-muted-foreground">
+            <div className="truncate text-xs text-muted-foreground">
               {invoice.clientName ?? clientLabel(client)}
               {invoice.month ? ` · ${monthName(invoice.month)}` : null}
             </div>
@@ -47,11 +52,11 @@ export function InvoicePreview({
             size="sm"
             onClick={onToggleStatus}
           >
-            <Check className="mr-1.5 h-4 w-4" />
+            <Check className="mr-1.5 h-4 w-4" aria-hidden />
             {paid ? "Mark as unpaid" : "Mark as paid"}
           </Button>
           <Button variant="outline" size="sm" onClick={onEdit}>
-            <Pencil className="mr-1.5 h-4 w-4" />
+            <Pencil className="mr-1.5 h-4 w-4" aria-hidden />
             Edit
           </Button>
           <Button
@@ -59,7 +64,7 @@ export function InvoicePreview({
             size="sm"
             onClick={() => window.print()}
           >
-            <Printer className="mr-1.5 h-4 w-4" />
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden />
             Print / PDF
           </Button>
           <Button
@@ -68,7 +73,7 @@ export function InvoicePreview({
             onClick={onDelete}
             className="text-destructive hover:text-destructive"
           >
-            <Trash2 className="mr-1.5 h-4 w-4" />
+            <Trash2 className="mr-1.5 h-4 w-4" aria-hidden />
             Delete
           </Button>
         </div>

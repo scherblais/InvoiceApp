@@ -87,16 +87,17 @@ export function ListingCard({
   return (
     <div className="rounded-lg border bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           Listing {index + 1}
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={onRemove}
+          aria-label={`Remove listing ${index + 1}`}
           className="h-7 w-7 text-muted-foreground hover:text-destructive"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden />
         </Button>
       </div>
 

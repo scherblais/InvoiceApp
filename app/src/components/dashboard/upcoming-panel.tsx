@@ -1,20 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatTime12, todayISO } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { COLOR_DOT, eventColor } from "@/lib/calendar";
 import type { CalEvent } from "@/lib/types";
-
-const eventColors: Record<string, string> = {
-  blue: "bg-[rgb(124,173,240)]",
-  purple: "bg-[rgb(167,139,250)]",
-  green: "bg-[rgb(109,212,168)]",
-  amber: "bg-[rgb(245,201,107)]",
-  pink: "bg-[rgb(240,160,196)]",
-  teal: "bg-[rgb(94,197,192)]",
-  rose: "bg-[rgb(244,135,127)]",
-  indigo: "bg-[rgb(129,140,248)]",
-};
 
 export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
   const navigate = useNavigate();
@@ -41,8 +31,12 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
       </CardHeader>
       <CardContent className="p-0">
         {upcoming.length === 0 ? (
-          <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-            No upcoming events
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+            <CalendarDays
+              className="h-8 w-8 text-muted-foreground/60"
+              aria-hidden
+            />
+            <span>No upcoming events</span>
           </div>
         ) : (
           <ul className="divide-y">
@@ -57,7 +51,7 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
                     day: "numeric",
                   });
               const time = formatTime12(ev.start ?? ev.startTime ?? "");
-              const dotClass = eventColors[ev.color ?? "blue"] ?? eventColors.blue;
+              const dotColor = COLOR_DOT[eventColor(ev)];
               return (
                 <li key={ev.id}>
                   <button
@@ -67,10 +61,9 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span
-                        className={cn(
-                          "h-2 w-2 shrink-0 rounded-full",
-                          dotClass
-                        )}
+                        style={{ backgroundColor: dotColor }}
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        aria-hidden
                       />
                       <div className="min-w-0">
                         <div className="truncate text-sm font-medium">

@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Download, LogOut, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
@@ -22,6 +23,7 @@ export function AccountTab() {
     saveConfig,
   } = useData();
   const fileInput = useRef<HTMLInputElement | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const handleExport = () => {
     const payload = {
@@ -48,14 +50,16 @@ export function AccountTab() {
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (
-      !window.confirm(
-        "Importing will overwrite your current data. Make sure you have a backup. Continue?"
-      )
-    ) {
-      e.target.value = "";
-      return;
-    }
+    // Stash the file and show the confirm dialog. The actual parse happens in
+    // `runImport` once the user approves.
+    setPendingFile(file);
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
+  const runImport = () => {
+    const file = pendingFile;
+    setPendingFile(null);
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -84,8 +88,6 @@ export function AccountTab() {
         toast.error("Import failed", {
           description: err instanceof Error ? err.message : "Unknown error",
         });
-      } finally {
-        e.target.value = "";
       }
     };
     reader.readAsText(file);
@@ -171,6 +173,18 @@ export function AccountTab() {
           </div>
         </dl>
       </section>
+
+      <ConfirmDialog
+        open={pendingFile !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingFile(null);
+        }}
+        title="Restore from this backup?"
+        description="Importing will overwrite all of your current data. Make sure you already have a backup you can come back to."
+        confirmLabel="Restore backup"
+        destructive
+        onConfirm={runImport}
+      />
     </div>
   );
 }

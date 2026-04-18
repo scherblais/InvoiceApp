@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import { clientShareLink } from "@/lib/shared";
 import { DEFAULT_ADDONS, DEFAULT_PACKAGES } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/format";
 import type { Client, ClientOverrides, Config } from "@/lib/types";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 
 interface ClientDialogProps {
@@ -62,6 +64,7 @@ export function ClientDialog({
   const [discountValue, setDiscountValue] = useState<string>("");
   const [pricingOpen, setPricingOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // Rehydrate form every time the dialog opens or target client changes.
   useEffect(() => {
@@ -159,16 +162,19 @@ export function ClientDialog({
 
   const handleDelete = () => {
     if (!initial?.id || !onDelete) return;
-    const label = initial.company || initial.name || "this client";
-    if (
-      window.confirm(
-        `Delete ${label}? Existing invoices and events are kept.`
-      )
-    ) {
-      onDelete(initial.id);
-      onOpenChange(false);
-    }
+    setConfirmDeleteOpen(true);
   };
+
+  const confirmDelete = () => {
+    if (!initial?.id || !onDelete) return;
+    onDelete(initial.id);
+    setConfirmDeleteOpen(false);
+    onOpenChange(false);
+  };
+
+  const deleteLabel = initial
+    ? initial.company || initial.name || "this client"
+    : "";
 
   const hasCustom =
     Object.keys(pkgOverrides).length > 0 ||
@@ -176,6 +182,7 @@ export function ClientDialog({
     !!discountValue.trim();
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
@@ -250,11 +257,7 @@ export function ClientDialog({
             >
               <span className="flex items-center gap-2">
                 Custom pricing
-                {hasCustom ? (
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                    Active
-                  </span>
-                ) : null}
+                {hasCustom ? <StatusBadge kind="custom" label="Active" /> : null}
               </span>
               <ChevronDown
                 className={cn(
@@ -267,7 +270,7 @@ export function ClientDialog({
               <div className="flex flex-col gap-4 border-t px-4 py-4">
                 {/* Discount */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Discount
                   </Label>
                   <p className="text-xs text-muted-foreground">
@@ -275,9 +278,16 @@ export function ClientDialog({
                     discounted amount.
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="inline-flex overflow-hidden rounded-md border">
+                    <div
+                      role="radiogroup"
+                      aria-label="Discount type"
+                      className="inline-flex overflow-hidden rounded-md border"
+                    >
                       <button
                         type="button"
+                        role="radio"
+                        aria-checked={discountType === "%"}
+                        aria-label="Percent"
                         onClick={() => setDiscountType("%")}
                         className={cn(
                           "px-3 py-1.5 text-sm transition-colors",
@@ -286,10 +296,13 @@ export function ClientDialog({
                             : "bg-background hover:bg-accent"
                         )}
                       >
-                        <Percent className="h-3.5 w-3.5" />
+                        <Percent className="h-3.5 w-3.5" aria-hidden />
                       </button>
                       <button
                         type="button"
+                        role="radio"
+                        aria-checked={discountType === "$"}
+                        aria-label="Dollar amount"
                         onClick={() => setDiscountType("$")}
                         className={cn(
                           "border-l px-3 py-1.5 text-sm transition-colors",
@@ -315,7 +328,7 @@ export function ClientDialog({
 
                 {/* Package overrides */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Package prices
                   </Label>
                   <div className="flex flex-col gap-2">
@@ -357,7 +370,7 @@ export function ClientDialog({
 
                 {/* Addon overrides */}
                 <div className="flex flex-col gap-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Add-on prices
                   </Label>
                   <div className="flex flex-col gap-2">
@@ -457,5 +470,15 @@ export function ClientDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={confirmDeleteOpen}
+      onOpenChange={setConfirmDeleteOpen}
+      title={`Delete ${deleteLabel}?`}
+      description="Existing invoices and events are kept."
+      confirmLabel="Delete client"
+      destructive
+      onConfirm={confirmDelete}
+    />
+    </>
   );
 }

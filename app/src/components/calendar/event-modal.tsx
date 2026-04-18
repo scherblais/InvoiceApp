@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,10 +114,12 @@ export function EventModal({
     event ? eventToForm(event) : emptyForm(defaultDate ?? "", defaultTime)
   );
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setError(null);
+    setConfirmDeleteOpen(false);
     setForm(
       event ? eventToForm(event) : emptyForm(defaultDate ?? "", defaultTime)
     );
@@ -158,15 +161,20 @@ export function EventModal({
 
   const handleDelete = () => {
     if (!event || !onDelete) return;
-    if (window.confirm("Delete this event?")) {
-      onDelete(event.id);
-      onOpenChange(false);
-    }
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!event || !onDelete) return;
+    onDelete(event.id);
+    setConfirmDeleteOpen(false);
+    onOpenChange(false);
   };
 
   const activeClients = clients.filter((c) => (c.name || c.company)?.trim());
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
@@ -227,12 +235,13 @@ export function EventModal({
             </div>
           </div>
 
-          <div className="rounded-md border p-3">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <fieldset className="rounded-md border p-3">
+            <legend className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Seller / tenant contact
-            </div>
+            </legend>
             <div className="flex flex-col gap-3">
               <Input
+                aria-label="Contact name"
                 placeholder="Name"
                 value={form.contactName}
                 onChange={(e) =>
@@ -241,13 +250,16 @@ export function EventModal({
               />
               <div className="grid grid-cols-2 gap-3">
                 <Input
+                  aria-label="Contact phone"
                   placeholder="Phone"
+                  type="tel"
                   value={form.contactPhone}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, contactPhone: e.target.value }))
                   }
                 />
                 <Input
+                  aria-label="Contact email"
                   placeholder="Email"
                   type="email"
                   value={form.contactEmail}
@@ -257,7 +269,7 @@ export function EventModal({
                 />
               </div>
             </div>
-          </div>
+          </fieldset>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
@@ -306,20 +318,26 @@ export function EventModal({
 
           <div className="flex flex-col gap-2">
             <Label>Color</Label>
-            <div className="flex gap-1.5">
+            <div
+              role="radiogroup"
+              aria-label="Event color"
+              className="flex gap-1.5"
+            >
               {EVENT_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
+                  role="radio"
+                  aria-checked={form.color === c}
                   onClick={() => setForm((f) => ({ ...f, color: c }))}
                   style={{ backgroundColor: COLOR_DOT[c] }}
                   className={cn(
-                    "h-7 w-7 rounded-full border-2 transition-transform",
+                    "h-7 w-7 rounded-full border-2 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     form.color === c
                       ? "border-foreground scale-110"
                       : "border-transparent"
                   )}
-                  aria-label={c}
+                  aria-label={`Color: ${c}`}
                 />
               ))}
             </div>
@@ -368,5 +386,15 @@ export function EventModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={confirmDeleteOpen}
+      onOpenChange={setConfirmDeleteOpen}
+      title="Delete this event?"
+      description="This permanently removes it from your calendar. This action cannot be undone."
+      confirmLabel="Delete"
+      destructive
+      onConfirm={confirmDelete}
+    />
+    </>
   );
 }

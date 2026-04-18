@@ -53,7 +53,7 @@ export function StatCard({
         ) : null}
       </div>
       <div className="flex flex-col gap-1">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
         </div>
         <div

@@ -120,15 +120,16 @@ export function RevenueChart({
     : 0;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+    <Card className="shadow-none gap-3">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
         <div>
-          <CardTitle className="text-sm font-semibold">
-            Revenue — last {compact ? 6 : months} months
+          <CardTitle className="text-sm font-medium">
+            Revenue · last {compact ? 6 : months} months
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            Avg {formatCurrency(windowAvg)} · Total{" "}
-            {formatCurrency(windowTotal)}
+            Avg <span className="font-medium text-foreground">{formatCurrency(windowAvg)}</span>
+            <span className="mx-1.5">·</span>
+            Total <span className="font-medium text-foreground">{formatCurrency(windowTotal)}</span>
           </p>
         </div>
       </CardHeader>

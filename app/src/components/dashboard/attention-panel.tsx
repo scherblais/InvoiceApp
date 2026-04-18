@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { StatusBadge, type StatusKind } from "@/components/ui/status-badge";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import type { Invoice, Draft, Client } from "@/lib/types";
 
@@ -78,8 +79,12 @@ export function AttentionPanel({
       </CardHeader>
       <CardContent className="p-0">
         {visible.length === 0 ? (
-          <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-            All caught up
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+            <CheckCircle2
+              className="h-8 w-8 text-muted-foreground/60"
+              aria-hidden
+            />
+            <span>All caught up</span>
           </div>
         ) : (
           <ul className="divide-y">
@@ -102,23 +107,7 @@ export function AttentionPanel({
                     <div className="text-sm font-medium tabular-nums">
                       {formatCurrency(item.total, 2)}
                     </div>
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium",
-                        item.kind === "draft" &&
-                          "bg-muted text-muted-foreground",
-                        item.kind === "unpaid" &&
-                          "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-                        item.kind === "overdue" &&
-                          "bg-red-500/10 text-red-600 dark:text-red-400"
-                      )}
-                    >
-                      {item.kind === "draft"
-                        ? "Draft"
-                        : item.kind === "overdue"
-                          ? "Overdue"
-                          : "Unpaid"}
-                    </span>
+                    <StatusBadge kind={item.kind as StatusKind} />
                   </div>
                 </button>
               </li>

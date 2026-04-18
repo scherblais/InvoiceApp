@@ -141,12 +141,13 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             className="h-6 w-6"
+            aria-label="Sign out"
             onClick={async () => {
               await logout();
               navigate("/login");
             }}
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <LogOut className="h-3.5 w-3.5" aria-hidden />
           </Button>
         </div>
       </SidebarFooter>

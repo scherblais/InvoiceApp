@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Eye, Plus, Send, Trash2 } from "lucide-react";
 import { InvoiceDocument } from "@/components/invoices/invoice-document";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -256,11 +257,17 @@ export function InvoiceEditor({
     onSend(buildInvoice());
   };
 
+  const [confirmDeleteDraftOpen, setConfirmDeleteDraftOpen] = useState(false);
+
   const handleDeleteDraft = () => {
     if (!source?.id || !onDeleteDraft) return;
-    if (window.confirm("Delete this draft?")) {
-      onDeleteDraft(source.id);
-    }
+    setConfirmDeleteDraftOpen(true);
+  };
+
+  const confirmDeleteDraft = () => {
+    if (!source?.id || !onDeleteDraft) return;
+    onDeleteDraft(source.id);
+    setConfirmDeleteDraftOpen(false);
   };
 
   if (reviewing) {
@@ -268,22 +275,23 @@ export function InvoiceEditor({
     return (
       <div className="flex h-full flex-col">
         <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setReviewing(false)}
+              aria-label="Back to editing"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" aria-hidden />
             </Button>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-lg font-semibold tracking-tight">
                 Review invoice
               </h1>
-              <div className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 This is exactly what the client will see. Nothing has been
                 sent yet.
-              </div>
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -315,19 +323,24 @@ export function InvoiceEditor({
   return (
     <div className="flex h-full flex-col">
       <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            aria-label="Back to invoices"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
           </Button>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight">
               {isEditingIssued ? "Edit invoice" : "New invoice"}
             </h1>
-            <div className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {isEditingIssued
                 ? "Changes save when you click Save"
                 : "Draft saves automatically"}
-            </div>
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -500,6 +513,15 @@ export function InvoiceEditor({
           </section>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmDeleteDraftOpen}
+        onOpenChange={setConfirmDeleteDraftOpen}
+        title="Delete this draft?"
+        description="The draft will be discarded permanently."
+        confirmLabel="Delete draft"
+        destructive
+        onConfirm={confirmDeleteDraft}
+      />
     </div>
   );
 }

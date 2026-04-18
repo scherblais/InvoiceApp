@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatLongDate } from "@/lib/format";
 import { clientLabel, isOverdue, monthName } from "@/lib/invoice";
 import type { Client, Invoice } from "@/lib/types";
@@ -43,27 +43,11 @@ export function InvoiceDocument({
             {invoice.number}
           </div>
           <div className="mt-1 flex items-center justify-end gap-2 text-xs text-muted-foreground">
-            {draft ? null : paid ? (
-              <Badge
-                variant="outline"
-                className="border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-              >
-                Paid
-              </Badge>
-            ) : overdue ? (
-              <Badge
-                variant="outline"
-                className="border-destructive/40 bg-destructive/10 text-destructive"
-              >
-                Overdue
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
-              >
-                Unpaid
-              </Badge>
+            {draft ? null : (
+              <StatusBadge
+                kind={paid ? "paid" : overdue ? "overdue" : "unpaid"}
+                size="md"
+              />
             )}
             <span>
               {invoice.createdAt

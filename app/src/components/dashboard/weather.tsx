@@ -94,39 +94,47 @@ export function Weather() {
     );
   }
 
+  const description = codeDescription(data.current.weather_code);
+  const current = Math.round(data.current.temperature_2m);
+  const feels = Math.round(data.current.apparent_temperature);
+
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-3">
+    <div
+      className="flex items-center gap-4"
+      aria-label={`Current weather: ${description}, ${current} degrees, feels like ${feels}`}
+    >
+      <div className="flex items-center gap-2.5">
         <WeatherIcon
           code={data.current.weather_code}
           className="h-5 w-5 text-muted-foreground"
+          aria-hidden
         />
         <div className="flex flex-col leading-tight">
-          <span className="text-xl font-semibold tracking-tight tabular-nums">
-            {Math.round(data.current.temperature_2m)}°
+          <span className="text-lg font-semibold tracking-tight tabular-nums">
+            {current}°
           </span>
           <span className="text-[11px] text-muted-foreground">
-            {codeDescription(data.current.weather_code)} · Feels{" "}
-            {Math.round(data.current.apparent_temperature)}°
+            {description} · Feels {feels}°
           </span>
         </div>
       </div>
       <div className="hidden md:flex items-center gap-3 border-l pl-4">
         {data.daily.time.slice(1).map((t, i) => {
           const d = new Date(`${t}T12:00:00`);
+          const max = Math.round(data.daily.temperature_2m_max[i + 1]);
           return (
             <div
               key={t}
-              className="flex flex-col items-center text-[11px] text-muted-foreground"
+              className="flex flex-col items-center gap-0.5 text-[11px] text-muted-foreground"
+              aria-label={`${dayNames[d.getDay()]}: ${max} degrees`}
             >
               <span>{dayNames[d.getDay()]}</span>
               <WeatherIcon
                 code={data.daily.weather_code[i + 1]}
-                className="h-4 w-4 my-0.5"
+                className="h-4 w-4"
+                aria-hidden
               />
-              <span className="tabular-nums">
-                {Math.round(data.daily.temperature_2m_max[i + 1])}°
-              </span>
+              <span className="tabular-nums">{max}°</span>
             </div>
           );
         })}

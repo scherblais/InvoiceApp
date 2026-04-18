@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import {
   clientLabel,
@@ -12,7 +13,6 @@ import {
   monthName,
 } from "@/lib/invoice";
 import type { Client, Draft, Invoice } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 type Filter = "all" | "drafts" | "sent" | "paid";
 
@@ -91,10 +91,16 @@ export function InvoiceList({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="app-header flex flex-col justify-center gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <h1 className="text-xl font-semibold tracking-tight">Invoices</h1>
+      <header className="app-header flex flex-col justify-center gap-3 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">Invoices</h1>
+          <p className="text-xs text-muted-foreground">
+            {counts.all} total · {counts.sent} unpaid · {counts.drafts} draft
+            {counts.drafts === 1 ? "" : "s"}
+          </p>
+        </div>
         <Button size="sm" onClick={onNew} className="gap-1.5">
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden />
           New invoice
         </Button>
       </header>
@@ -151,10 +157,10 @@ export function InvoiceList({
         ) : (
           <div className="divide-y">
             {visibleDrafts.length > 0 ? (
-              <section>
-                <div className="bg-muted/40 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
+              <section aria-label="Drafts">
+                <h2 className="bg-muted/40 px-6 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
                   Drafts · {visibleDrafts.length}
-                </div>
+                </h2>
                 <ul className="divide-y">
                   {visibleDrafts.map((d) => {
                     const client = d.clientId
@@ -173,12 +179,7 @@ export function InvoiceList({
                               {clientLabel(client)}
                             </div>
                             <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                              <Badge
-                                variant="outline"
-                                className="h-5 px-1.5 text-[10px]"
-                              >
-                                Draft
-                              </Badge>
+                              <StatusBadge kind="draft" />
                               {d.month ? <span>{monthName(d.month)}</span> : null}
                               <span>
                                 {(d.items ?? []).length} item
@@ -205,10 +206,10 @@ export function InvoiceList({
             ) : null}
 
             {visibleInvoices.length > 0 ? (
-              <section>
-                <div className="bg-muted/40 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
+              <section aria-label="Invoices">
+                <h2 className="bg-muted/40 px-6 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-8">
                   Invoices · {visibleInvoices.length}
-                </div>
+                </h2>
                 <ul className="divide-y">
                   {visibleInvoices.map((inv) => {
                     const overdue = isOverdue(inv);
@@ -235,8 +236,13 @@ export function InvoiceList({
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                               <StatusBadge
-                                status={inv.status ?? "sent"}
-                                overdue={overdue}
+                                kind={
+                                  inv.status === "paid"
+                                    ? "paid"
+                                    : overdue
+                                      ? "overdue"
+                                      : "unpaid"
+                                }
                               />
                               {inv.month ? <span>{monthName(inv.month)}</span> : null}
                               {inv.createdAt ? (
@@ -263,42 +269,3 @@ export function InvoiceList({
   );
 }
 
-function StatusBadge({
-  status,
-  overdue,
-}: {
-  status: string;
-  overdue: boolean;
-}) {
-  if (status === "paid") {
-    return (
-      <Badge
-        variant="outline"
-        className="h-5 border-emerald-500/40 bg-emerald-500/10 px-1.5 text-[10px] text-emerald-700 dark:text-emerald-400"
-      >
-        Paid
-      </Badge>
-    );
-  }
-  if (overdue) {
-    return (
-      <Badge
-        variant="outline"
-        className="h-5 border-destructive/40 bg-destructive/10 px-1.5 text-[10px] text-destructive"
-      >
-        Overdue
-      </Badge>
-    );
-  }
-  return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "h-5 px-1.5 text-[10px]",
-        "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
-      )}
-    >
-      Unpaid
-    </Badge>
-  );
-}

@@ -4,6 +4,7 @@ import { useData } from "@/contexts/data-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
@@ -178,11 +179,7 @@ export function ClientsView() {
                           </div>
                         ) : null}
                       </div>
-                      {hasCustom ? (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                          Custom
-                        </span>
-                      ) : null}
+                      {hasCustom ? <StatusBadge kind="custom" /> : null}
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                       {c.email ? (

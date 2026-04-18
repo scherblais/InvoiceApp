@@ -204,7 +204,7 @@ function SharedList({ events }: { events: SharedEvent[] }) {
         const evs = byDate.get(date) ?? [];
         return (
           <section key={date} className="flex flex-col gap-2">
-            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {formatSharedDateLong(date)}
             </div>
             <div className="flex flex-col divide-y overflow-hidden rounded-lg border bg-card">
