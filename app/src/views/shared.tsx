@@ -12,8 +12,6 @@ const SHARED_COLS: { id: string; label: string; dot: string }[] = [
   { id: "received", label: "Received", dot: COLOR_DOT.rose },
   { id: "pending", label: "Pending", dot: COLOR_DOT.pink },
   { id: "scheduled", label: "Scheduled", dot: COLOR_DOT.blue },
-  { id: "shooting", label: "Shooting", dot: COLOR_DOT.amber },
-  { id: "editing", label: "Editing", dot: COLOR_DOT.purple },
   { id: "delivered", label: "Delivered", dot: COLOR_DOT.green },
 ];
 
@@ -55,7 +53,6 @@ type ViewMode = "board" | "list";
 
 interface CountMap {
   upcoming: number;
-  inProgress: number;
   delivered: number;
 }
 
@@ -63,12 +60,14 @@ function computeCounts(events: SharedEvent[]): CountMap {
   const counts: Record<string, number> = {};
   for (const ev of events) {
     const s = ev.status || "scheduled";
-    counts[s] = (counts[s] ?? 0) + 1;
+    // Legacy statuses collapse into the active bucket — the workflow
+    // doesn't surface Shooting / Editing separately anymore.
+    const bucket = s === "shooting" || s === "editing" ? "scheduled" : s;
+    counts[bucket] = (counts[bucket] ?? 0) + 1;
   }
   return {
     upcoming:
       (counts.received ?? 0) + (counts.pending ?? 0) + (counts.scheduled ?? 0),
-    inProgress: (counts.shooting ?? 0) + (counts.editing ?? 0),
     delivered: counts.delivered ?? 0,
   };
 }
@@ -359,7 +358,7 @@ export function SharedView() {
         {data && events.length > 0 ? (
           <>
             {/* Stats */}
-            <div className="mb-6 grid grid-cols-3 gap-3">
+            <div className="mb-6 grid grid-cols-2 gap-3">
               <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
@@ -370,18 +369,6 @@ export function SharedView() {
                     {counts.upcoming}
                   </div>
                   <div className="text-xs text-muted-foreground">Upcoming</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: COLOR_DOT.amber as EventColor }}
-                />
-                <div>
-                  <div className="text-xl font-semibold tabular-nums">
-                    {counts.inProgress}
-                  </div>
-                  <div className="text-xs text-muted-foreground">In progress</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 rounded-lg border bg-card p-4">

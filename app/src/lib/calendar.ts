@@ -97,16 +97,12 @@ export type EventStatus =
   | "received"
   | "pending"
   | "scheduled"
-  | "shooting"
-  | "editing"
   | "delivered";
 
 export const STATUS_ORDER: EventStatus[] = [
   "received",
   "pending",
   "scheduled",
-  "shooting",
-  "editing",
   "delivered",
 ];
 
@@ -114,8 +110,6 @@ export const STATUS_META: Record<EventStatus, { label: string; dot: string }> = 
   received: { label: "Received", dot: "#9e9ea7" },
   pending: { label: "Pending", dot: "#f0a0c4" },
   scheduled: { label: "Scheduled", dot: "#7cadf0" },
-  shooting: { label: "Shooting", dot: "#f5c96b" },
-  editing: { label: "Editing", dot: "#a78bfa" },
   delivered: { label: "Delivered", dot: "#6dd4a8" },
 };
 
@@ -123,6 +117,10 @@ export function normalizeStatus(status?: string): EventStatus {
   if (status && STATUS_ORDER.includes(status as EventStatus)) {
     return status as EventStatus;
   }
+  // Legacy "shooting" and "editing" values collapse to "scheduled" —
+  // the workflow simplified so these intermediate statuses no longer
+  // appear in the picker. Existing events silently fold to the active
+  // bucket on their next read.
   return "scheduled";
 }
 

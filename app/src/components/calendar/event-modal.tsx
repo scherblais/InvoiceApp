@@ -22,17 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  COLOR_DOT,
-  EVENT_COLORS,
   STATUS_ORDER,
   STATUS_META,
-  clientColor,
   normalizeStatus,
-  type EventColor,
   type EventStatus,
 } from "@/lib/calendar";
 import { eventClientId, type CalEvent, type Client } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface EventModalProps {
   open: boolean;
@@ -55,7 +50,6 @@ interface FormState {
   contactEmail: string;
   clientId: string;
   status: EventStatus;
-  color: EventColor;
   notes: string;
 }
 
@@ -70,7 +64,6 @@ function emptyForm(defaultDate: string, defaultTime = ""): FormState {
     contactEmail: "",
     clientId: "",
     status: "scheduled",
-    color: "blue",
     notes: "",
   };
 }
@@ -95,9 +88,6 @@ function eventToForm(ev: CalEvent): FormState {
     contactEmail: (ev as { contactEmail?: string }).contactEmail ?? "",
     clientId: eventClientId(ev) ?? "",
     status: normalizeStatus(ev.status),
-    color: (EVENT_COLORS.includes((ev.color ?? "") as EventColor)
-      ? ev.color
-      : "blue") as EventColor,
     notes: ev.notes ?? "",
   };
 }
@@ -150,7 +140,10 @@ export function EventModal({
       contactName: form.contactName.trim(),
       clientId: form.clientId || undefined,
       status: form.status,
-      color: form.color,
+      // Preserve any color the event already carried (legacy manual
+      // picks still render via `eventColor` fallback for client-less
+      // events) without exposing a picker in the UI.
+      ...(event?.color ? { color: event.color } : {}),
       notes: form.notes.trim(),
       ...( {
         contactPhone: form.contactPhone.trim(),
@@ -272,15 +265,15 @@ export function EventModal({
           </fieldset>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
-              <Label>Client</Label>
+            <div className="flex min-w-0 flex-col gap-2">
+              <Label htmlFor="ev-client">Client</Label>
               <Select
                 value={form.clientId || "none"}
                 onValueChange={(v) =>
                   setForm((f) => ({ ...f, clientId: v === "none" ? "" : v }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="ev-client" className="w-full">
                   <SelectValue placeholder="No client" />
                 </SelectTrigger>
                 <SelectContent>
@@ -294,15 +287,15 @@ export function EventModal({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label>Status</Label>
+            <div className="flex min-w-0 flex-col gap-2">
+              <Label htmlFor="ev-status">Status</Label>
               <Select
                 value={form.status}
                 onValueChange={(v) =>
                   setForm((f) => ({ ...f, status: v as EventStatus }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="ev-status" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,57 +309,6 @@ export function EventModal({
             </div>
           </div>
 
-          {form.clientId ? (
-            <div className="flex flex-col gap-2">
-              <Label>Color</Label>
-              <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                <span
-                  className="h-3 w-3 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor:
-                      COLOR_DOT[
-                        clientColor(
-                          clients.find((c) => c.id === form.clientId)
-                        )
-                      ],
-                  }}
-                  aria-hidden
-                />
-                <span>Auto-assigned from client</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <Label>Color</Label>
-              <div
-                role="radiogroup"
-                aria-label="Event color"
-                className="flex gap-1.5"
-              >
-                {EVENT_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    role="radio"
-                    aria-checked={form.color === c}
-                    onClick={() => setForm((f) => ({ ...f, color: c }))}
-                    style={{ backgroundColor: COLOR_DOT[c] }}
-                    className={cn(
-                      "h-7 w-7 rounded-full border-2 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                      form.color === c
-                        ? "border-foreground scale-110"
-                        : "border-transparent"
-                    )}
-                    aria-label={`Color: ${c}`}
-                  />
-                ))}
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                Events attached to a client pick up the client's color
-                automatically.
-              </p>
-            </div>
-          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="ev-notes">Notes</Label>
