@@ -9,6 +9,7 @@ import {
 import { PageHeader } from "@/components/ui/page-header";
 import { PricingTab } from "@/components/settings/pricing-tab";
 import { AccountTab } from "@/components/settings/account-tab";
+import { TaxReportTab } from "@/components/settings/tax-report-tab";
 
 export function SettingsView() {
   const { config, saveConfig } = useData();
@@ -22,10 +23,14 @@ export function SettingsView() {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
               <TabsTrigger value="pricing">Pricing</TabsTrigger>
+              <TabsTrigger value="taxes">Tax report</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
             <TabsContent value="pricing" className="mt-8">
               <PricingTab config={config} onSave={saveConfig} />
+            </TabsContent>
+            <TabsContent value="taxes" className="mt-8">
+              <TaxReportTab />
             </TabsContent>
             <TabsContent value="account" className="mt-8">
               <AccountTab />
