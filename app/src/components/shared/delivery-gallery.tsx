@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Lightbox } from "@/components/shared/lightbox";
 import type { SharedFile } from "@/lib/shared";
 import { formatBytes } from "@/lib/storage";
+import { logActivity, logOnce } from "@/lib/activity";
 import { cn } from "@/lib/utils";
 
 interface DeliveryGalleryProps {
@@ -22,6 +23,10 @@ interface DeliveryGalleryProps {
   onClose: () => void;
   /** Used to pick sensible default file names inside generated zips. */
   addressHint?: string;
+  /** Share token for logging activity back to the photographer. */
+  token?: string;
+  /** Display name of the client — denormalized into activity writes. */
+  clientName?: string;
 }
 
 /** Download a single URL as a blob + trigger a save dialog. Uses
@@ -60,6 +65,8 @@ export function DeliveryGallery({
   files,
   onClose,
   addressHint,
+  token,
+  clientName,
 }: DeliveryGalleryProps) {
   const photos = useMemo(() => files.filter((f) => f.kind === "photo"), [files]);
   const videos = useMemo(() => files.filter((f) => f.kind === "video"), [files]);
@@ -85,6 +92,20 @@ export function DeliveryGallery({
     };
   }, []);
 
+  // Log a "gallery_opened" activity once per gallery per session so
+  // the photographer's feed doesn't get hammered if the client
+  // reopens the same modal a few times.
+  useEffect(() => {
+    if (!token) return;
+    logOnce(`gallery:${token}:${title}`, () => {
+      void logActivity(token, {
+        type: "gallery_opened",
+        clientName,
+        eventLabel: title,
+      });
+    });
+  }, [token, title, clientName]);
+
   const hasMls = photos.some((p) => p.compressed);
   const baseSlug = safeSlug(addressHint || title);
 
@@ -106,6 +127,15 @@ export function DeliveryGallery({
     try {
       setSingleDownload(file.id + ":" + variant);
       await downloadOne(srcUrl, fname);
+      if (token) {
+        void logActivity(token, {
+          type: "file_downloaded",
+          clientName,
+          eventLabel: title,
+          fileLabel:
+            variant === "compressed" ? "MLS version" : file.name,
+        });
+      }
     } catch (err) {
       // Fallback: open in new tab if fetch fails (CORS hiccups, etc.)
       window.open(srcUrl, "_blank", "noopener");
@@ -161,6 +191,15 @@ export function DeliveryGallery({
       setBulkState({ status: "zipping", variant, ratio: 1 });
       const zipName = `${baseSlug}-${variant === "mls" ? "MLS" : "originals"}.zip`;
       triggerBlobDownload(zipBlob, zipName);
+      if (token) {
+        void logActivity(token, {
+          type: "files_downloaded_zip",
+          clientName,
+          eventLabel: title,
+          fileLabel: variant === "mls" ? "MLS photos" : "original photos",
+          fileCount: list.length,
+        });
+      }
       setTimeout(() => setBulkState({ status: "idle" }), 600);
     } catch (err) {
       setBulkState({

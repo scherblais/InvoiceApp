@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { ref, onValue, off, db } from "@/lib/firebase";
+import { logActivity, logOnce } from "@/lib/activity";
 import {
   Sidebar,
   SidebarInset,
@@ -107,6 +108,20 @@ export function SharedView() {
     return () => off(r, "value", listener);
   }, [token]);
 
+  // Fire a one-per-session "page_visited" activity once we have the
+  // client's display name in hand, so the photographer's feed reads
+  // "Press Realty opened their portal" instead of "A client…".
+  useEffect(() => {
+    if (!token || !data) return;
+    const name = data.realtorName || data.realtorCompany || "A client";
+    logOnce(`visit:${token}`, () => {
+      void logActivity(token, {
+        type: "page_visited",
+        clientName: name,
+      });
+    });
+  }, [token, data]);
+
   const events = useMemo(() => {
     const raw = data?.events ?? [];
     if (Array.isArray(raw)) return raw;
@@ -185,6 +200,8 @@ export function SharedView() {
           files={galleryEvent.files ?? []}
           addressHint={galleryEvent.address}
           onClose={() => setGalleryEvent(null)}
+          token={token ?? undefined}
+          clientName={data?.realtorName || data?.realtorCompany}
         />
       ) : null}
     </SharedDataProvider>

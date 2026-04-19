@@ -11,6 +11,16 @@
         ".read": true,
         ".write": "auth !== null"
       }
+    },
+    "activity": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": true,
+        "$id": {
+          ".validate": "newData.hasChildren(['type', 'at']) && newData.child('type').val().matches(/^[a-z_]{1,32}$/) && newData.child('at').isNumber()"
+        }
+      }
     }
   }
 }
+

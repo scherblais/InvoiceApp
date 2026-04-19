@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
+import { ActivityBell } from "@/components/activity-bell";
 
 const nav = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/" },
@@ -136,6 +137,7 @@ export function AppSidebar() {
               {user?.email}
             </span>
           </div>
+          <ActivityBell />
           <Button
             variant="ghost"
             size="icon"
