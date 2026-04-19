@@ -63,11 +63,6 @@ function formatFullDate(iso: string): string {
   });
 }
 
-function formatShortDate(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`);
-  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
-}
-
 function formatRelativeDate(iso: string): string {
   const d = new Date(`${iso}T12:00:00`);
   const today = new Date();
@@ -154,116 +149,34 @@ function Hero({
 }
 
 /**
- * The client-facing board — four lanes arranged left-to-right on
- * desktop (Received / Pending / Scheduled / Delivered), stacking
- * into two columns on tablet and a single column on mobile.
- *
- * Cards in the Delivered lane carry a photo mosaic when files are
- * present, so the visual delivery experience is built into the same
- * board instead of living in a separate section.
+ * The payoff section. Delivered shoots get pulled out of the board
+ * and rendered as big photo-forward cards so the client lands on
+ * their photos first. Every card leads with a real thumbnail
+ * mosaic, with the full gallery one click away.
  */
-function Board({
-  lanes,
+function ReadySection({
+  events,
   onOpenGallery,
 }: {
-  lanes: Record<(typeof LANES)[number]["id"], SharedEvent[]>;
+  events: SharedEvent[];
   onOpenGallery: (ev: SharedEvent) => void;
 }) {
+  if (events.length === 0) return null;
   return (
     <section className="flex flex-col gap-4">
-      <SectionLabel icon={Calendar}>Your board</SectionLabel>
-      {/* Matches the photographer's Kanban layout exactly: fixed-width
-          lanes in a horizontal flex, scrolling when they overflow the
-          viewport. Same column width, same gap, same overflow handling. */}
-      <div className="-mx-6 overflow-x-auto px-6 md:-mx-10 md:px-10">
-        <div className="flex gap-3 min-w-max pb-1">
-          {LANES.map((lane) => (
-            <Lane
-              key={lane.id}
-              lane={lane}
-              events={lanes[lane.id] ?? []}
-              onOpenGallery={onOpenGallery}
-            />
-          ))}
-        </div>
-      </div>
+      <SectionLabel icon={Camera}>Ready for you</SectionLabel>
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {events.map((ev, i) => (
+          <li key={`${ev.date}-${ev.address}-${i}`}>
+            <ReadyCard ev={ev} onOpen={() => onOpenGallery(ev)} />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-function Lane({
-  lane,
-  events,
-  onOpenGallery,
-}: {
-  lane: (typeof LANES)[number];
-  events: SharedEvent[];
-  onOpenGallery: (ev: SharedEvent) => void;
-}) {
-  return (
-    <div className="flex w-80 shrink-0 flex-col rounded-xl border bg-card shadow-xs">
-      <header className="flex items-center gap-2 border-b px-4 py-3">
-        <span
-          aria-hidden
-          className="h-2.5 w-2.5 rounded-full"
-          style={{ background: lane.dot }}
-        />
-        <span className="text-sm font-semibold">{lane.label}</span>
-        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">
-          {events.length}
-        </span>
-      </header>
-      <div className="flex flex-1 flex-col gap-2 p-2">
-        {events.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-10 text-center">
-            <span
-              aria-hidden
-              className="h-2 w-2 rounded-full opacity-60"
-              style={{ background: lane.dot }}
-            />
-            <p className="text-xs text-muted-foreground">{lane.emptyCopy}</p>
-          </div>
-        ) : (
-          events.map((ev, i) =>
-            lane.id === "delivered" ? (
-              <DeliveredCard
-                key={`${ev.date}-${ev.address}-${i}`}
-                ev={ev}
-                onOpen={() => onOpenGallery(ev)}
-              />
-            ) : (
-              <UpcomingCard key={`${ev.date}-${ev.address}-${i}`} ev={ev} />
-            )
-          )
-        )}
-      </div>
-    </div>
-  );
-}
-
-function UpcomingCard({ ev }: { ev: SharedEvent }) {
-  return (
-    <div className="rounded-md border bg-background/40 p-3">
-      <div className="text-sm font-medium">{eventLocation(ev)}</div>
-      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-        {ev.date ? (
-          <>
-            <Calendar className="h-3 w-3 shrink-0" aria-hidden />
-            <span className="tabular-nums">{formatRelativeDate(ev.date)}</span>
-          </>
-        ) : (
-          <span className="font-medium">TBD</span>
-        )}
-        {ev.start ? <span className="tabular-nums">· {formatTime(ev.start)}</span> : null}
-      </div>
-      {ev.notes ? (
-        <p className="mt-2 text-xs text-muted-foreground">{ev.notes}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function DeliveredCard({
+function ReadyCard({
   ev,
   onOpen,
 }: {
@@ -271,10 +184,10 @@ function DeliveredCard({
   onOpen: () => void;
 }) {
   const photos = (ev.files ?? []).filter((f) => f.kind === "photo");
-  const videos = (ev.files ?? []).filter((f) => f.kind === "video");
+  const videos = (ev.files ?? []).filter((f) => f.kind === "video").length;
   const thumbs = photos.slice(0, 3);
   const overflow = photos.length - thumbs.length;
-  const hasMedia = thumbs.length > 0 || videos.length > 0;
+  const hasMedia = thumbs.length > 0 || videos > 0;
 
   return (
     <button
@@ -282,9 +195,9 @@ function DeliveredCard({
       onClick={onOpen}
       disabled={!hasMedia}
       className={cn(
-        "group flex w-full flex-col overflow-hidden rounded-md border bg-background/40 text-left transition-all",
+        "group flex w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs transition-all",
         hasMedia
-          ? "hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-sm"
+          ? "hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md"
           : "cursor-default opacity-80"
       )}
     >
@@ -317,7 +230,7 @@ function DeliveredCard({
                       className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                     />
                     {i === 1 && overflow > 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-semibold text-white">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-sm font-semibold text-white">
                         +{overflow}
                       </div>
                     ) : null}
@@ -327,10 +240,7 @@ function DeliveredCard({
             </>
           ) : (
             thumbs.map((t, i) => (
-              <div
-                key={i}
-                className="aspect-[4/3] bg-muted overflow-hidden"
-              >
+              <div key={i} className="aspect-[4/3] overflow-hidden bg-muted">
                 <img
                   src={t.compressed?.url ?? t.original.url}
                   alt=""
@@ -341,35 +251,44 @@ function DeliveredCard({
             ))
           )}
         </div>
-      ) : null}
-      <div className="flex flex-col gap-2 p-3">
+      ) : (
+        <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted/60 text-muted-foreground">
+          <ImageIcon className="h-8 w-8" aria-hidden />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2 p-4">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-medium">
+          <h3 className="truncate text-[15px] font-semibold tracking-tight">
             {eventLocation(ev)}
           </h3>
           {ev.date ? (
-            <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-              {formatShortDate(ev.date)}
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {formatFullDate(ev.date)}
             </p>
           ) : null}
         </div>
         {hasMedia ? (
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {photos.length ? (
-                <span className="inline-flex items-center gap-1 tabular-nums">
+                <span className="inline-flex items-center gap-1">
                   <ImageIcon className="h-3 w-3" aria-hidden />
-                  {photos.length}
+                  <span className="tabular-nums">{photos.length}</span>{" "}
+                  {photos.length === 1 ? "photo" : "photos"}
                 </span>
               ) : null}
-              {videos.length ? (
-                <span className="tabular-nums">{videos.length} video</span>
+              {videos ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="tabular-nums">{videos}</span>{" "}
+                  {videos === 1 ? "video" : "videos"}
+                </span>
               ) : null}
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-              View
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+              View &amp; download
               <ArrowRight
-                className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
                 aria-hidden
               />
             </span>
@@ -381,6 +300,101 @@ function DeliveredCard({
         )}
       </div>
     </button>
+  );
+}
+
+/**
+ * Secondary pipeline board — only the three non-delivered lanes
+ * (Received / Pending / Scheduled). Delivered lives above in its
+ * own photo-forward section. Uses the same fixed-width lane layout
+ * as the photographer's kanban so muscle memory transfers.
+ */
+function Board({
+  lanes,
+}: {
+  lanes: Record<(typeof LANES)[number]["id"], SharedEvent[]>;
+}) {
+  const pipelineLanes = LANES.filter((l) => l.id !== "delivered");
+  const anyContent = pipelineLanes.some((l) => (lanes[l.id] ?? []).length > 0);
+  if (!anyContent) return null;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <SectionLabel icon={Calendar}>In the pipeline</SectionLabel>
+      <div className="-mx-6 overflow-x-auto px-6 md:-mx-10 md:px-10">
+        <div className="flex gap-3 min-w-max pb-1">
+          {pipelineLanes.map((lane) => (
+            <Lane
+              key={lane.id}
+              lane={lane}
+              events={lanes[lane.id] ?? []}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Lane({
+  lane,
+  events,
+}: {
+  lane: (typeof LANES)[number];
+  events: SharedEvent[];
+}) {
+  return (
+    <div className="flex w-80 shrink-0 flex-col rounded-xl border bg-card shadow-xs">
+      <header className="flex items-center gap-2 border-b px-4 py-3">
+        <span
+          aria-hidden
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ background: lane.dot }}
+        />
+        <span className="text-sm font-semibold">{lane.label}</span>
+        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">
+          {events.length}
+        </span>
+      </header>
+      <div className="flex flex-1 flex-col gap-2 p-2">
+        {events.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-10 text-center">
+            <span
+              aria-hidden
+              className="h-2 w-2 rounded-full opacity-60"
+              style={{ background: lane.dot }}
+            />
+            <p className="text-xs text-muted-foreground">{lane.emptyCopy}</p>
+          </div>
+        ) : (
+          events.map((ev, i) => (
+            <UpcomingCard key={`${ev.date}-${ev.address}-${i}`} ev={ev} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function UpcomingCard({ ev }: { ev: SharedEvent }) {
+  return (
+    <div className="rounded-md border bg-background/40 p-3">
+      <div className="text-sm font-medium">{eventLocation(ev)}</div>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+        {ev.date ? (
+          <>
+            <Calendar className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="tabular-nums">{formatRelativeDate(ev.date)}</span>
+          </>
+        ) : (
+          <span className="font-medium">TBD</span>
+        )}
+        {ev.start ? <span className="tabular-nums">· {formatTime(ev.start)}</span> : null}
+      </div>
+      {ev.notes ? (
+        <p className="mt-2 text-xs text-muted-foreground">{ev.notes}</p>
+      ) : null}
+    </div>
   );
 }
 
@@ -630,11 +644,17 @@ export function SharedView() {
       <div className="mx-auto flex w-full flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
         <Hero name={name} company={company} totals={totals} />
 
-        {!hasContent ? (
-          <EmptyState />
-        ) : events.length > 0 ? (
-          <Board lanes={lanes} onOpenGallery={setGalleryEvent} />
-        ) : null}
+        {!hasContent ? <EmptyState /> : null}
+
+        {/* Photos first — biggest, widest visual on the page. */}
+        <ReadySection
+          events={lanes.delivered}
+          onOpenGallery={setGalleryEvent}
+        />
+
+        {/* Workflow pipeline underneath — shows what's still in
+            flight without competing with the photos above. */}
+        <Board lanes={lanes} />
 
         {data ? <PricingSection data={data} /> : null}
 
