@@ -22,39 +22,51 @@ export const EVENT_COLORS: EventColor[] = [
   "indigo",
 ];
 
+/**
+ * Pop-pastel palette. Hues kept, chroma pushed so the dots and chips
+ * read vividly against both white and the new pure-black dark mode
+ * without tipping into neon. Values align with Tailwind's 500-level
+ * so the chip backgrounds / foregrounds below can reuse Tailwind's
+ * surrounding shades without retuning by eye.
+ */
 export const COLOR_DOT: Record<EventColor, string> = {
-  blue: "#7cadf0",
-  purple: "#a78bfa",
-  green: "#6dd4a8",
-  amber: "#f5c96b",
-  pink: "#f0a0c4",
-  teal: "#5ec5c0",
-  rose: "#f4877f",
-  indigo: "#818cf8",
+  blue: "#3b82f6",    // blue-500
+  purple: "#a855f7",  // purple-500
+  green: "#10b981",   // emerald-500
+  amber: "#f59e0b",   // amber-500
+  pink: "#ec4899",    // pink-500
+  teal: "#14b8a6",    // teal-500
+  rose: "#f43f5e",    // rose-500
+  indigo: "#6366f1",  // indigo-500
 };
 
-// Soft chip backgrounds + text for light/dark, applied via inline style so we
-// don't need to generate dozens of Tailwind color classes.
+/**
+ * Chip backgrounds + foregrounds for light / dark. Backgrounds are the
+ * COLOR_DOT hue at 15 / 22% alpha (enough tint to read as colored,
+ * not so much that it competes with the card). Foregrounds are
+ * Tailwind's 700-level in light mode and 300-level in dark so text
+ * stays comfortably readable at 11–12px.
+ */
 export const COLOR_CHIP_LIGHT: Record<EventColor, { bg: string; fg: string }> = {
-  blue: { bg: "rgba(124,173,240,0.16)", fg: "#3574c4" },
-  purple: { bg: "rgba(167,139,250,0.16)", fg: "#7c3aed" },
-  green: { bg: "rgba(109,212,168,0.16)", fg: "#0e9a6e" },
-  amber: { bg: "rgba(245,201,107,0.16)", fg: "#a5710a" },
-  pink: { bg: "rgba(240,160,196,0.16)", fg: "#c4477a" },
-  teal: { bg: "rgba(94,197,192,0.16)", fg: "#0d8a85" },
-  rose: { bg: "rgba(244,135,127,0.16)", fg: "#c9403a" },
-  indigo: { bg: "rgba(129,140,248,0.16)", fg: "#5558d6" },
+  blue: { bg: "rgba(59,130,246,0.15)", fg: "#1d4ed8" },    // blue-700
+  purple: { bg: "rgba(168,85,247,0.15)", fg: "#7e22ce" },  // purple-700
+  green: { bg: "rgba(16,185,129,0.15)", fg: "#047857" },   // emerald-700
+  amber: { bg: "rgba(245,158,11,0.18)", fg: "#b45309" },   // amber-700
+  pink: { bg: "rgba(236,72,153,0.15)", fg: "#be185d" },    // pink-700
+  teal: { bg: "rgba(20,184,166,0.15)", fg: "#0f766e" },    // teal-700
+  rose: { bg: "rgba(244,63,94,0.15)", fg: "#be123c" },     // rose-700
+  indigo: { bg: "rgba(99,102,241,0.15)", fg: "#4338ca" },  // indigo-700
 };
 
 export const COLOR_CHIP_DARK: Record<EventColor, { bg: string; fg: string }> = {
-  blue: { bg: "rgba(124,173,240,0.22)", fg: "#a8c8f5" },
-  purple: { bg: "rgba(167,139,250,0.22)", fg: "#c4b1fb" },
-  green: { bg: "rgba(109,212,168,0.22)", fg: "#9be3c3" },
-  amber: { bg: "rgba(245,201,107,0.22)", fg: "#f4d58e" },
-  pink: { bg: "rgba(240,160,196,0.22)", fg: "#f5bcd5" },
-  teal: { bg: "rgba(94,197,192,0.22)", fg: "#9ad9d6" },
-  rose: { bg: "rgba(244,135,127,0.22)", fg: "#f5ada7" },
-  indigo: { bg: "rgba(129,140,248,0.22)", fg: "#adb3f7" },
+  blue: { bg: "rgba(59,130,246,0.22)", fg: "#93c5fd" },    // blue-300
+  purple: { bg: "rgba(168,85,247,0.22)", fg: "#d8b4fe" },  // purple-300
+  green: { bg: "rgba(16,185,129,0.22)", fg: "#6ee7b7" },   // emerald-300
+  amber: { bg: "rgba(245,158,11,0.25)", fg: "#fcd34d" },   // amber-300
+  pink: { bg: "rgba(236,72,153,0.22)", fg: "#f9a8d4" },    // pink-300
+  teal: { bg: "rgba(20,184,166,0.22)", fg: "#5eead4" },    // teal-300
+  rose: { bg: "rgba(244,63,94,0.22)", fg: "#fda4af" },     // rose-300
+  indigo: { bg: "rgba(99,102,241,0.22)", fg: "#a5b4fc" },  // indigo-300
 };
 
 /**
@@ -107,10 +119,10 @@ export const STATUS_ORDER: EventStatus[] = [
 ];
 
 export const STATUS_META: Record<EventStatus, { label: string; dot: string }> = {
-  received: { label: "Received", dot: "#9e9ea7" },
-  pending: { label: "Pending", dot: "#f0a0c4" },
-  scheduled: { label: "Scheduled", dot: "#7cadf0" },
-  delivered: { label: "Delivered", dot: "#6dd4a8" },
+  received: { label: "Received", dot: "#94a3b8" },   // slate-400
+  pending: { label: "Pending", dot: "#ec4899" },     // pink-500
+  scheduled: { label: "Scheduled", dot: "#3b82f6" }, // blue-500
+  delivered: { label: "Delivered", dot: "#10b981" }, // emerald-500
 };
 
 export function normalizeStatus(status?: string): EventStatus {
