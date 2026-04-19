@@ -600,7 +600,7 @@ export function SharedView() {
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
+        <div className="mx-auto flex max-w-[96rem] items-center justify-between px-6 py-4 md:px-10">
           <div className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
               <LumeriaLogo className="h-3.5 w-3.5" aria-hidden />
@@ -622,7 +622,7 @@ export function SharedView() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
+      <div className="mx-auto flex max-w-[96rem] flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
         <Hero name={name} company={company} totals={totals} />
 
         {!hasContent ? (
