@@ -173,11 +173,12 @@ function SharedBoard({
     return map;
   }, [events]);
 
-  const visibleCols = SHARED_COLS.filter(
-    (c) => (byStatus.get(c.id)?.length ?? 0) > 0
-  );
-
-  if (!visibleCols.length) {
+  // Every lane always renders so the board reads as a complete
+  // pipeline even when some stages are empty — clients can see at a
+  // glance where their shoots are in the workflow. The outer
+  // "No appointments at all" empty state fires only when there's
+  // zero activity period.
+  if (events.length === 0) {
     return (
       <Empty
         title="No appointments yet"
@@ -187,11 +188,14 @@ function SharedBoard({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-      {visibleCols.map((col) => {
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+      {SHARED_COLS.map((col) => {
         const list = byStatus.get(col.id) ?? [];
         return (
-          <div key={col.id} className="flex flex-col gap-2 rounded-lg border bg-card p-3">
+          <div
+            key={col.id}
+            className="flex flex-col gap-2 rounded-lg border bg-card p-3"
+          >
             <div className="flex items-center gap-2 px-1 text-sm font-semibold">
               <span
                 className="h-2.5 w-2.5 rounded-full"
@@ -202,39 +206,78 @@ function SharedBoard({
                 {list.length}
               </span>
             </div>
-            <div className="flex flex-col gap-2">
-              {list.map((ev, i) => {
-                const loc = ev.unit ? `${ev.address}, ${ev.unit}` : ev.address ?? ev.title ?? "";
-                const timeStr = ev.start ? formatSharedTime(ev.start) : "";
-                return (
-                  <div
-                    key={`${ev.date}-${ev.start}-${i}`}
-                    className="rounded-md border bg-background/50 p-3"
-                  >
-                    <div className="text-sm font-medium">{loc}</div>
-                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" aria-hidden />
-                      <span>
-                        {formatSharedDate(ev.date)}
-                        {timeStr ? ` · ${timeStr}` : ""}
-                      </span>
-                    </div>
-                    {ev.notes ? (
-                      <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
-                        {ev.notes}
+            <div className="flex flex-1 flex-col gap-2">
+              {list.length === 0 ? (
+                <SharedEmptyColumn label={col.label} dot={col.dot} />
+              ) : (
+                list.map((ev, i) => {
+                  const loc = ev.unit
+                    ? `${ev.address}, ${ev.unit}`
+                    : ev.address ?? ev.title ?? "";
+                  const timeStr = ev.start ? formatSharedTime(ev.start) : "";
+                  return (
+                    <div
+                      key={`${ev.date}-${ev.start}-${i}`}
+                      className="rounded-md border bg-background/50 p-3"
+                    >
+                      <div className="text-sm font-medium">{loc}</div>
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" aria-hidden />
+                        <span>
+                          {formatSharedDate(ev.date)}
+                          {timeStr ? ` · ${timeStr}` : ""}
+                        </span>
                       </div>
-                    ) : null}
-                    <FilesBadge
-                      files={ev.files}
-                      onOpen={() => onOpenGallery(ev)}
-                    />
-                  </div>
-                );
-              })}
+                      {ev.notes ? (
+                        <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
+                          {ev.notes}
+                        </div>
+                      ) : null}
+                      <FilesBadge
+                        files={ev.files}
+                        onOpen={() => onOpenGallery(ev)}
+                      />
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Per-lane empty state on the client-facing board. Read-only — no
+ * "drag a card here" copy since clients can't edit. Just a quiet
+ * acknowledgement that the stage is currently empty so the
+ * pipeline still reads as four lanes instead of collapsing.
+ */
+function SharedEmptyColumn({
+  label,
+  dot,
+}: {
+  label: string;
+  dot: string;
+}) {
+  const copy: Record<string, string> = {
+    Received: "No new inquiries yet.",
+    Pending: "Nothing pending.",
+    Scheduled: "Nothing booked here.",
+    Delivered: "No deliveries yet.",
+  };
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-8 text-center">
+      <span
+        className="h-2 w-2 rounded-full opacity-60"
+        style={{ background: dot }}
+        aria-hidden
+      />
+      <p className="text-xs text-muted-foreground">
+        {copy[label] ?? `No ${label.toLowerCase()} shoots.`}
+      </p>
     </div>
   );
 }
