@@ -172,15 +172,20 @@ function Board({
   return (
     <section className="flex flex-col gap-4">
       <SectionLabel icon={Calendar}>Your board</SectionLabel>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {LANES.map((lane) => (
-          <Lane
-            key={lane.id}
-            lane={lane}
-            events={lanes[lane.id] ?? []}
-            onOpenGallery={onOpenGallery}
-          />
-        ))}
+      {/* Matches the photographer's Kanban layout exactly: fixed-width
+          lanes in a horizontal flex, scrolling when they overflow the
+          viewport. Same column width, same gap, same overflow handling. */}
+      <div className="-mx-6 overflow-x-auto px-6 md:-mx-10 md:px-10">
+        <div className="flex gap-3 min-w-max pb-1">
+          {LANES.map((lane) => (
+            <Lane
+              key={lane.id}
+              lane={lane}
+              events={lanes[lane.id] ?? []}
+              onOpenGallery={onOpenGallery}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -196,19 +201,19 @@ function Lane({
   onOpenGallery: (ev: SharedEvent) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-xs">
-      <header className="flex items-center gap-2 px-1 pt-1 pb-2">
+    <div className="flex w-80 shrink-0 flex-col rounded-xl border bg-card shadow-xs">
+      <header className="flex items-center gap-2 border-b px-4 py-3">
         <span
           aria-hidden
           className="h-2.5 w-2.5 rounded-full"
           style={{ background: lane.dot }}
         />
         <span className="text-sm font-semibold">{lane.label}</span>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">
           {events.length}
         </span>
       </header>
-      <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2 p-2">
         {events.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-10 text-center">
             <span
@@ -600,7 +605,7 @@ export function SharedView() {
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[96rem] items-center justify-between px-6 py-4 md:px-10">
+        <div className="mx-auto flex w-full items-center justify-between px-6 py-4 md:px-10">
           <div className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
               <LumeriaLogo className="h-3.5 w-3.5" aria-hidden />
@@ -622,7 +627,7 @@ export function SharedView() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[96rem] flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
+      <div className="mx-auto flex w-full flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
         <Hero name={name} company={company} totals={totals} />
 
         {!hasContent ? (
