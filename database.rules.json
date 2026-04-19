@@ -20,6 +20,16 @@
           ".validate": "newData.hasChildren(['type', 'at']) && newData.child('type').val().matches(/^[a-z_]{1,32}$/) && newData.child('at').isNumber()"
         }
       }
+    },
+    "inquiries": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "$id": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['at', 'name', 'address']) && newData.child('at').isNumber() && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length < 200 && newData.child('address').isString() && newData.child('address').val().length > 0 && newData.child('address').val().length < 500"
+        }
+      }
     }
   }
 }

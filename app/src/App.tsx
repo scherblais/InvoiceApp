@@ -13,6 +13,7 @@ import { InvoicesView } from "@/views/invoices";
 import { ClientsView } from "@/views/clients";
 import { SettingsView } from "@/views/settings";
 import { SharedView } from "@/views/shared";
+import { BookingView } from "@/views/book";
 import { PlaceholderView } from "@/views/placeholder";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<LoginView />} />
               <Route path="/shared" element={<SharedView />} />
+              <Route path="/book" element={<BookingView />} />
               <Route
                 element={
                   <RequireAuth>

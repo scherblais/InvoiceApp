@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { Download, LogOut, Upload } from "lucide-react";
+import { Copy, Download, ExternalLink, LogOut, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
@@ -119,6 +120,20 @@ export function AccountTab() {
         </div>
       </section>
 
+      {/* Booking link — public form that lands in the To Schedule
+          panel. Shareable via any channel: email signature, Instagram
+          bio, LinkedIn, QR code on a business card. */}
+      {user ? (
+        <section className="rounded-lg border bg-card p-5">
+          <h3 className="text-sm font-semibold">Booking link</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Send this URL to anyone who wants to request a shoot.
+            Submissions land in your dashboard's To Schedule panel.
+          </p>
+          <BookingLinkRow uid={user.uid} />
+        </section>
+      ) : null}
+
       <section className="rounded-lg border bg-card p-5">
         <h3 className="text-sm font-semibold">Backup &amp; restore</h3>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -185,6 +200,38 @@ export function AccountTab() {
         destructive
         onConfirm={runImport}
       />
+    </div>
+  );
+}
+
+function BookingLinkRow({ uid }: { uid: string }) {
+  const url = `${window.location.origin}/book?to=${uid}`;
+  return (
+    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+      <Input readOnly value={url} className="font-mono text-xs" />
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(url);
+              toast.success("Booking link copied");
+            } catch {
+              toast.error("Couldn't copy");
+            }
+          }}
+        >
+          <Copy className="mr-1.5 h-3.5 w-3.5" />
+          Copy
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <a href={url} target="_blank" rel="noreferrer">
+            <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+            Preview
+          </a>
+        </Button>
+      </div>
     </div>
   );
 }
