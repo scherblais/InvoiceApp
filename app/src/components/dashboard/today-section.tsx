@@ -13,6 +13,7 @@ import {
 import { formatTime12, todayISO } from "@/lib/format";
 import { eventClientId, type CalEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { PreShootBrief } from "@/components/dashboard/pre-shoot-brief";
 
 /**
  * Hero card for the dashboard. Photographers care about one thing
@@ -24,7 +25,7 @@ import { cn } from "@/lib/utils";
  * deliberate "you're clear" instead of a broken card.
  */
 export function TodaySection() {
-  const { calEvents } = useData();
+  const { calEvents, clientsById, config } = useData();
   const navigate = useNavigate();
   const iso = todayISO();
 
@@ -38,6 +39,25 @@ export function TodaySection() {
     const d = new Date();
     return d.getHours() * 60 + d.getMinutes();
   }, []);
+
+  // Surface a briefing card when a non-delivered shoot starts within
+  // the next 4 hours (or is currently underway and not yet an hour
+  // past). Pulls the earliest matching shoot — the one you actually
+  // need to prep for right now.
+  const briefEvent = useMemo(() => {
+    for (const ev of todayShoots) {
+      if (normalizeStatus(ev.status) === "delivered") continue;
+      if (!ev.start) continue;
+      const m = toMinutes(ev.start);
+      const diff = m - nowMin;
+      if (diff <= 240 && diff >= -60) return ev;
+    }
+    return null;
+  }, [todayShoots, nowMin]);
+
+  const briefClient = briefEvent
+    ? clientsById.get(eventClientId(briefEvent) ?? "") ?? null
+    : null;
 
   if (todayShoots.length === 0) {
     return (
@@ -59,7 +79,15 @@ export function TodaySection() {
   }
 
   return (
-    <Card className="gap-0 overflow-hidden p-0">
+    <div className="flex flex-col gap-4 md:gap-6">
+      {briefEvent ? (
+        <PreShootBrief
+          event={briefEvent}
+          client={briefClient}
+          config={config}
+        />
+      ) : null}
+      <Card className="gap-0 overflow-hidden p-0">
       <div className="flex items-end justify-between gap-3 px-6 pt-5">
         <div>
           <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -91,7 +119,13 @@ export function TodaySection() {
         ))}
       </ul>
     </Card>
+    </div>
   );
+}
+
+function toMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
 }
 
 function TodayRow({
@@ -183,9 +217,4 @@ function TodayRow({
       </button>
     </li>
   );
-}
-
-function toMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(":").map(Number);
-  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
 }

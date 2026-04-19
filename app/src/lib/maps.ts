@@ -125,6 +125,19 @@ export async function computeDrivingDistanceKm(
   origin: string | google.maps.LatLngLiteral,
   destination: string | google.maps.LatLngLiteral
 ): Promise<number | null> {
+  const info = await computeDriveInfo(origin, destination);
+  return info?.km ?? null;
+}
+
+/**
+ * Full drive info — distance in km + duration in seconds — for the
+ * same origin/destination pair. Used by the pre-shoot brief to
+ * show "18 km · 24 min" at a glance without a second API call.
+ */
+export async function computeDriveInfo(
+  origin: string | google.maps.LatLngLiteral,
+  destination: string | google.maps.LatLngLiteral
+): Promise<{ km: number; durationSeconds: number } | null> {
   const routes = await getRoutes();
   if (!routes) return null;
   const service = new routes.DistanceMatrixService();
@@ -136,8 +149,10 @@ export async function computeDrivingDistanceKm(
   });
   const element = response.rows[0]?.elements[0];
   if (!element || element.status !== "OK") return null;
-  // `distance.value` is in meters.
-  return element.distance.value / 1000;
+  return {
+    km: element.distance.value / 1000,
+    durationSeconds: element.duration.value,
+  };
 }
 
 /**
