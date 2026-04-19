@@ -1,4 +1,6 @@
-import { ArrowLeft, Check, Pencil, Printer, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Check, Download, Loader2, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { clientLabel, monthName } from "@/lib/invoice";
 import type { Client, Invoice } from "@/lib/types";
@@ -23,6 +25,27 @@ export function InvoicePreview({
   onToggleStatus,
 }: InvoicePreviewProps) {
   const paid = invoice.status === "paid";
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      // Dynamic import so @react-pdf/renderer (~1.5MB) only lands
+      // in the network cache the first time a user downloads an
+      // invoice, not on every page load.
+      const { downloadInvoicePdf } = await import(
+        "@/components/invoices/invoice-pdf"
+      );
+      await downloadInvoicePdf(invoice, client);
+    } catch (err) {
+      toast.error("Couldn't build the PDF", {
+        description:
+          err instanceof Error ? err.message : "Try printing to PDF instead.",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -62,10 +85,15 @@ export function InvoicePreview({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.print()}
+            onClick={handleDownload}
+            disabled={downloading}
           >
-            <Printer className="mr-1.5 h-4 w-4" aria-hidden />
-            Print / PDF
+            {downloading ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="mr-1.5 h-4 w-4" aria-hidden />
+            )}
+            {downloading ? "Building PDF…" : "Download PDF"}
           </Button>
           <Button
             variant="ghost"
