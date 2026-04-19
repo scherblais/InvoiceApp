@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
+import { CommandMenu } from "@/components/command-menu";
 
 export function AppShell() {
   // Keying the outlet wrapper by pathname forces a remount on every
@@ -27,6 +28,7 @@ export function AppShell() {
           </div>
         </main>
       </SidebarInset>
+      <CommandMenu />
     </SidebarProvider>
   );
 }
