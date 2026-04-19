@@ -10,7 +10,6 @@ import {
   Loader2,
   Moon,
   Package as PackageIcon,
-  Sparkles,
   Sun,
 } from "lucide-react";
 import { ref, onValue, off, db } from "@/lib/firebase";
@@ -22,62 +21,37 @@ import { COLOR_DOT } from "@/lib/calendar";
 import type { SharedData, SharedEvent } from "@/lib/shared";
 import { cn } from "@/lib/utils";
 
-const STATUS_COPY: Record<
-  string,
-  { label: string; dot: string; chip: string }
-> = {
-  received: {
-    label: "Received",
-    dot: COLOR_DOT.rose,
-    chip: "Received",
-  },
-  pending: {
-    label: "Pending",
-    dot: COLOR_DOT.pink,
-    chip: "Confirming",
-  },
-  scheduled: {
-    label: "Scheduled",
-    dot: COLOR_DOT.blue,
-    chip: "Scheduled",
-  },
-  delivered: {
-    label: "Delivered",
-    dot: COLOR_DOT.green,
-    chip: "Delivered",
-  },
-};
+/** The four lanes of the client board. Order matches the workflow
+ *  left-to-right: inbound → confirming → booked → done. */
+const LANES: {
+  id: "received" | "pending" | "scheduled" | "delivered";
+  label: string;
+  dot: string;
+  emptyCopy: string;
+}[] = [
+  { id: "received", label: "Received", dot: COLOR_DOT.rose, emptyCopy: "No new inquiries yet." },
+  { id: "pending", label: "Pending", dot: COLOR_DOT.pink, emptyCopy: "Nothing pending." },
+  { id: "scheduled", label: "Scheduled", dot: COLOR_DOT.blue, emptyCopy: "Nothing booked here." },
+  { id: "delivered", label: "Delivered", dot: COLOR_DOT.green, emptyCopy: "No deliveries yet." },
+];
 
-function statusMeta(status: string | undefined) {
-  const key = status && STATUS_COPY[status] ? status : "scheduled";
-  return STATUS_COPY[key];
+function laneFor(status: string | undefined): (typeof LANES)[number] {
+  const s = status ?? "scheduled";
+  // Legacy "shooting" and "editing" collapse into Scheduled — same
+  // logic the internal dashboard normalizeStatus applies.
+  const bucket =
+    s === "shooting" || s === "editing"
+      ? "scheduled"
+      : (s as (typeof LANES)[number]["id"]);
+  return LANES.find((l) => l.id === bucket) ?? LANES[2];
 }
 
-function formatSharedTime(t?: string): string {
+function formatTime(t?: string): string {
   if (!t) return "";
   const [h, m] = t.split(":").map(Number);
   const ampm = h >= 12 ? "PM" : "AM";
   const hr12 = h % 12 || 12;
   return `${hr12}:${String(m).padStart(2, "0")} ${ampm}`;
-}
-
-function formatWeekday(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`);
-  const today = new Date();
-  const todayISO = today.toISOString().split("T")[0];
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowISO = tomorrow.toISOString().split("T")[0];
-  if (iso === todayISO) return "Today";
-  if (iso === tomorrowISO) return "Tomorrow";
-  return d.toLocaleDateString("en-CA", {
-    weekday: "long",
-  });
-}
-
-function formatMonthDay(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`);
-  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
 }
 
 function formatFullDate(iso: string): string {
@@ -87,6 +61,23 @@ function formatFullDate(iso: string): string {
     month: "long",
     day: "numeric",
   });
+}
+
+function formatShortDate(iso: string): string {
+  const d = new Date(`${iso}T12:00:00`);
+  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+}
+
+function formatRelativeDate(iso: string): string {
+  const d = new Date(`${iso}T12:00:00`);
+  const today = new Date();
+  const todayISO = today.toISOString().split("T")[0];
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowISO = tomorrow.toISOString().split("T")[0];
+  if (iso === todayISO) return "Today";
+  if (iso === tomorrowISO) return "Tomorrow";
+  return d.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" });
 }
 
 function formatDollar(value: number): string {
@@ -102,28 +93,21 @@ function eventLocation(ev: SharedEvent): string {
   return ev.address ?? ev.title ?? "Untitled";
 }
 
-/**
- * Welcome hero. Large, quiet, confident — the client's name sits as
- * a display heading, with a thin stat line underneath that avoids
- * the "SaaS dashboard" feel of a row of stat cards.
- */
 function Hero({
   name,
   company,
-  upcoming,
-  ready,
+  totals,
 }: {
   name: string;
   company: string;
-  upcoming: number;
-  ready: number;
+  totals: { ready: number; upcoming: number };
 }) {
   const hour = new Date().getHours();
   const greet =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <section className="flex flex-col gap-5 pb-2">
+    <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <span className="text-sm text-muted-foreground">{greet},</span>
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
@@ -133,9 +117,9 @@ function Hero({
           <p className="text-sm text-muted-foreground">{company}</p>
         ) : null}
       </div>
-      {upcoming + ready > 0 ? (
+      {totals.ready + totals.upcoming > 0 ? (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-          {ready > 0 ? (
+          {totals.ready > 0 ? (
             <span className="inline-flex items-center gap-2">
               <Camera
                 className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400"
@@ -143,13 +127,13 @@ function Hero({
               />
               <span>
                 <span className="font-medium text-foreground tabular-nums">
-                  {ready}
+                  {totals.ready}
                 </span>{" "}
-                {ready === 1 ? "delivery ready" : "deliveries ready"}
+                {totals.ready === 1 ? "delivery ready" : "deliveries ready"}
               </span>
             </span>
           ) : null}
-          {upcoming > 0 ? (
+          {totals.upcoming > 0 ? (
             <span className="inline-flex items-center gap-2">
               <Calendar
                 className="h-3.5 w-3.5 text-muted-foreground"
@@ -157,9 +141,9 @@ function Hero({
               />
               <span>
                 <span className="font-medium text-foreground tabular-nums">
-                  {upcoming}
+                  {totals.upcoming}
                 </span>{" "}
-                {upcoming === 1 ? "shoot coming up" : "shoots coming up"}
+                {totals.upcoming === 1 ? "shoot coming up" : "shoots coming up"}
               </span>
             </span>
           ) : null}
@@ -170,45 +154,135 @@ function Hero({
 }
 
 /**
- * The payoff section — delivered shoots with real photo thumbnails.
- * This is what the client came here for, so it leads with visuals
- * instead of metadata.
+ * The client-facing board — four lanes arranged left-to-right on
+ * desktop (Received / Pending / Scheduled / Delivered), stacking
+ * into two columns on tablet and a single column on mobile.
+ *
+ * Cards in the Delivered lane carry a photo mosaic when files are
+ * present, so the visual delivery experience is built into the same
+ * board instead of living in a separate section.
  */
-function ReadySection({
-  events,
+function Board({
+  lanes,
   onOpenGallery,
 }: {
-  events: SharedEvent[];
+  lanes: Record<(typeof LANES)[number]["id"], SharedEvent[]>;
   onOpenGallery: (ev: SharedEvent) => void;
 }) {
-  if (events.length === 0) return null;
   return (
     <section className="flex flex-col gap-4">
-      <SectionLabel icon={Sparkles}>Ready for you</SectionLabel>
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {events.map((ev) => (
-          <li key={`${ev.date}-${ev.address}`}>
-            <ReadyCard ev={ev} onOpen={() => onOpenGallery(ev)} />
-          </li>
+      <SectionLabel icon={Calendar}>Your board</SectionLabel>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {LANES.map((lane) => (
+          <Lane
+            key={lane.id}
+            lane={lane}
+            events={lanes[lane.id] ?? []}
+            onOpenGallery={onOpenGallery}
+          />
         ))}
-      </ul>
+      </div>
     </section>
   );
 }
 
-function ReadyCard({ ev, onOpen }: { ev: SharedEvent; onOpen: () => void }) {
+function Lane({
+  lane,
+  events,
+  onOpenGallery,
+}: {
+  lane: (typeof LANES)[number];
+  events: SharedEvent[];
+  onOpenGallery: (ev: SharedEvent) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-xs">
+      <header className="flex items-center gap-2 px-1 pt-1 pb-2">
+        <span
+          aria-hidden
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ background: lane.dot }}
+        />
+        <span className="text-sm font-semibold">{lane.label}</span>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+          {events.length}
+        </span>
+      </header>
+      <div className="flex flex-1 flex-col gap-2">
+        {events.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-10 text-center">
+            <span
+              aria-hidden
+              className="h-2 w-2 rounded-full opacity-60"
+              style={{ background: lane.dot }}
+            />
+            <p className="text-xs text-muted-foreground">{lane.emptyCopy}</p>
+          </div>
+        ) : (
+          events.map((ev, i) =>
+            lane.id === "delivered" ? (
+              <DeliveredCard
+                key={`${ev.date}-${ev.address}-${i}`}
+                ev={ev}
+                onOpen={() => onOpenGallery(ev)}
+              />
+            ) : (
+              <UpcomingCard key={`${ev.date}-${ev.address}-${i}`} ev={ev} />
+            )
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+function UpcomingCard({ ev }: { ev: SharedEvent }) {
+  return (
+    <div className="rounded-md border bg-background/40 p-3">
+      <div className="text-sm font-medium">{eventLocation(ev)}</div>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+        {ev.date ? (
+          <>
+            <Calendar className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="tabular-nums">{formatRelativeDate(ev.date)}</span>
+          </>
+        ) : (
+          <span className="font-medium">TBD</span>
+        )}
+        {ev.start ? <span className="tabular-nums">· {formatTime(ev.start)}</span> : null}
+      </div>
+      {ev.notes ? (
+        <p className="mt-2 text-xs text-muted-foreground">{ev.notes}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function DeliveredCard({
+  ev,
+  onOpen,
+}: {
+  ev: SharedEvent;
+  onOpen: () => void;
+}) {
   const photos = (ev.files ?? []).filter((f) => f.kind === "photo");
-  const videoCount = (ev.files ?? []).filter((f) => f.kind === "video").length;
-  const thumbs = photos.slice(0, 4);
+  const videos = (ev.files ?? []).filter((f) => f.kind === "video");
+  const thumbs = photos.slice(0, 3);
   const overflow = photos.length - thumbs.length;
+  const hasMedia = thumbs.length > 0 || videos.length > 0;
 
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="group flex w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md"
+      disabled={!hasMedia}
+      className={cn(
+        "group flex w-full flex-col overflow-hidden rounded-md border bg-background/40 text-left transition-all",
+        hasMedia
+          ? "hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-sm"
+          : "cursor-default opacity-80"
+      )}
     >
-      {/* Thumbnail mosaic */}
       {thumbs.length > 0 ? (
         <div
           className={cn(
@@ -238,7 +312,7 @@ function ReadyCard({ ev, onOpen }: { ev: SharedEvent; onOpen: () => void }) {
                       className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                     />
                     {i === 1 && overflow > 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-sm font-semibold text-white">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-semibold text-white">
                         +{overflow}
                       </div>
                     ) : null}
@@ -262,107 +336,46 @@ function ReadyCard({ ev, onOpen }: { ev: SharedEvent; onOpen: () => void }) {
             ))
           )}
         </div>
-      ) : (
-        <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted/60 text-muted-foreground">
-          <ImageIcon className="h-8 w-8" aria-hidden />
-        </div>
-      )}
-
-      {/* Details */}
-      <div className="flex flex-col gap-2 p-4">
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-[15px] font-semibold tracking-tight">
-              {eventLocation(ev)}
-            </h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {formatFullDate(ev.date)}
+      ) : null}
+      <div className="flex flex-col gap-2 p-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium">
+            {eventLocation(ev)}
+          </h3>
+          {ev.date ? (
+            <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+              {formatShortDate(ev.date)}
             </p>
-          </div>
+          ) : null}
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            {photos.length ? (
-              <span className="inline-flex items-center gap-1">
-                <ImageIcon className="h-3 w-3" aria-hidden />
-                <span className="tabular-nums">{photos.length}</span>{" "}
-                {photos.length === 1 ? "photo" : "photos"}
-              </span>
-            ) : null}
-            {videoCount ? (
-              <span className="inline-flex items-center gap-1">
-                <span className="tabular-nums">{videoCount}</span>{" "}
-                {videoCount === 1 ? "video" : "videos"}
-              </span>
-            ) : null}
+        {hasMedia ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
+              {photos.length ? (
+                <span className="inline-flex items-center gap-1 tabular-nums">
+                  <ImageIcon className="h-3 w-3" aria-hidden />
+                  {photos.length}
+                </span>
+              ) : null}
+              {videos.length ? (
+                <span className="tabular-nums">{videos.length} video</span>
+              ) : null}
+            </div>
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
+              View
+              <ArrowRight
+                className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </span>
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
-            View &amp; download
-            <ArrowRight
-              className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
-              aria-hidden
-            />
-          </span>
-        </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            Files will appear once delivered.
+          </p>
+        )}
       </div>
     </button>
-  );
-}
-
-/**
- * Forward-looking list of shoots that are scheduled but not yet
- * delivered. Simpler than a kanban — clients think in dates, not
- * workflow columns.
- */
-function UpcomingSection({ events }: { events: SharedEvent[] }) {
-  if (events.length === 0) return null;
-  return (
-    <section className="flex flex-col gap-4">
-      <SectionLabel icon={Calendar}>Coming up</SectionLabel>
-      <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
-        {events.map((ev, i) => {
-          const meta = statusMeta(ev.status);
-          return (
-            <li
-              key={`${ev.date}-${ev.address}-${i}`}
-              className="flex flex-col gap-3 p-4 md:flex-row md:items-start md:gap-6"
-            >
-              <div className="flex shrink-0 items-start gap-3 md:w-44">
-                <div className="flex flex-col">
-                  <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    {formatWeekday(ev.date)}
-                  </span>
-                  <span className="text-sm font-semibold tracking-tight">
-                    {formatMonthDay(ev.date)}
-                  </span>
-                  {ev.start ? (
-                    <span className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-                      {formatSharedTime(ev.start)}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">{eventLocation(ev)}</div>
-                {ev.notes ? (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {ev.notes}
-                  </p>
-                ) : null}
-              </div>
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ background: meta.dot }}
-                  aria-hidden
-                />
-                {meta.chip}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
   );
 }
 
@@ -370,7 +383,7 @@ function SectionLabel({
   icon: Icon,
   children,
 }: {
-  icon: typeof Sparkles;
+  icon: typeof Calendar;
   children: React.ReactNode;
 }) {
   return (
@@ -522,31 +535,44 @@ export function SharedView() {
     return Object.values(raw) as SharedEvent[];
   }, [data]);
 
-  // Split events into "ready" (delivered, has files) and "upcoming"
-  // (anything not yet delivered, sorted soonest-first).
-  const { readyEvents, upcomingEvents } = useMemo(() => {
-    const todayISO = new Date().toISOString().slice(0, 10);
-    const ready: SharedEvent[] = [];
-    const upcoming: SharedEvent[] = [];
+  const lanes = useMemo(() => {
+    const out: Record<
+      (typeof LANES)[number]["id"],
+      SharedEvent[]
+    > = {
+      received: [],
+      pending: [],
+      scheduled: [],
+      delivered: [],
+    };
     for (const ev of events) {
-      const isDelivered =
-        ev.status === "delivered" && (ev.files?.length ?? 0) > 0;
-      if (isDelivered) {
-        ready.push(ev);
-      } else if (ev.date >= todayISO) {
-        upcoming.push(ev);
-      }
+      const lane = laneFor(ev.status);
+      out[lane.id].push(ev);
     }
-    // Ready: newest first (most recent delivery at the top).
-    ready.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-    // Upcoming: earliest first.
-    upcoming.sort(
-      (a, b) =>
-        (a.date || "").localeCompare(b.date || "") ||
-        (a.start || "").localeCompare(b.start || "")
-    );
-    return { readyEvents: ready, upcomingEvents: upcoming };
+    // Sort within each lane: non-delivered by date ascending (soonest
+    // first), delivered by date descending (most recent delivery
+    // first so the freshest shoot is front-and-center).
+    for (const id of Object.keys(out) as (keyof typeof out)[]) {
+      const cmp =
+        id === "delivered"
+          ? (a: SharedEvent, b: SharedEvent) =>
+              (b.date || "").localeCompare(a.date || "")
+          : (a: SharedEvent, b: SharedEvent) =>
+              (a.date || "").localeCompare(b.date || "") ||
+              (a.start || "").localeCompare(b.start || "");
+      out[id].sort(cmp);
+    }
+    return out;
   }, [events]);
+
+  const totals = useMemo(() => {
+    const ready = lanes.delivered.filter(
+      (ev) => (ev.files?.length ?? 0) > 0
+    ).length;
+    const upcoming =
+      lanes.received.length + lanes.pending.length + lanes.scheduled.length;
+    return { ready, upcoming };
+  }, [lanes]);
 
   if (loading) {
     return (
@@ -574,7 +600,7 @@ export function SharedView() {
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-10">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
           <div className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
               <LumeriaLogo className="h-3.5 w-3.5" aria-hidden />
@@ -596,19 +622,14 @@ export function SharedView() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
-        <Hero
-          name={name}
-          company={company}
-          upcoming={upcomingEvents.length}
-          ready={readyEvents.length}
-        />
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
+        <Hero name={name} company={company} totals={totals} />
 
-        {!hasContent ? <EmptyState /> : null}
-
-        <ReadySection events={readyEvents} onOpenGallery={setGalleryEvent} />
-
-        <UpcomingSection events={upcomingEvents} />
+        {!hasContent ? (
+          <EmptyState />
+        ) : events.length > 0 ? (
+          <Board lanes={lanes} onOpenGallery={setGalleryEvent} />
+        ) : null}
 
         {data ? <PricingSection data={data} /> : null}
 
