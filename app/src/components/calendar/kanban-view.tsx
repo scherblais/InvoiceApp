@@ -118,9 +118,15 @@ export function KanbanView({
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="tabular-nums">
-                          {formatShortDate(ev.date)}
-                        </span>
+                        {ev.date ? (
+                          <span className="tabular-nums">
+                            {formatShortDate(ev.date)}
+                          </span>
+                        ) : (
+                          <span className="font-medium text-foreground">
+                            TBD
+                          </span>
+                        )}
                         {ev.start ? (
                           <span className="tabular-nums">
                             · {formatTime12(ev.start)}
@@ -145,15 +151,54 @@ export function KanbanView({
                   );
                 })}
                 {items.length === 0 ? (
-                  <div className="py-4 text-center text-xs text-muted-foreground/60">
-                    Drop here
-                  </div>
+                  <EmptyColumn
+                    label={meta.label}
+                    dot={meta.dot}
+                    isDragTarget={isOver}
+                  />
                 ) : null}
               </div>
             </div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Per-column empty state. Pulls the status color from STATUS_META so
+ * each lane looks distinctly empty-but-present instead of showing a
+ * generic "no items" blob. Morphs into a subtle drop target when a
+ * card is being dragged over the column.
+ */
+function EmptyColumn({
+  label,
+  dot,
+  isDragTarget,
+}: {
+  label: string;
+  dot: string;
+  isDragTarget: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/20 px-3 py-10 text-center transition-colors",
+        isDragTarget && "border-primary bg-primary/5"
+      )}
+    >
+      <span
+        className="h-2 w-2 rounded-full opacity-60"
+        style={{ backgroundColor: dot }}
+        aria-hidden
+      />
+      <p className="text-xs font-medium text-muted-foreground">
+        No {label.toLowerCase()} shoots
+      </p>
+      <p className="text-[10.5px] text-muted-foreground/60">
+        {isDragTarget ? `Drop to mark as ${label.toLowerCase()}` : "Drag a card here"}
+      </p>
     </div>
   );
 }
