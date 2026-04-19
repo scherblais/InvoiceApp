@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+  ArrowRight,
   Calendar,
+  Camera,
   DollarSign,
   Image as ImageIcon,
   Images,
-  List,
   Loader2,
   Moon,
   Package as PackageIcon,
+  Sparkles,
   Sun,
 } from "lucide-react";
 import { ref, onValue, off, db } from "@/lib/firebase";
@@ -16,16 +18,40 @@ import { useTheme } from "@/contexts/theme-context";
 import { Button } from "@/components/ui/button";
 import { LumeriaLogo } from "@/components/lumeria-logo";
 import { DeliveryGallery } from "@/components/shared/delivery-gallery";
-import { COLOR_DOT, type EventColor } from "@/lib/calendar";
+import { COLOR_DOT } from "@/lib/calendar";
 import type { SharedData, SharedEvent } from "@/lib/shared";
 import { cn } from "@/lib/utils";
 
-const SHARED_COLS: { id: string; label: string; dot: string }[] = [
-  { id: "received", label: "Received", dot: COLOR_DOT.rose },
-  { id: "pending", label: "Pending", dot: COLOR_DOT.pink },
-  { id: "scheduled", label: "Scheduled", dot: COLOR_DOT.blue },
-  { id: "delivered", label: "Delivered", dot: COLOR_DOT.green },
-];
+const STATUS_COPY: Record<
+  string,
+  { label: string; dot: string; chip: string }
+> = {
+  received: {
+    label: "Received",
+    dot: COLOR_DOT.rose,
+    chip: "Received",
+  },
+  pending: {
+    label: "Pending",
+    dot: COLOR_DOT.pink,
+    chip: "Confirming",
+  },
+  scheduled: {
+    label: "Scheduled",
+    dot: COLOR_DOT.blue,
+    chip: "Scheduled",
+  },
+  delivered: {
+    label: "Delivered",
+    dot: COLOR_DOT.green,
+    chip: "Delivered",
+  },
+};
+
+function statusMeta(status: string | undefined) {
+  const key = status && STATUS_COPY[status] ? status : "scheduled";
+  return STATUS_COPY[key];
+}
 
 function formatSharedTime(t?: string): string {
   if (!t) return "";
@@ -35,28 +61,30 @@ function formatSharedTime(t?: string): string {
   return `${hr12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-function formatSharedDateLong(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
+function formatWeekday(iso: string): string {
+  const d = new Date(`${iso}T12:00:00`);
   const today = new Date();
   const todayISO = today.toISOString().split("T")[0];
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowISO = tomorrow.toISOString().split("T")[0];
-  const long = d.toLocaleDateString("en-CA", {
+  if (iso === todayISO) return "Today";
+  if (iso === tomorrowISO) return "Tomorrow";
+  return d.toLocaleDateString("en-CA", {
     weekday: "long",
-    month: "long",
-    day: "numeric",
   });
-  if (iso === todayISO) return `Today · ${long}`;
-  if (iso === tomorrowISO) return `Tomorrow · ${long}`;
-  return long;
 }
 
-function formatSharedDate(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
+function formatMonthDay(iso: string): string {
+  const d = new Date(`${iso}T12:00:00`);
+  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+}
+
+function formatFullDate(iso: string): string {
+  const d = new Date(`${iso}T12:00:00`);
   return d.toLocaleDateString("en-CA", {
-    weekday: "short",
-    month: "short",
+    weekday: "long",
+    month: "long",
     day: "numeric",
   });
 }
@@ -69,325 +97,302 @@ function formatDollar(value: number): string {
   });
 }
 
-type ViewMode = "board" | "list";
-type Tab = "appointments" | "pricing";
+function eventLocation(ev: SharedEvent): string {
+  if (ev.unit && ev.address) return `${ev.address}, ${ev.unit}`;
+  return ev.address ?? ev.title ?? "Untitled";
+}
 
-interface CountMap {
+/**
+ * Welcome hero. Large, quiet, confident — the client's name sits as
+ * a display heading, with a thin stat line underneath that avoids
+ * the "SaaS dashboard" feel of a row of stat cards.
+ */
+function Hero({
+  name,
+  company,
+  upcoming,
+  ready,
+}: {
+  name: string;
+  company: string;
   upcoming: number;
-  delivered: number;
-  files: number;
-}
+  ready: number;
+}) {
+  const hour = new Date().getHours();
+  const greet =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-function computeCounts(events: SharedEvent[]): CountMap {
-  const counts: Record<string, number> = {};
-  let files = 0;
-  for (const ev of events) {
-    const s = ev.status || "scheduled";
-    // Legacy statuses collapse into the active bucket — the workflow
-    // doesn't surface Shooting / Editing separately anymore.
-    const bucket = s === "shooting" || s === "editing" ? "scheduled" : s;
-    counts[bucket] = (counts[bucket] ?? 0) + 1;
-    files += ev.files?.length ?? 0;
-  }
-  return {
-    upcoming:
-      (counts.received ?? 0) + (counts.pending ?? 0) + (counts.scheduled ?? 0),
-    delivered: counts.delivered ?? 0,
-    files,
-  };
-}
-
-function Empty({ title, sub }: { title: string; sub: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed bg-background p-14 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-muted/40 text-muted-foreground">
-        <Calendar className="h-5 w-5" aria-hidden />
+    <section className="flex flex-col gap-5 pb-2">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-muted-foreground">{greet},</span>
+        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          {name || "Welcome"}
+        </h1>
+        {company ? (
+          <p className="text-sm text-muted-foreground">{company}</p>
+        ) : null}
       </div>
-      <div>
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-sm text-muted-foreground">{sub}</p>
-      </div>
-    </div>
+      {upcoming + ready > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          {ready > 0 ? (
+            <span className="inline-flex items-center gap-2">
+              <Camera
+                className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400"
+                aria-hidden
+              />
+              <span>
+                <span className="font-medium text-foreground tabular-nums">
+                  {ready}
+                </span>{" "}
+                {ready === 1 ? "delivery ready" : "deliveries ready"}
+              </span>
+            </span>
+          ) : null}
+          {upcoming > 0 ? (
+            <span className="inline-flex items-center gap-2">
+              <Calendar
+                className="h-3.5 w-3.5 text-muted-foreground"
+                aria-hidden
+              />
+              <span>
+                <span className="font-medium text-foreground tabular-nums">
+                  {upcoming}
+                </span>{" "}
+                {upcoming === 1 ? "shoot coming up" : "shoots coming up"}
+              </span>
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
 /**
- * Compact summary + "View & download" button shown inline on each
- * event card. The actual gallery opens in a full-screen modal so the
- * client can browse thumbnails, preview in a lightbox, and grab
- * everything as a zip.
+ * The payoff section — delivered shoots with real photo thumbnails.
+ * This is what the client came here for, so it leads with visuals
+ * instead of metadata.
  */
-function FilesBadge({
-  files,
-  onOpen,
+function ReadySection({
+  events,
+  onOpenGallery,
 }: {
-  files: SharedEvent["files"];
-  onOpen: () => void;
+  events: SharedEvent[];
+  onOpenGallery: (ev: SharedEvent) => void;
 }) {
-  if (!files || !files.length) return null;
-  const photos = files.filter((f) => f.kind === "photo").length;
-  const videos = files.filter((f) => f.kind === "video").length;
-  const parts: string[] = [];
-  if (photos) parts.push(`${photos} ${photos === 1 ? "photo" : "photos"}`);
-  if (videos) parts.push(`${videos} ${videos === 1 ? "video" : "videos"}`);
+  if (events.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-4">
+      <SectionLabel icon={Sparkles}>Ready for you</SectionLabel>
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {events.map((ev) => (
+          <li key={`${ev.date}-${ev.address}`}>
+            <ReadyCard ev={ev} onOpen={() => onOpenGallery(ev)} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ReadyCard({ ev, onOpen }: { ev: SharedEvent; onOpen: () => void }) {
+  const photos = (ev.files ?? []).filter((f) => f.kind === "photo");
+  const videoCount = (ev.files ?? []).filter((f) => f.kind === "video").length;
+  const thumbs = photos.slice(0, 4);
+  const overflow = photos.length - thumbs.length;
+
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="mt-3 flex w-full items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-left text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex w-full flex-col overflow-hidden rounded-xl border bg-card text-left shadow-xs transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md"
     >
-      <Images className="h-4 w-4 shrink-0" aria-hidden />
-      <span className="min-w-0 flex-1">
-        View &amp; download
-        <span className="ml-1 font-normal text-muted-foreground">
-          · {parts.join(" · ")}
-        </span>
-      </span>
-      <span className="shrink-0 text-muted-foreground">→</span>
+      {/* Thumbnail mosaic */}
+      {thumbs.length > 0 ? (
+        <div
+          className={cn(
+            "grid gap-px bg-border",
+            thumbs.length === 1 && "grid-cols-1",
+            thumbs.length === 2 && "grid-cols-2",
+            thumbs.length >= 3 && "grid-cols-[2fr_1fr]"
+          )}
+        >
+          {thumbs.length >= 3 ? (
+            <>
+              <div className="aspect-[4/3] bg-muted">
+                <img
+                  src={thumbs[0].compressed?.url ?? thumbs[0].original.url}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                />
+              </div>
+              <div className="grid grid-rows-2 gap-px">
+                {thumbs.slice(1, 3).map((t, i) => (
+                  <div key={i} className="relative bg-muted">
+                    <img
+                      src={t.compressed?.url ?? t.original.url}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                    />
+                    {i === 1 && overflow > 0 ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-sm font-semibold text-white">
+                        +{overflow}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            thumbs.map((t, i) => (
+              <div
+                key={i}
+                className="aspect-[4/3] bg-muted overflow-hidden"
+              >
+                <img
+                  src={t.compressed?.url ?? t.original.url}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                />
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted/60 text-muted-foreground">
+          <ImageIcon className="h-8 w-8" aria-hidden />
+        </div>
+      )}
+
+      {/* Details */}
+      <div className="flex flex-col gap-2 p-4">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-[15px] font-semibold tracking-tight">
+              {eventLocation(ev)}
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {formatFullDate(ev.date)}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {photos.length ? (
+              <span className="inline-flex items-center gap-1">
+                <ImageIcon className="h-3 w-3" aria-hidden />
+                <span className="tabular-nums">{photos.length}</span>{" "}
+                {photos.length === 1 ? "photo" : "photos"}
+              </span>
+            ) : null}
+            {videoCount ? (
+              <span className="inline-flex items-center gap-1">
+                <span className="tabular-nums">{videoCount}</span>{" "}
+                {videoCount === 1 ? "video" : "videos"}
+              </span>
+            ) : null}
+          </div>
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+            View &amp; download
+            <ArrowRight
+              className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </span>
+        </div>
+      </div>
     </button>
   );
 }
 
-function SharedBoard({
-  events,
-  onOpenGallery,
-}: {
-  events: SharedEvent[];
-  onOpenGallery: (ev: SharedEvent) => void;
-}) {
-  const byStatus = useMemo(() => {
-    const map = new Map<string, SharedEvent[]>();
-    for (const col of SHARED_COLS) map.set(col.id, []);
-    for (const ev of events) {
-      const s = ev.status || "scheduled";
-      const bucket = s === "shooting" || s === "editing" ? "scheduled" : s;
-      (map.get(bucket) ?? map.get("scheduled"))?.push(ev);
-    }
-    for (const list of map.values()) {
-      list.sort(
-        (a, b) =>
-          (a.date || "").localeCompare(b.date || "") ||
-          (a.start || "").localeCompare(b.start || "")
-      );
-    }
-    return map;
-  }, [events]);
-
-  // Every lane always renders so the board reads as a complete
-  // pipeline even when some stages are empty — clients can see at a
-  // glance where their shoots are in the workflow. The outer
-  // "No appointments at all" empty state fires only when there's
-  // zero activity period.
-  if (events.length === 0) {
-    return (
-      <Empty
-        title="No appointments yet"
-        sub="Your photographer will share upcoming shoots here."
-      />
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-      {SHARED_COLS.map((col) => {
-        const list = byStatus.get(col.id) ?? [];
-        return (
-          <div
-            key={col.id}
-            className="flex flex-col gap-2 rounded-lg border bg-card p-3"
-          >
-            <div className="flex items-center gap-2 px-1 text-sm font-semibold">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ background: col.dot }}
-              />
-              <span>{col.label}</span>
-              <span className="ml-auto text-xs font-normal text-muted-foreground">
-                {list.length}
-              </span>
-            </div>
-            <div className="flex flex-1 flex-col gap-2">
-              {list.length === 0 ? (
-                <SharedEmptyColumn label={col.label} dot={col.dot} />
-              ) : (
-                list.map((ev, i) => {
-                  const loc = ev.unit
-                    ? `${ev.address}, ${ev.unit}`
-                    : ev.address ?? ev.title ?? "";
-                  const timeStr = ev.start ? formatSharedTime(ev.start) : "";
-                  return (
-                    <div
-                      key={`${ev.date}-${ev.start}-${i}`}
-                      className="rounded-md border bg-background/50 p-3"
-                    >
-                      <div className="text-sm font-medium">{loc}</div>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" aria-hidden />
-                        <span>
-                          {formatSharedDate(ev.date)}
-                          {timeStr ? ` · ${timeStr}` : ""}
-                        </span>
-                      </div>
-                      {ev.notes ? (
-                        <div className="mt-2 border-t pt-2 text-xs text-muted-foreground">
-                          {ev.notes}
-                        </div>
-                      ) : null}
-                      <FilesBadge
-                        files={ev.files}
-                        onOpen={() => onOpenGallery(ev)}
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 /**
- * Per-lane empty state on the client-facing board. Read-only — no
- * "drag a card here" copy since clients can't edit. Just a quiet
- * acknowledgement that the stage is currently empty so the
- * pipeline still reads as four lanes instead of collapsing.
+ * Forward-looking list of shoots that are scheduled but not yet
+ * delivered. Simpler than a kanban — clients think in dates, not
+ * workflow columns.
  */
-function SharedEmptyColumn({
-  label,
-  dot,
-}: {
-  label: string;
-  dot: string;
-}) {
-  const copy: Record<string, string> = {
-    Received: "No new inquiries yet.",
-    Pending: "Nothing pending.",
-    Scheduled: "Nothing booked here.",
-    Delivered: "No deliveries yet.",
-  };
+function UpcomingSection({ events }: { events: SharedEvent[] }) {
+  if (events.length === 0) return null;
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-background/30 px-3 py-8 text-center">
-      <span
-        className="h-2 w-2 rounded-full opacity-60"
-        style={{ background: dot }}
-        aria-hidden
-      />
-      <p className="text-xs text-muted-foreground">
-        {copy[label] ?? `No ${label.toLowerCase()} shoots.`}
-      </p>
+    <section className="flex flex-col gap-4">
+      <SectionLabel icon={Calendar}>Coming up</SectionLabel>
+      <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        {events.map((ev, i) => {
+          const meta = statusMeta(ev.status);
+          return (
+            <li
+              key={`${ev.date}-${ev.address}-${i}`}
+              className="flex flex-col gap-3 p-4 md:flex-row md:items-start md:gap-6"
+            >
+              <div className="flex shrink-0 items-start gap-3 md:w-44">
+                <div className="flex flex-col">
+                  <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    {formatWeekday(ev.date)}
+                  </span>
+                  <span className="text-sm font-semibold tracking-tight">
+                    {formatMonthDay(ev.date)}
+                  </span>
+                  {ev.start ? (
+                    <span className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                      {formatSharedTime(ev.start)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium">{eventLocation(ev)}</div>
+                {ev.notes ? (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {ev.notes}
+                  </p>
+                ) : null}
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: meta.dot }}
+                  aria-hidden
+                />
+                {meta.chip}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function SectionLabel({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof Sparkles;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {children}
+      </h2>
     </div>
   );
 }
 
-function SharedList({
-  events,
-  onOpenGallery,
-}: {
-  events: SharedEvent[];
-  onOpenGallery: (ev: SharedEvent) => void;
-}) {
-  const sorted = useMemo(
-    () =>
-      [...events].sort(
-        (a, b) =>
-          (a.date || "").localeCompare(b.date || "") ||
-          (a.start || "").localeCompare(b.start || "")
-      ),
-    [events]
-  );
-
-  const byDate = useMemo(() => {
-    const map = new Map<string, SharedEvent[]>();
-    for (const ev of sorted) {
-      const list = map.get(ev.date) ?? [];
-      list.push(ev);
-      map.set(ev.date, list);
-    }
-    return map;
-  }, [sorted]);
-
-  const dates = Array.from(byDate.keys()).sort();
-  if (!dates.length) {
-    return (
-      <Empty
-        title="No appointments yet"
-        sub="Your photographer will share upcoming shoots here."
-      />
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      {dates.map((date) => {
-        const evs = byDate.get(date) ?? [];
-        return (
-          <section key={date} className="flex flex-col gap-2">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {formatSharedDateLong(date)}
-            </div>
-            <div className="flex flex-col divide-y overflow-hidden rounded-lg border bg-card">
-              {evs.map((ev, i) => {
-                const loc = ev.unit ? `${ev.address}, ${ev.unit}` : ev.address ?? ev.title ?? "";
-                const timeStr = ev.start ? formatSharedTime(ev.start) : "—";
-                const col =
-                  SHARED_COLS.find((c) => c.id === (ev.status || "scheduled")) ??
-                  SHARED_COLS[2];
-                return (
-                  <div
-                    key={`${ev.date}-${ev.start}-${i}`}
-                    className="flex flex-col gap-3 p-4 md:flex-row md:items-start"
-                  >
-                    <div className="min-w-16 shrink-0 text-sm font-medium tabular-nums text-muted-foreground">
-                      {timeStr}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">{loc}</div>
-                      {ev.notes ? (
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {ev.notes}
-                        </div>
-                      ) : null}
-                      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
-                        <span
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{ background: col.dot }}
-                        />
-                        <span>{col.label}</span>
-                      </div>
-                      <FilesBadge
-                        files={ev.files}
-                        onOpen={() => onOpenGallery(ev)}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
-}
-
-function SharedPricingView({ data }: { data: SharedData }) {
+function PricingSection({ data }: { data: SharedData }) {
   const pricing = data.pricing;
-  if (!pricing) {
-    return (
-      <Empty
-        title="No pricing shared yet"
-        sub="Your photographer hasn't published pricing for you. It'll show up here automatically once they do."
-      />
-    );
-  }
+  if (!pricing) return null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <section className="flex flex-col gap-4">
+      <SectionLabel icon={PackageIcon}>Your pricing</SectionLabel>
+
       {pricing.discount ? (
-        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <DollarSign className="h-4 w-4" aria-hidden />
           </div>
@@ -400,75 +405,82 @@ function SharedPricingView({ data }: { data: SharedData }) {
         </div>
       ) : null}
 
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-          <PackageIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
-          Packages
-        </h2>
-        <ul className="flex flex-col divide-y overflow-hidden rounded-lg border bg-card">
-          {pricing.packages.map((p) => (
-            <li
-              key={p.id}
-              className="flex items-center gap-4 p-4"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium">{p.name}</div>
-                {p.extraLabel && p.extraPrice ? (
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    + {formatDollar(p.extraPrice)} per extra{" "}
-                    {p.extraLabel.toLowerCase().replace("extra ", "")}
-                  </div>
-                ) : null}
-              </div>
-              <div className="shrink-0 text-right text-sm font-semibold tabular-nums">
-                {formatDollar(p.price)}
-              </div>
-            </li>
-          ))}
-          {pricing.packages.length === 0 ? (
-            <li className="p-4 text-center text-sm text-muted-foreground">
-              No packages configured.
-            </li>
-          ) : null}
-        </ul>
-      </section>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Packages
+          </h3>
+          <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+            {pricing.packages.map((p) => (
+              <li key={p.id} className="flex items-center gap-4 p-4">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">{p.name}</div>
+                  {p.extraLabel && p.extraPrice ? (
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      + {formatDollar(p.extraPrice)} per extra{" "}
+                      {p.extraLabel.toLowerCase().replace("extra ", "")}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="shrink-0 text-right text-sm font-semibold tabular-nums">
+                  {formatDollar(p.price)}
+                </div>
+              </li>
+            ))}
+            {pricing.packages.length === 0 ? (
+              <li className="p-4 text-center text-sm text-muted-foreground">
+                No packages configured.
+              </li>
+            ) : null}
+          </ul>
+        </div>
 
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-          <ImageIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
-          Add-ons
-        </h2>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {pricing.addons.map((a) => (
-            <li
-              key={a.id}
-              className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium">{a.name}</div>
-                {a.qty ? (
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    Per unit
-                  </div>
-                ) : null}
-              </div>
-              <div className="shrink-0 text-sm font-semibold tabular-nums">
-                {formatDollar(a.price)}
-              </div>
-            </li>
-          ))}
-          {pricing.addons.length === 0 ? (
-            <li className="p-4 text-center text-sm text-muted-foreground">
-              No add-ons configured.
-            </li>
-          ) : null}
-        </ul>
-      </section>
+        <div className="flex flex-col gap-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Add-ons</h3>
+          <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+            {pricing.addons.map((a) => (
+              <li key={a.id} className="flex items-center gap-4 p-4">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">{a.name}</div>
+                  {a.qty ? (
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">
+                      Per unit
+                    </div>
+                  ) : null}
+                </div>
+                <div className="shrink-0 text-sm font-semibold tabular-nums">
+                  {formatDollar(a.price)}
+                </div>
+              </li>
+            ))}
+            {pricing.addons.length === 0 ? (
+              <li className="p-4 text-center text-sm text-muted-foreground">
+                No add-ons configured.
+              </li>
+            ) : null}
+          </ul>
+        </div>
+      </div>
 
       <p className="text-[11px] text-muted-foreground">
-        Prices shown reflect your account. Taxes (GST 5% + QST 9.975%)
-        are added on the invoice.
+        Taxes (GST 5% + QST 9.975%) added on the invoice.
       </p>
+    </section>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-card p-14 text-center shadow-xs">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-muted/40 text-muted-foreground">
+        <Calendar className="h-5 w-5" aria-hidden />
+      </div>
+      <div>
+        <p className="text-sm font-medium">Nothing here yet</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your photographer will share upcoming shoots and deliveries here.
+        </p>
+      </div>
     </div>
   );
 }
@@ -479,10 +491,6 @@ export function SharedView() {
   const [data, setData] = useState<SharedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<ViewMode>(() =>
-    (localStorage.getItem("shared_view_mode") as ViewMode) || "board"
-  );
-  const [tab, setTab] = useState<Tab>("appointments");
   const [galleryEvent, setGalleryEvent] = useState<SharedEvent | null>(null);
   const { theme, toggleTheme } = useTheme();
 
@@ -508,24 +516,37 @@ export function SharedView() {
     return () => off(r, "value", listener);
   }, [token]);
 
-  const handleSetMode = (m: ViewMode) => {
-    setMode(m);
-    localStorage.setItem("shared_view_mode", m);
-  };
-
   const events = useMemo(() => {
     const raw = data?.events ?? [];
     if (Array.isArray(raw)) return raw;
     return Object.values(raw) as SharedEvent[];
   }, [data]);
 
-  const counts = useMemo(() => computeCounts(events), [events]);
-
-  const hour = new Date().getHours();
-  const greet =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const name = data?.realtorName || "";
-  const company = data?.realtorCompany || "";
+  // Split events into "ready" (delivered, has files) and "upcoming"
+  // (anything not yet delivered, sorted soonest-first).
+  const { readyEvents, upcomingEvents } = useMemo(() => {
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const ready: SharedEvent[] = [];
+    const upcoming: SharedEvent[] = [];
+    for (const ev of events) {
+      const isDelivered =
+        ev.status === "delivered" && (ev.files?.length ?? 0) > 0;
+      if (isDelivered) {
+        ready.push(ev);
+      } else if (ev.date >= todayISO) {
+        upcoming.push(ev);
+      }
+    }
+    // Ready: newest first (most recent delivery at the top).
+    ready.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    // Upcoming: earliest first.
+    upcoming.sort(
+      (a, b) =>
+        (a.date || "").localeCompare(b.date || "") ||
+        (a.start || "").localeCompare(b.start || "")
+    );
+    return { readyEvents: ready, upcomingEvents: upcoming };
+  }, [events]);
 
   if (loading) {
     return (
@@ -537,7 +558,7 @@ export function SharedView() {
 
   if (error || !token) {
     return (
-      <div className="flex min-h-svh flex-col items-center justify-center bg-background p-6 text-center">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-2 bg-background p-6 text-center">
         <p className="text-sm font-medium">Can't load this page</p>
         <p className="text-sm text-muted-foreground">
           {error ?? "This share link is missing or invalid."}
@@ -546,12 +567,18 @@ export function SharedView() {
     );
   }
 
+  const name = data?.realtorName || "";
+  const company = data?.realtorCompany || "";
+  const hasContent = events.length > 0 || !!data?.pricing;
+
   return (
     <div className="min-h-svh bg-background">
-      <header className="border-b">
+      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-10">
-          <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-            <LumeriaLogo className="h-4 w-4 text-primary" aria-hidden />
+          <div className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
+              <LumeriaLogo className="h-3.5 w-3.5" aria-hidden />
+            </div>
             Lumeria Media
           </div>
           <Button
@@ -569,158 +596,34 @@ export function SharedView() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-6 py-10 md:px-10">
-        {/* Hero */}
-        <div className="mb-10">
-          <div className="text-sm text-muted-foreground">{greet}</div>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-            {name || "Your Shoots"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {company
-              ? `${company} · Live status from Lumeria Media`
-              : "Live status from Lumeria Media"}
-          </p>
-        </div>
+      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-10 md:gap-14 md:px-10 md:py-14">
+        <Hero
+          name={name}
+          company={company}
+          upcoming={upcomingEvents.length}
+          ready={readyEvents.length}
+        />
 
-        {/* Top-level tabs */}
-        <div className="mb-8 flex gap-1 border-b">
-          <button
-            type="button"
-            onClick={() => setTab("appointments")}
-            className={cn(
-              "relative px-3 py-2 text-sm font-medium transition-colors",
-              tab === "appointments"
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Appointments
-            <span
-              className={cn(
-                "absolute inset-x-0 -bottom-px h-0.5 bg-primary transition-opacity",
-                tab === "appointments" ? "opacity-100" : "opacity-0"
-              )}
-              aria-hidden
-            />
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("pricing")}
-            className={cn(
-              "relative px-3 py-2 text-sm font-medium transition-colors",
-              tab === "pricing"
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Pricing
-            <span
-              className={cn(
-                "absolute inset-x-0 -bottom-px h-0.5 bg-primary transition-opacity",
-                tab === "pricing" ? "opacity-100" : "opacity-0"
-              )}
-              aria-hidden
-            />
-          </button>
-        </div>
+        {!hasContent ? <EmptyState /> : null}
 
-        <div
-          key={tab}
-          className="animate-in fade-in-0 duration-150 ease-out motion-reduce:animate-none"
-        >
-        {tab === "appointments" ? (
-          data && events.length > 0 ? (
-            <>
-              {/* Stats */}
-              <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
-                <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ background: COLOR_DOT.blue as EventColor }}
-                  />
-                  <div>
-                    <div className="text-xl font-semibold tabular-nums">
-                      {counts.upcoming}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Upcoming</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ background: COLOR_DOT.green as EventColor }}
-                  />
-                  <div>
-                    <div className="text-xl font-semibold tabular-nums">
-                      {counts.delivered}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Delivered</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-                  <Images className="h-4 w-4 text-muted-foreground" aria-hidden />
-                  <div>
-                    <div className="text-xl font-semibold tabular-nums">
-                      {counts.files}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Files ready</div>
-                  </div>
-                </div>
-              </div>
+        <ReadySection events={readyEvents} onOpenGallery={setGalleryEvent} />
 
-              {/* Toolbar */}
-              <div className="mb-4 flex items-center justify-end gap-1">
-                <Button
-                  variant={mode === "board" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleSetMode("board")}
-                >
-                  <Calendar className="mr-1.5 h-4 w-4" aria-hidden />
-                  Board
-                </Button>
-                <Button
-                  variant={mode === "list" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleSetMode("list")}
-                >
-                  <List className="mr-1.5 h-4 w-4" aria-hidden />
-                  List
-                </Button>
-              </div>
+        <UpcomingSection events={upcomingEvents} />
 
-              {mode === "board" ? (
-                <SharedBoard
-                  events={events}
-                  onOpenGallery={setGalleryEvent}
-                />
-              ) : (
-                <SharedList
-                  events={events}
-                  onOpenGallery={setGalleryEvent}
-                />
-              )}
-            </>
-          ) : (
-            <Empty
-              title="No appointments yet"
-              sub="Your photographer will share upcoming shoots here."
-            />
-          )
-        ) : null}
+        {data ? <PricingSection data={data} /> : null}
 
-        {tab === "pricing" && data ? <SharedPricingView data={data} /> : null}
-        </div>
+        <footer className="mt-4 border-t pt-6 text-center text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-center gap-1.5">
+            <Images className="h-3 w-3" aria-hidden />
+            <span>Delivered by Lumeria Media</span>
+          </div>
+        </footer>
       </div>
 
       {galleryEvent ? (
         <DeliveryGallery
-          title={
-            galleryEvent.unit
-              ? `${galleryEvent.address ?? galleryEvent.title}, ${galleryEvent.unit}`
-              : galleryEvent.address ?? galleryEvent.title ?? "Delivery"
-          }
-          subtitle={formatSharedDateLong(galleryEvent.date)}
+          title={eventLocation(galleryEvent)}
+          subtitle={formatFullDate(galleryEvent.date)}
           files={galleryEvent.files ?? []}
           addressHint={galleryEvent.address}
           onClose={() => setGalleryEvent(null)}
