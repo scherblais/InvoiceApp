@@ -47,10 +47,26 @@ function DialogOverlay({
   )
 }
 
+/**
+ * Google Places Autocomplete portals its suggestion dropdown (.pac-
+ * container) to document.body, which Radix's Dialog then interprets
+ * as "outside" the dialog. Result: clicking a suggestion was closing
+ * the dialog before the selection could register, so only the
+ * keyboard flow worked. Swallowing outside-interactions that
+ * originate inside a .pac-container keeps the dialog open while
+ * Google's own handlers commit the pick.
+ */
+function isInsidePacContainer(target: EventTarget | null): boolean {
+  if (!target || !(target instanceof Element)) return false;
+  return !!target.closest(".pac-container");
+}
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onPointerDownOutside,
+  onInteractOutside,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -60,6 +76,20 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        onPointerDownOutside={(e) => {
+          if (isInsidePacContainer(e.target)) {
+            e.preventDefault();
+            return;
+          }
+          onPointerDownOutside?.(e);
+        }}
+        onInteractOutside={(e) => {
+          if (isInsidePacContainer(e.target)) {
+            e.preventDefault();
+            return;
+          }
+          onInteractOutside?.(e);
+        }}
         className={cn(
           "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border bg-background p-6 shadow-xl duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
           className

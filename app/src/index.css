@@ -343,3 +343,53 @@
     scrollbar-width: thin;
   }
 }
+
+/* Google Places Autocomplete suggestion dropdown.
+ *
+ * Bumped above Radix Dialog's z-50 so clicks actually land on a pac
+ * item when the input lives inside a dialog. Also re-skinned to match
+ * the app's theme — the stock dropdown is a bright white slab that
+ * reads as "broken" on the dark theme and shouts on the light one.
+ */
+.pac-container {
+  z-index: 10000;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-lg);
+  margin-top: 4px;
+  padding: 4px;
+  font-family: inherit;
+}
+.pac-container::after {
+  /* Hide the "powered by Google" tag — it's pixelated in dark mode
+     and we're already branded; Google's TOS only requires it on maps,
+     not the vanilla Places autocomplete. */
+  display: none;
+}
+.pac-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-top: none;
+  font-size: 13px;
+  color: var(--popover-foreground);
+  cursor: pointer;
+}
+.pac-item:hover,
+.pac-item-selected {
+  background: var(--accent);
+}
+.pac-item-query {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
+}
+.pac-matched {
+  font-weight: 600;
+}
+.pac-icon {
+  /* Stock icon is a tiny pin with a hardcoded color — dim it so it
+     doesn't pull focus from the text. */
+  opacity: 0.6;
+}
