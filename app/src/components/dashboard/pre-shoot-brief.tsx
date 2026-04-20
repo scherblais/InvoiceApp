@@ -166,12 +166,10 @@ export function PreShootBrief({ event, client, config }: PreShootBriefProps) {
     : "Up next";
 
   return (
-    <Card className="relative overflow-hidden gap-0 p-0 shadow-sm dark:shadow-glow-md">
-      {/* Header band — carries a bloom backdrop so the eye lands
-          here first. Stronger in dark mode where the glow reads. */}
-      <div className="relative flex flex-col gap-2 overflow-hidden border-b bg-gradient-to-br from-primary/5 to-transparent bloom-accent px-6 py-5 md:flex-row md:items-center md:justify-between">
+    <Card className="relative overflow-hidden gap-0 p-0 shadow-sm">
+      <div className="relative flex flex-col gap-2 overflow-hidden border-b bg-gradient-to-br from-primary/5 to-transparent px-6 py-5 md:flex-row md:items-center md:justify-between">
         <div className="relative flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-glow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Sparkles className="h-4 w-4" aria-hidden />
           </div>
           <div className="min-w-0">

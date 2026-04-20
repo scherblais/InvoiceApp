@@ -65,7 +65,6 @@ export function InvoiceDocument({
             {draft ? null : (
               <StatusBadge
                 kind={paid ? "paid" : overdue ? "overdue" : "unpaid"}
-                size="md"
               />
             )}
             <span>

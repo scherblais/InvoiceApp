@@ -7,8 +7,6 @@ import {
   LogOut,
   Moon,
   Sun,
-  ChevronRight,
-  ChevronsUpDown,
 } from "lucide-react";
 import { LumeriaLogo } from "@/components/lumeria-logo";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -18,17 +16,13 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
 import { ActivityBell } from "@/components/activity-bell";
@@ -45,63 +39,35 @@ export function AppSidebar() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const initials = user?.email
-    ? user.email.slice(0, 2).toUpperCase()
-    : "LM";
+  const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "LM";
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-2 py-0">
-        {/* Brand block styled like AlignUI's workspace selector — even
-           though we only have one workspace, the chevron + hover state
-           signals "this is the identity block" and gives the top of
-           the sidebar a clear anchor. */}
-        <button
-          type="button"
-          className="flex h-12 items-center gap-2.5 rounded-lg px-2 text-left transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-sidebar"
-        >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="app-header justify-center border-b px-4 py-0">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <LumeriaLogo className="h-4 w-4" />
           </div>
-          <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
-            <span className="truncate text-sm font-semibold leading-tight tracking-tight">
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-semibold leading-tight">
               Lumeria Media
             </span>
-            <span className="truncate text-[11px] text-muted-foreground">
-              Invoicing
-            </span>
+            <span className="text-xs text-muted-foreground">Invoicing</span>
           </div>
-          <ChevronsUpDown
-            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70 group-data-[collapsible=icon]:hidden"
-            aria-hidden
-          />
-        </button>
+        </div>
       </SidebarHeader>
 
-      <SidebarContent className="gap-0">
-        <SidebarGroup className="py-3">
-          <SidebarGroupLabel className="px-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
-            Main
-          </SidebarGroupLabel>
+      <SidebarContent>
+        <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu>
               {nav.map((item) => (
                 <SidebarMenuItem key={item.to}>
                   <NavLink to={item.to} end={item.to === "/"}>
                     {({ isActive }) => (
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        tooltip={item.label}
-                        className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-card data-[active=true]:text-foreground data-[active=true]:shadow-sm data-[active=true]:ring-1 data-[active=true]:ring-inset data-[active=true]:ring-border data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground dark:data-[active=true]:before:shadow-[0_0_14px_rgb(255_255_255/0.45)] group-data-[collapsible=icon]:data-[active=true]:before:hidden"
-                      >
+                      <SidebarMenuButton isActive={isActive} tooltip={item.label}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
-                        {isActive ? (
-                          <ChevronRight
-                            className="ml-auto h-3.5 w-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden"
-                            aria-hidden
-                          />
-                        ) : null}
                       </SidebarMenuButton>
                     )}
                   </NavLink>
@@ -112,14 +78,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="gap-1 border-t py-2">
-        <SidebarMenu className="gap-0.5">
+      <SidebarFooter className="border-t">
+        <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={toggleTheme}
-              tooltip="Toggle theme"
-              className="h-9 text-[13px] font-medium"
-            >
+            <SidebarMenuButton onClick={toggleTheme} tooltip="Toggle theme">
               {theme === "dark" ? (
                 <Sun className="h-4 w-4" />
               ) : (
@@ -131,30 +93,18 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <NavLink to="/settings">
               {({ isActive }) => (
-                <SidebarMenuButton
-                  isActive={isActive}
-                  tooltip="Settings"
-                  className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-card data-[active=true]:text-foreground data-[active=true]:shadow-sm data-[active=true]:ring-1 data-[active=true]:ring-inset data-[active=true]:ring-border data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground dark:data-[active=true]:before:shadow-[0_0_14px_rgb(255_255_255/0.45)] group-data-[collapsible=icon]:data-[active=true]:before:hidden"
-                >
+                <SidebarMenuButton isActive={isActive} tooltip="Settings">
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
-                  {isActive ? (
-                    <ChevronRight
-                      className="ml-auto h-3.5 w-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden"
-                      aria-hidden
-                    />
-                  ) : null}
                 </SidebarMenuButton>
               )}
             </NavLink>
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <div className="mx-2 mt-1 flex items-center gap-2 rounded-lg border bg-card px-2 py-2 shadow-xs group-data-[collapsible=icon]:hidden">
+        <div className="flex items-center gap-2 px-2 py-2 group-data-[collapsible=icon]:hidden">
           <Avatar className="h-8 w-8">
-            <AvatarFallback
-              className="bg-muted text-[11px] font-semibold"
-            >
+            <AvatarFallback className="text-[11px] font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>

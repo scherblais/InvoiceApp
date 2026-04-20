@@ -168,7 +168,7 @@ function TodayRow({
             {event.start ? formatTime12(event.start) : "All day"}
           </div>
           {isUpNext ? (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/30 dark:shadow-[0_0_10px_rgb(255_255_255/0.2)]">
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/30">
               <Sparkles className="h-2.5 w-2.5" aria-hidden />
               Up next
             </span>
