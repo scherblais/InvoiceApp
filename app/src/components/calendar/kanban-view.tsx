@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
-import { Paperclip } from "lucide-react";
+import { MapPin, Paperclip } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 import {
+  COLOR_CHIP_DARK,
+  COLOR_CHIP_LIGHT,
   COLOR_DOT,
   STATUS_META,
   STATUS_ORDER,
@@ -26,6 +29,7 @@ export function KanbanView({
   onEventClick,
   onStatusChange,
 }: KanbanViewProps) {
+  const { theme } = useTheme();
   const [dragOver, setDragOver] = useState<EventStatus | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -46,9 +50,16 @@ export function KanbanView({
     return buckets;
   }, [events]);
 
+  const chipPalette = theme === "dark" ? COLOR_CHIP_DARK : COLOR_CHIP_LIGHT;
+
+  // Grid layout — columns divide the available width evenly on desktop
+  // and stack on narrower viewports so nothing gets squeezed into a
+  // horizontal scroll trench like the old fixed-width rail. Matches
+  // the AlignUI week-view treatment where every column carries equal
+  // visual weight.
   return (
-    <div className="flex-1 overflow-x-auto p-4 md:p-6">
-      <div className="flex h-full gap-3 min-w-max">
+    <div className="flex-1 overflow-hidden p-4 md:p-6">
+      <div className="grid h-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {STATUS_ORDER.map((status) => {
           const items = columns.get(status) ?? [];
           const meta = STATUS_META[status];
@@ -70,27 +81,33 @@ export function KanbanView({
                 if (id) onStatusChange(id, status);
               }}
               className={cn(
-                "flex h-full w-72 shrink-0 flex-col rounded-lg border bg-muted/20 transition-colors",
-                isOver && "border-primary bg-primary/5"
+                "flex min-h-0 flex-col overflow-hidden rounded-xl border bg-muted/20 transition-colors",
+                isOver && "border-primary bg-primary/5 ring-2 ring-primary/20"
               )}
             >
-              <header className="flex items-center justify-between border-b px-3 py-2">
+              <header className="flex items-center justify-between border-b bg-background/60 px-3.5 py-2.5 backdrop-blur-sm">
                 <div className="flex items-center gap-2">
                   <span
                     style={{ backgroundColor: meta.dot }}
                     className="h-2 w-2 rounded-full"
                   />
-                  <span className="text-sm font-medium">{meta.label}</span>
+                  <span className="text-[13px] font-semibold tracking-tight">
+                    {meta.label}
+                  </span>
+                  <span className="rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground tabular-nums">
+                    {items.length}
+                  </span>
                 </div>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">
-                  {items.length}
-                </span>
               </header>
-              <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
                 {items.map((ev) => {
                   const color = eventColor(ev, clientById);
+                  const chip = chipPalette[color];
                   const cid = eventClientId(ev);
                   const client = cid ? clientById.get(cid) : null;
+                  const address = ev.unit
+                    ? `${ev.address}, Apt ${ev.unit}`
+                    : ev.address ?? "";
                   return (
                     <button
                       key={ev.id}
@@ -103,48 +120,71 @@ export function KanbanView({
                       }}
                       onDragEnd={() => setDraggingId(null)}
                       onClick={() => onEventClick(ev.id)}
+                      style={{ backgroundColor: chip.bg }}
                       className={cn(
-                        "group flex flex-col gap-1.5 rounded-md border bg-background p-2.5 text-left transition-all hover:border-foreground/20",
+                        // Pastel tonal card — pulls bg from the event's
+                        // color palette so scanning the board by
+                        // category is as fast as scanning by status.
+                        "group flex cursor-grab flex-col gap-1.5 rounded-lg p-3 text-left ring-1 ring-inset ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-sm active:cursor-grabbing dark:ring-white/5",
                         draggingId === ev.id && "opacity-40"
                       )}
                     >
-                      <div className="flex items-start gap-2">
-                        <span
-                          style={{ backgroundColor: COLOR_DOT[color] }}
-                          className="mt-1 h-2 w-2 shrink-0 rounded-full"
-                        />
-                        <span className="truncate text-sm font-medium leading-tight">
-                          {ev.title || ev.address || "Untitled"}
-                        </span>
+                      <div
+                        className="truncate text-[13px] font-semibold leading-tight"
+                        style={{ color: chip.fg }}
+                      >
+                        {ev.title || ev.address || "Untitled"}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div
+                        className="flex items-center gap-1.5 text-[11px] tabular-nums opacity-80"
+                        style={{ color: chip.fg }}
+                      >
                         {ev.date ? (
-                          <span className="tabular-nums">
-                            {formatShortDate(ev.date)}
-                          </span>
+                          <span>{formatShortDate(ev.date)}</span>
                         ) : (
-                          <span className="font-medium text-foreground">
-                            TBD
-                          </span>
+                          <span className="font-semibold">TBD</span>
                         )}
                         {ev.start ? (
-                          <span className="tabular-nums">
-                            · {formatTime12(ev.start)}
-                          </span>
+                          <span>· {formatTime12(ev.start)}</span>
                         ) : null}
                         {ev.files?.length ? (
                           <span
-                            className="ml-auto inline-flex items-center gap-1 tabular-nums"
+                            className="ml-auto inline-flex items-center gap-1"
                             title={`${ev.files.length} file${ev.files.length === 1 ? "" : "s"} attached`}
                           >
-                            <Paperclip className="h-3 w-3" aria-hidden />
+                            <Paperclip
+                              className="h-3 w-3"
+                              aria-hidden
+                            />
                             {ev.files.length}
                           </span>
                         ) : null}
                       </div>
+                      {address ? (
+                        <div
+                          className="flex min-w-0 items-center gap-1 text-[11px] opacity-75"
+                          style={{ color: chip.fg }}
+                        >
+                          <MapPin
+                            className="h-3 w-3 shrink-0"
+                            aria-hidden
+                          />
+                          <span className="truncate">{address}</span>
+                        </div>
+                      ) : null}
                       {client ? (
-                        <div className="truncate text-xs text-muted-foreground">
-                          {client.name || client.company}
+                        <div
+                          className="inline-flex items-center gap-1.5 text-[11px] font-medium"
+                          style={{ color: chip.fg }}
+                        >
+                          <span
+                            aria-hidden
+                            className="h-1.5 w-1.5 rounded-full opacity-80"
+                            style={{ backgroundColor: COLOR_DOT[color] }}
+                          />
+                          <span className="truncate opacity-90">
+                            {client.name || client.company}
+                          </span>
                         </div>
                       ) : null}
                     </button>
