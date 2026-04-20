@@ -125,6 +125,26 @@ export const STATUS_META: Record<EventStatus, { label: string; dot: string }> = 
   delivered: { label: "Delivered", dot: "#10b981" }, // emerald-500
 };
 
+/**
+ * Pastel chip backgrounds + readable foregrounds per status. Same
+ * 15/22% alpha + 700/300-level text formula as COLOR_CHIP_* so
+ * status-tinted surfaces (kanban cards, status pills) blend into
+ * the rest of the UI's tonal language.
+ */
+export const STATUS_CHIP_LIGHT: Record<EventStatus, { bg: string; fg: string }> = {
+  received: { bg: "rgba(148,163,184,0.18)", fg: "#334155" },  // slate-700
+  pending: { bg: "rgba(236,72,153,0.15)", fg: "#be185d" },    // pink-700
+  scheduled: { bg: "rgba(59,130,246,0.15)", fg: "#1d4ed8" },  // blue-700
+  delivered: { bg: "rgba(16,185,129,0.15)", fg: "#047857" },  // emerald-700
+};
+
+export const STATUS_CHIP_DARK: Record<EventStatus, { bg: string; fg: string }> = {
+  received: { bg: "rgba(148,163,184,0.18)", fg: "#cbd5e1" },  // slate-300
+  pending: { bg: "rgba(236,72,153,0.22)", fg: "#f9a8d4" },    // pink-300
+  scheduled: { bg: "rgba(59,130,246,0.22)", fg: "#93c5fd" },  // blue-300
+  delivered: { bg: "rgba(16,185,129,0.22)", fg: "#6ee7b7" },  // emerald-300
+};
+
 export function normalizeStatus(status?: string): EventStatus {
   if (status && STATUS_ORDER.includes(status as EventStatus)) {
     return status as EventStatus;

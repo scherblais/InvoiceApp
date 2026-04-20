@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { MapPin, Paperclip } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import {
-  COLOR_CHIP_DARK,
-  COLOR_CHIP_LIGHT,
   COLOR_DOT,
+  STATUS_CHIP_DARK,
+  STATUS_CHIP_LIGHT,
   STATUS_META,
   STATUS_ORDER,
   compareEvents,
@@ -50,7 +50,12 @@ export function KanbanView({
     return buckets;
   }, [events]);
 
-  const chipPalette = theme === "dark" ? COLOR_CHIP_DARK : COLOR_CHIP_LIGHT;
+  // Cards take their tonal fill from STATUS (not the event's color) so
+  // the whole board reads as a status-colored map: slate Received,
+  // pink Pending, blue Scheduled, emerald Delivered. Client color
+  // survives as a small dot on the client pill below.
+  const statusPalette =
+    theme === "dark" ? STATUS_CHIP_DARK : STATUS_CHIP_LIGHT;
 
   // Grid layout — columns divide the available width evenly on desktop
   // and stack on narrower viewports so nothing gets squeezed into a
@@ -102,7 +107,7 @@ export function KanbanView({
               <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
                 {items.map((ev) => {
                   const color = eventColor(ev, clientById);
-                  const chip = chipPalette[color];
+                  const chip = statusPalette[status];
                   const cid = eventClientId(ev);
                   const client = cid ? clientById.get(cid) : null;
                   const address = ev.unit
