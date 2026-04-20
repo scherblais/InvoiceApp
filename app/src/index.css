@@ -361,6 +361,16 @@
   margin-top: 4px;
   padding: 4px;
   font-family: inherit;
+  /* When a Radix Dialog is open it sets pointer-events:none on the
+     <body> (via react-remove-scroll) to neutralize everything behind
+     the modal. The pac-container is portaled to document.body as a
+     sibling of the dialog, so it gets swept up by the same rule and
+     clicks land on nothing. Forcing it back to auto — on both the
+     container and its items — lets suggestions be clickable again. */
+  pointer-events: auto !important;
+}
+.pac-container * {
+  pointer-events: auto !important;
 }
 .pac-container::after {
   /* Hide the "powered by Google" tag — it's pixelated in dark mode
