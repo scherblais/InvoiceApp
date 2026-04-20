@@ -1,4 +1,4 @@
-import { eventClientId, type CalEvent, type Client } from "@/lib/types";
+import { type CalEvent, type Client } from "@/lib/types";
 import { todayISO } from "@/lib/format";
 
 export type EventColor =
@@ -86,21 +86,15 @@ export function clientColor(client: Client | null | undefined): EventColor {
 }
 
 /**
- * Resolve the display color for an event. When the event has a client
- * and the clients map carries them, the client's auto-assigned color
- * wins — this keeps every event for the same client visually uniform
- * across the calendar, agenda, board, and dashboard. Events without a
- * client fall back to their own `color` field, and then to "blue".
+ * Resolve the display color for an event. Clients are no longer color-
+ * coded, so this only reads the event's own explicit `color` field,
+ * defaulting to "blue" otherwise. (The `clientsById` parameter is
+ * retained for signature compatibility with existing call sites.)
  */
 export function eventColor(
   ev: CalEvent,
-  clientsById?: Map<string, Client> | null
+  _clientsById?: Map<string, Client> | null
 ): EventColor {
-  const cid = eventClientId(ev);
-  if (cid && clientsById) {
-    const client = clientsById.get(cid);
-    if (client) return clientColor(client);
-  }
   const c = (ev.color as EventColor) || "blue";
   return EVENT_COLORS.includes(c) ? c : "blue";
 }

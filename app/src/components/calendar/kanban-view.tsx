@@ -2,13 +2,11 @@ import { useMemo, useState } from "react";
 import { MapPin, Paperclip } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import {
-  COLOR_DOT,
   STATUS_CHIP_DARK,
   STATUS_CHIP_LIGHT,
   STATUS_META,
   STATUS_ORDER,
   compareEvents,
-  eventColor,
   normalizeStatus,
   type EventStatus,
 } from "@/lib/calendar";
@@ -106,7 +104,6 @@ export function KanbanView({
               </header>
               <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
                 {items.map((ev) => {
-                  const color = eventColor(ev, clientById);
                   const chip = statusPalette[status];
                   const cid = eventClientId(ev);
                   const client = cid ? clientById.get(cid) : null;
@@ -179,17 +176,10 @@ export function KanbanView({
                       ) : null}
                       {client ? (
                         <div
-                          className="inline-flex items-center gap-1.5 text-[11px] font-medium"
+                          className="truncate text-[11px] font-medium opacity-90"
                           style={{ color: chip.fg }}
                         >
-                          <span
-                            aria-hidden
-                            className="h-1.5 w-1.5 rounded-full opacity-80"
-                            style={{ backgroundColor: COLOR_DOT[color] }}
-                          />
-                          <span className="truncate opacity-90">
-                            {client.name || client.company}
-                          </span>
+                          {client.name || client.company}
                         </div>
                       ) : null}
                     </button>

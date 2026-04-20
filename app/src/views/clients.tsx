@@ -17,7 +17,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { KbdSequence } from "@/components/ui/kbd";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
-import { clientColor, COLOR_DOT } from "@/lib/calendar";
 import { formatCurrency } from "@/lib/format";
 
 function clientInitials(c: Client): string {
@@ -183,12 +182,7 @@ export function ClientsView() {
                     className="group relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
                   >
                     <Avatar className="h-9 w-9 shrink-0">
-                      <AvatarFallback
-                        className="text-[11px] font-semibold text-foreground/90"
-                        style={{
-                          backgroundColor: `${COLOR_DOT[clientColor(c)]}33`,
-                        }}
-                      >
+                      <AvatarFallback className="bg-muted text-[11px] font-semibold text-foreground/80">
                         {clientInitials(c)}
                       </AvatarFallback>
                     </Avatar>
