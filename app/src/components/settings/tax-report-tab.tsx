@@ -367,52 +367,57 @@ export function TaxReportTab() {
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  <th className="px-4 py-3">Month</th>
-                  <th className="px-4 py-3 text-right">Invoices</th>
-                  <th className="px-4 py-3 text-right">Subtotal</th>
-                  <th className="px-4 py-3 text-right">GST</th>
-                  <th className="px-4 py-3 text-right">QST</th>
-                  <th className="px-4 py-3 text-right">Total</th>
+              <thead className="bg-muted/30">
+                <tr className="text-left text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <th className="px-5 py-3">Month</th>
+                  <th className="px-5 py-3 text-right">Invoices</th>
+                  <th className="px-5 py-3 text-right">Subtotal</th>
+                  <th className="px-5 py-3 text-right">GST</th>
+                  <th className="px-5 py-3 text-right">QST</th>
+                  <th className="px-5 py-3 text-right">Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y border-t">
                 {report.byMonth.map((m) => (
-                  <tr key={m.key}>
-                    <td className="px-4 py-3 font-medium">{m.label}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                  <tr
+                    key={m.key}
+                    className="transition-colors hover:bg-muted/20"
+                  >
+                    <td className="px-5 py-3 font-medium">{m.label}</td>
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {m.count}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {formatCurrency(m.subtotal, 2)}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {formatCurrency(m.gst, 2)}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">
                       {formatCurrency(m.qst, 2)}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                    <td className="px-5 py-3 text-right font-medium tabular-nums">
                       {formatCurrency(m.total, 2)}
                     </td>
                   </tr>
                 ))}
-                <tr className="border-t-2 bg-muted/30 font-semibold">
-                  <td className="px-4 py-3">Total</td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                <tr className="border-t bg-muted/40">
+                  <td className="px-5 py-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Total
+                  </td>
+                  <td className="px-5 py-3 text-right font-semibold tabular-nums">
                     {report.invoiceCount}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="px-5 py-3 text-right font-semibold tabular-nums">
                     {formatCurrency(report.subtotal, 2)}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="px-5 py-3 text-right font-semibold tabular-nums">
                     {formatCurrency(report.gst, 2)}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="px-5 py-3 text-right font-semibold tabular-nums">
                     {formatCurrency(report.qst, 2)}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="px-5 py-3 text-right font-semibold tabular-nums">
                     {formatCurrency(report.total, 2)}
                   </td>
                 </tr>

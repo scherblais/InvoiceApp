@@ -21,6 +21,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { Kbd, KbdSequence } from "@/components/ui/kbd";
 import { useData } from "@/contexts/data-context";
 import { useTheme } from "@/contexts/theme-context";
 import { clientLabel, isOverdue, monthName } from "@/lib/invoice";
@@ -106,7 +107,7 @@ export function CommandMenu() {
           >
             <Plus />
             <span>New invoice</span>
-            <CommandShortcut>Invoices</CommandShortcut>
+            <CommandShortcut><Kbd>I</Kbd></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="new event shoot"
@@ -114,7 +115,7 @@ export function CommandMenu() {
           >
             <Plus />
             <span>New event</span>
-            <CommandShortcut>Calendar</CommandShortcut>
+            <CommandShortcut><Kbd>C</Kbd></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="new client"
@@ -122,7 +123,7 @@ export function CommandMenu() {
           >
             <Plus />
             <span>New client</span>
-            <CommandShortcut>Clients</CommandShortcut>
+            <CommandShortcut><Kbd>L</Kbd></CommandShortcut>
           </CommandItem>
         </CommandGroup>
 
@@ -135,7 +136,7 @@ export function CommandMenu() {
           >
             <LayoutDashboard />
             <span>Dashboard</span>
-            <CommandShortcut>G D</CommandShortcut>
+            <CommandShortcut><KbdSequence keys="GD" /></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="invoices"
@@ -143,7 +144,7 @@ export function CommandMenu() {
           >
             <FileText />
             <span>Invoices</span>
-            <CommandShortcut>G I</CommandShortcut>
+            <CommandShortcut><KbdSequence keys="GI" /></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="calendar"
@@ -151,7 +152,7 @@ export function CommandMenu() {
           >
             <Calendar />
             <span>Calendar</span>
-            <CommandShortcut>G C</CommandShortcut>
+            <CommandShortcut><KbdSequence keys="GC" /></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="clients"
