@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
+  fullAddressFromPlace,
   getPlacesLibrary,
   hasMapsApiKey,
   shortAddressFromPlace,
@@ -80,13 +81,15 @@ export function AddressAutocomplete({
       listenerRef.current = ac.addListener("place_changed", () => {
         const place = ac.getPlace();
         if (!place.geometry?.location) return;
+        // Push the FULL "street, city, province" form into the input
+        // so the saved record carries enough to identify the listing.
+        // The short form is still passed through `onPlacePicked` for
+        // consumers that want the compact variant (e.g. chip labels).
+        const full = fullAddressFromPlace(place);
         const short = shortAddressFromPlace(place);
-        // Push the short form into the text input so what the user sees
-        // matches what lands on the invoice. Full place data is passed
-        // upward separately via `onPlacePicked`.
-        onChangeRef.current(short);
+        onChangeRef.current(full);
         onPlacePickedRef.current?.({
-          formatted: place.formatted_address ?? short,
+          formatted: place.formatted_address ?? full,
           shortAddress: short,
           city: place.address_components?.find((c) =>
             c.types.includes("locality")

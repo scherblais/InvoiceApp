@@ -32,6 +32,13 @@ export interface InvoiceItem {
   qst?: number;
   total?: number;
   description?: string; // legacy free-text
+  /**
+   * Back-reference to the calendar event this listing was auto-created
+   * from. Present only when the item was spawned by the event → draft
+   * auto-link. Manual listings leave this undefined so they survive
+   * event edits and deletions untouched.
+   */
+  eventId?: string;
 }
 
 export const TAX_GST = 5;

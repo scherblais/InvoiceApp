@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { useData } from "@/contexts/data-context";
 import {
   MONTH_NAMES,
@@ -9,6 +10,11 @@ import {
   type EventStatus,
 } from "@/lib/calendar";
 import type { CalEvent } from "@/lib/types";
+import {
+  removeEventDraftLink,
+  syncEventDraftLink,
+} from "@/lib/invoice-link";
+import { monthName } from "@/lib/invoice";
 import { CalendarHeader } from "@/components/calendar/calendar-header";
 import { MonthView } from "@/components/calendar/month-view";
 import { WeekView } from "@/components/calendar/week-view";
@@ -20,7 +26,14 @@ import type { CalendarViewMode } from "@/components/calendar/types";
 const VIEW_KEY = "lumeria_cal_view";
 
 export function CalendarView() {
-  const { calEvents, clients, saveCalEvents } = useData();
+  const {
+    calEvents,
+    clients,
+    clientsById,
+    drafts,
+    saveCalEvents,
+    saveDrafts,
+  } = useData();
 
   const [view, setView] = useState<CalendarViewMode>(() => {
     const saved = localStorage.getItem(VIEW_KEY) as CalendarViewMode | null;
@@ -78,21 +91,56 @@ export function CalendarView() {
 
   const handleSave = useCallback(
     (ev: CalEvent) => {
+      // 1. Persist the event itself.
       const idx = calEvents.findIndex((e) => e.id === ev.id);
-      const next =
+      const nextEvents =
         idx >= 0
           ? calEvents.map((e) => (e.id === ev.id ? ev : e))
           : [...calEvents, ev];
-      saveCalEvents(next);
+      saveCalEvents(nextEvents);
+
+      // 2. Auto-link to the client's draft invoice. The helper
+      // upserts / moves / strips a line item tagged with the event id
+      // as the event's client + date + address changes over its life.
+      const result = syncEventDraftLink(ev, drafts);
+      if (result.action === "none") return;
+      saveDrafts(result.drafts);
+
+      // 3. Surface what just happened so the photographer isn't
+      // confused about extra drafts appearing — small signals,
+      // suppressed for pure address-text edits (updated) so saves
+      // don't spam the toast queue.
+      const client = ev.clientId ? clientsById.get(ev.clientId) : null;
+      const clientLabel = client
+        ? client.name || client.company || "client"
+        : "client";
+      const monthLabel = result.month ? monthName(result.month) : "";
+      if (result.action === "created") {
+        toast.success(`Added to ${monthLabel} draft`, {
+          description: `Linked to ${clientLabel}'s invoice.`,
+        });
+      } else if (result.action === "moved") {
+        toast.success(`Moved to ${monthLabel} draft`, {
+          description: `Now billed to ${clientLabel}.`,
+        });
+      } else if (result.action === "removed") {
+        toast.info("Removed from draft invoice", {
+          description: `Event no longer has a client + date + address.`,
+        });
+      }
     },
-    [calEvents, saveCalEvents]
+    [calEvents, drafts, saveCalEvents, saveDrafts, clientsById]
   );
 
   const handleDelete = useCallback(
     (id: string) => {
       saveCalEvents(calEvents.filter((e) => e.id !== id));
+      // Also strip any draft line item linked to this event — don't
+      // keep billing for a shoot that no longer exists.
+      const nextDrafts = removeEventDraftLink(id, drafts);
+      if (nextDrafts !== drafts) saveDrafts(nextDrafts);
     },
-    [calEvents, saveCalEvents]
+    [calEvents, drafts, saveCalEvents, saveDrafts]
   );
 
   const handleStatusChange = useCallback(

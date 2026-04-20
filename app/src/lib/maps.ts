@@ -93,10 +93,17 @@ function extractComponent(
   return components?.find((c) => c.types.includes(type))?.long_name;
 }
 
+function extractComponentShort(
+  components: google.maps.GeocoderAddressComponent[] | undefined,
+  type: string
+): string | undefined {
+  return components?.find((c) => c.types.includes(type))?.short_name;
+}
+
 /**
- * Pull a short "street number + route" address out of a Place — the
- * photographer only wants the street line, not "123 Main St, Montreal,
- * QC H1A 1A1, Canada" pasted into their invoice.
+ * Pull a short "street number + route" address out of a Place — just
+ * the street line, used when we deliberately want to hide city/province
+ * (e.g. kanban card labels, chip truncation).
  */
 export function shortAddressFromPlace(
   place: google.maps.places.PlaceResult
@@ -106,6 +113,38 @@ export function shortAddressFromPlace(
   if (num && route) return `${num} ${route}`;
   if (route) return route;
   return place.formatted_address?.split(",")[0] ?? "";
+}
+
+/**
+ * Pull a complete but readable address out of a Place: street + city +
+ * province. Used as the default when a user picks a suggestion so the
+ * saved record actually identifies the listing (a bare "123 Main St"
+ * is ambiguous across cities and was the source of "addresses look
+ * incomplete" reports). Postal code and country are omitted — they add
+ * noise and the province already disambiguates.
+ */
+export function fullAddressFromPlace(
+  place: google.maps.places.PlaceResult
+): string {
+  const comps = place.address_components;
+  const num = extractComponent(comps, "street_number");
+  const route = extractComponent(comps, "route");
+  const street = num && route ? `${num} ${route}` : route ?? "";
+  // Canadian addresses sometimes use `sublocality_level_1` (borough)
+  // instead of `locality` — fall through so Montreal-area listings
+  // resolve to their actual city rather than an empty string.
+  const city =
+    extractComponent(comps, "locality") ??
+    extractComponent(comps, "sublocality_level_1") ??
+    extractComponent(comps, "administrative_area_level_2") ??
+    "";
+  // Province/state in short form ("QC" rather than "Quebec") reads
+  // better on invoice line items and event cards.
+  const region = extractComponentShort(comps, "administrative_area_level_1") ?? "";
+  const parts = [street, city, region].filter((p) => p.length > 0);
+  if (parts.length > 0) return parts.join(", ");
+  // Fallback: trim the ", Canada" tail from formatted_address.
+  return (place.formatted_address ?? "").replace(/,\s*[A-Z]{2,3}\s*\d.*$/i, "").replace(/,\s*Canada$/i, "");
 }
 
 /**
