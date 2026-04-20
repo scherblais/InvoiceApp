@@ -86,12 +86,21 @@ export function computeDashboardStats(
   for (const d of drafts) {
     const dm = d.month ?? "";
     const sums = sumItems(d.items);
+    const inYtd = dm >= ytdStart && dm <= thisMonth;
     if (dm === thisMonth) {
       monthRevenue += sums.total;
       monthTax += sums.tax;
     }
     if (dm === lastMonth) {
       lastMonthRevenue += sums.total;
+    }
+    // Year-to-date folds in every draft in the current calendar year,
+    // including this month's in-progress drafts, so the YTD stat
+    // reflects real-time income instead of lagging by one billing
+    // cycle.
+    if (inYtd) {
+      ytdRevenue += sums.total;
+      ytdTax += sums.tax;
     }
   }
 

@@ -34,7 +34,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { ActivityBell } from "@/components/activity-bell";
 
 const nav = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/" },
+  { label: "Overview", icon: LayoutDashboard, to: "/" },
   { label: "Invoicing", icon: FileText, to: "/invoices" },
   { label: "Calendar", icon: Calendar, to: "/calendar" },
   { label: "Clients", icon: Users, to: "/clients" },

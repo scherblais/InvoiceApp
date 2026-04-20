@@ -1,4 +1,4 @@
-import { DollarSign, TrendingUp, Clock, Receipt } from "lucide-react";
+import { CalendarClock, DollarSign, Receipt, TrendingUp } from "lucide-react";
 import { useData } from "@/contexts/data-context";
 import { computeDashboardStats } from "@/lib/stats";
 import { formatCurrency, formatLongDate, getGreeting } from "@/lib/format";
@@ -47,7 +47,9 @@ export function DashboardView() {
         </div>
 
         {/* Money / admin section — lives at the bottom so the top of
-            the dashboard stays focused on scheduling and action items. */}
+            the dashboard stays focused on scheduling and action items.
+            Order walks the owner through time: current → previous →
+            cumulative → liability (taxes). */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
           <StatCard
             label="This Month"
@@ -59,22 +61,14 @@ export function DashboardView() {
             }}
           />
           <StatCard
-            label="YTD Revenue"
-            value={formatCurrency(stats.ytdRevenue)}
-            icon={TrendingUp}
+            label="Last Month"
+            value={formatCurrency(stats.lastMonthRevenue)}
+            icon={CalendarClock}
           />
           <StatCard
-            label="Unpaid"
-            value={formatCurrency(stats.pendingAmount)}
-            icon={Clock}
-            warn={stats.pendingAmount > 0}
-            subValue={
-              stats.pendingCount > 0
-                ? `${stats.pendingCount} invoice${
-                    stats.pendingCount === 1 ? "" : "s"
-                  }`
-                : undefined
-            }
+            label="Year to Date"
+            value={formatCurrency(stats.ytdRevenue)}
+            icon={TrendingUp}
           />
           <StatCard
             label="Taxes Owed"

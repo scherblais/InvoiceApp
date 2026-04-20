@@ -131,12 +131,12 @@ export function CommandMenu() {
 
         <CommandGroup heading="Go to">
           <CommandItem
-            value="dashboard home"
+            value="overview dashboard home"
             onSelect={() => run(() => navigate("/"))}
           >
             <LayoutDashboard />
-            <span>Dashboard</span>
-            <CommandShortcut><KbdSequence keys="GD" /></CommandShortcut>
+            <span>Overview</span>
+            <CommandShortcut><KbdSequence keys="GO" /></CommandShortcut>
           </CommandItem>
           <CommandItem
             value="invoices"
