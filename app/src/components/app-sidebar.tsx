@@ -51,7 +51,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-2 py-0 bloom-accent">
+      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-2 py-0">
         {/* Brand block styled like AlignUI's workspace selector — even
            though we only have one workspace, the chevron + hover state
            signals "this is the identity block" and gives the top of
