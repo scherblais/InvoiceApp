@@ -65,36 +65,50 @@
   --shadow-xl:
     0 18px 36px -8px rgb(0 0 0 / 0.1),
     0 6px 12px -6px rgb(0 0 0 / 0.05);
+
+  /* --- Glow scale ---
+   *
+   * Soft bloom halos used for hover / focus / active states on
+   * things that should feel alive: primary buttons, the sidebar
+   * active indicator, focus rings on inputs, the sparkle chip on the
+   * Up Next row. Light-mode glows use a subtle black bloom so they
+   * read as elevation; dark-mode glows pick up the foreground hue
+   * so the bloom shows up at all against a dark surface.
+   */
+  --glow-sm: 0 0 0 1px rgb(0 0 0 / 0.04), 0 4px 12px -2px rgb(0 0 0 / 0.06);
+  --glow-md: 0 0 0 1px rgb(0 0 0 / 0.05), 0 8px 24px -4px rgb(0 0 0 / 0.12);
+  --glow-lg: 0 0 0 1px rgb(0 0 0 / 0.05), 0 16px 40px -8px rgb(0 0 0 / 0.16);
 }
 
 .dark {
-  /* --- All-black palette ---
+  /* --- Brighter dark palette ---
    *
-   * Pure black background, fully neutral neutrals. Cards step up in
-   * lightness to read as elevated (0.09 and 0.13) without picking up
-   * any tint, so the app reads as monochrome rather than "dark zinc
-   * with a hint of purple." Primary is pure white so filled buttons
-   * feel like spotlights.
+   * Move off the pure-black floor: the background picks up a faint
+   * cool blue tint (think "paper of a deep-twilight sky") so the
+   * whole app feels like an OLED panel at premium dim instead of
+   * a flat void. Card tiers step up by 4–5% lightness each so
+   * elevated surfaces — dashboard panels, dialogs, command
+   * palette — read as properly layered without shouting.
    */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.09 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.13 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(1 0 0);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.16 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.15 0 0);
-  --muted-foreground: oklch(0.68 0 0);
-  --accent: oklch(0.18 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.11 0.012 258);
+  --foreground: oklch(0.985 0.003 258);
+  --card: oklch(0.155 0.012 258);
+  --card-foreground: oklch(0.985 0.003 258);
+  --popover: oklch(0.19 0.014 258);
+  --popover-foreground: oklch(0.985 0.003 258);
+  --primary: oklch(0.985 0.003 258);
+  --primary-foreground: oklch(0.15 0.012 258);
+  --secondary: oklch(0.22 0.014 258);
+  --secondary-foreground: oklch(0.985 0.003 258);
+  --muted: oklch(0.21 0.014 258);
+  --muted-foreground: oklch(0.74 0.015 258);
+  --accent: oklch(0.24 0.015 258);
+  --accent-foreground: oklch(0.985 0.003 258);
   --destructive: oklch(0.7 0.19 22.2);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.6 0 0);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.7 0.04 258);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -109,22 +123,36 @@
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
 
-  /* Dark-mode shadows are nearly invisible — the contrast between card
-     and background is already plenty. A trace is still useful on
-     popovers and dialogs to sell the elevation. */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+  /* Dark-mode shadows carry a hint of the ink color at the bottom
+     edge so even on a lifted surface you get the feeling of a card
+     hovering above the app. Popovers and dialogs still use shadow-xl
+     for the "this is floating" read. */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35);
   --shadow-sm:
-    0 1px 2px 0 rgb(0 0 0 / 0.2),
-    0 1px 3px -1px rgb(0 0 0 / 0.15);
+    0 1px 2px 0 rgb(0 0 0 / 0.4),
+    0 1px 3px -1px rgb(0 0 0 / 0.25);
   --shadow-md:
-    0 4px 8px -2px rgb(0 0 0 / 0.3),
-    0 2px 4px -2px rgb(0 0 0 / 0.2);
+    0 4px 10px -2px rgb(0 0 0 / 0.45),
+    0 2px 4px -2px rgb(0 0 0 / 0.3);
   --shadow-lg:
-    0 10px 20px -4px rgb(0 0 0 / 0.4),
-    0 4px 8px -4px rgb(0 0 0 / 0.25);
+    0 10px 24px -4px rgb(0 0 0 / 0.55),
+    0 4px 10px -4px rgb(0 0 0 / 0.35);
   --shadow-xl:
-    0 18px 36px -8px rgb(0 0 0 / 0.5),
-    0 6px 12px -6px rgb(0 0 0 / 0.3);
+    0 18px 40px -8px rgb(0 0 0 / 0.65),
+    0 8px 16px -6px rgb(0 0 0 / 0.4);
+
+  /* Dark-mode glow: white bloom so light-colored highlights
+     (primary buttons, focus rings, the active sidebar bar) feel
+     luminous against the deep background. */
+  --glow-sm:
+    0 0 0 1px rgb(255 255 255 / 0.06),
+    0 6px 18px -4px rgb(255 255 255 / 0.06);
+  --glow-md:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 10px 30px -6px rgb(255 255 255 / 0.1);
+  --glow-lg:
+    0 0 0 1px rgb(255 255 255 / 0.1),
+    0 20px 50px -10px rgb(255 255 255 / 0.16);
 }
 
 @theme inline {
@@ -171,6 +199,48 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
+  /* Glow variants — use via shadow-glow-sm / -md / -lg. Separate
+     from the regular shadow scale so a card's resting elevation
+     and its hover bloom can be tuned independently. */
+  --shadow-glow-sm: var(--glow-sm);
+  --shadow-glow-md: var(--glow-md);
+  --shadow-glow-lg: var(--glow-lg);
+}
+
+/* Subtle radial bloom utilities. Drop one of these on a surface
+ * that should feel like it has a light source — sidebar header,
+ * dashboard hero, command palette trigger. The gradient is tuned
+ * per-theme via CSS vars so it's near-invisible in light and a
+ * gentle halo in dark. */
+@layer utilities {
+  .bloom-accent {
+    background-image: radial-gradient(
+      120% 100% at 0% 0%,
+      color-mix(in oklab, var(--foreground) 6%, transparent),
+      transparent 55%
+    );
+  }
+  .dark .bloom-accent {
+    background-image: radial-gradient(
+      120% 100% at 0% 0%,
+      color-mix(in oklab, var(--foreground) 10%, transparent),
+      transparent 60%
+    );
+  }
+  .bloom-top {
+    background-image: radial-gradient(
+      80% 60% at 50% -10%,
+      color-mix(in oklab, var(--foreground) 4%, transparent),
+      transparent 70%
+    );
+  }
+  .dark .bloom-top {
+    background-image: radial-gradient(
+      80% 60% at 50% -10%,
+      color-mix(in oklab, var(--foreground) 9%, transparent),
+      transparent 70%
+    );
+  }
 }
 
 @layer base {

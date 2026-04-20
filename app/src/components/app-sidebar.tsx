@@ -48,7 +48,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="app-header justify-center border-b px-4 py-0">
+      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-4 py-0 bloom-accent">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <LumeriaLogo className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         isActive={isActive}
                         tooltip={item.label}
-                        className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground group-data-[collapsible=icon]:data-[active=true]:before:hidden"
+                        className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground dark:data-[active=true]:before:shadow-[0_0_14px_rgb(255_255_255/0.35)] group-data-[collapsible=icon]:data-[active=true]:before:hidden"
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -111,7 +111,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   isActive={isActive}
                   tooltip="Settings"
-                  className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground group-data-[collapsible=icon]:data-[active=true]:before:hidden"
+                  className="relative h-9 text-[13px] font-medium transition-colors data-[active=true]:bg-accent data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-1.5 data-[active=true]:before:h-[calc(100%-0.75rem)] data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-foreground dark:data-[active=true]:before:shadow-[0_0_14px_rgb(255_255_255/0.35)] group-data-[collapsible=icon]:data-[active=true]:before:hidden"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
