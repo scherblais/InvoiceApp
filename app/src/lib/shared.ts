@@ -88,16 +88,21 @@ function eventToShared(ev: CalEvent): SharedEvent {
   // Caller guarantees a date (syncSharedData filters dateless events
   // out) but we default to empty string defensively in case of
   // unexpected upstream data.
+  //
+  // Critical: Firebase's `set()` rejects ANY `undefined` value in the
+  // payload (entire write fails, not just the field). Only copy
+  // optional fields when they're actually populated so we never send
+  // `color: undefined` and friends down the wire.
   const shared: SharedEvent = {
-    title: ev.title,
-    address: ev.address,
-    unit: ev.unit,
     date: ev.date ?? "",
-    start: ev.start,
-    color: ev.color,
-    notes: ev.notes,
     status: ev.status || "scheduled",
   };
+  if (ev.title) shared.title = ev.title;
+  if (ev.address) shared.address = ev.address;
+  if (ev.unit) shared.unit = ev.unit;
+  if (ev.start) shared.start = ev.start;
+  if (ev.color) shared.color = ev.color;
+  if (ev.notes) shared.notes = ev.notes;
   if (ev.files?.length) {
     shared.files = ev.files.map(fileToShared);
   }
@@ -116,19 +121,28 @@ function buildClientPricing(
 ): SharedPricing {
   const basePackages = config.packages?.length ? config.packages : DEFAULT_PACKAGES;
   const baseAddons = config.addons?.length ? config.addons : DEFAULT_ADDONS;
-  const packages = resolvePackages(basePackages, client).map((p) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    extraLabel: p.extraLabel,
-    extraPrice: p.extraPrice,
-  }));
-  const addons = resolveAddons(baseAddons, client).map((a) => ({
-    id: a.id,
-    name: a.name,
-    price: a.price,
-    qty: a.qty,
-  }));
+  // Only attach optional fields when they're actually populated —
+  // Firebase's set() validation rejects any `undefined` anywhere in
+  // the payload and fails the whole write.
+  const packages = resolvePackages(basePackages, client).map((p) => {
+    const out: SharedPricing["packages"][number] = {
+      id: p.id,
+      name: p.name,
+      price: p.price,
+    };
+    if (p.extraLabel) out.extraLabel = p.extraLabel;
+    if (typeof p.extraPrice === "number") out.extraPrice = p.extraPrice;
+    return out;
+  });
+  const addons = resolveAddons(baseAddons, client).map((a) => {
+    const out: SharedPricing["addons"][number] = {
+      id: a.id,
+      name: a.name,
+      price: a.price,
+    };
+    if (typeof a.qty === "boolean") out.qty = a.qty;
+    return out;
+  });
   const out: SharedPricing = { packages, addons };
   if (client.discount?.value && client.discount.value > 0) {
     const sample = 100; // we just use it for label formatting
@@ -177,6 +191,13 @@ export function syncSharedData(
       events: byClient.get(c.id) ?? [],
       pricing: buildClientPricing(config, c),
     };
-    void set(ref(db, `shared/${token}`), payload);
+    // Fire-and-forget by design, but we MUST catch so a validation
+    // failure on any one client doesn't bubble up as an unhandled
+    // promise rejection and — under React 19's stricter default error
+    // policy — unmount the whole app.
+    set(ref(db, `shared/${token}`), payload).catch((err) => {
+      /* eslint-disable-next-line no-console */
+      console.warn("[lumeria shared sync] skipped:", c.id, err?.message ?? err);
+    });
   }
 }
