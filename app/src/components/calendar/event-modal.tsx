@@ -197,7 +197,12 @@ export function EventModal({
               placeholder="123 Main St"
             />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          {/* Unit is usually short ("301", "2A") or empty, so it
+              shares a row with Date. Date + Time live on separate
+              rows so the calendar popover (which opens below the
+              trigger) can't spill over the Time field and cover
+              the slot list while the user is picking. */}
+          <div className="grid grid-cols-[120px_1fr] gap-3">
             <div className="flex flex-col gap-2">
               <Label htmlFor="ev-unit">Unit</Label>
               <Input
@@ -231,17 +236,18 @@ export function EventModal({
                 ariaLabel="Shoot date"
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="ev-start">Time</Label>
-              <TimePicker
-                id="ev-start"
-                value={form.start}
-                onChange={(next) => setForm((f) => ({ ...f, start: next }))}
-                placeholder="All day"
-                clearable
-                ariaLabel="Start time"
-              />
-            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="ev-start">Time</Label>
+            <TimePicker
+              id="ev-start"
+              value={form.start}
+              onChange={(next) => setForm((f) => ({ ...f, start: next }))}
+              placeholder="All day"
+              clearable
+              ariaLabel="Start time"
+            />
           </div>
 
           <fieldset className="rounded-md border p-3">
