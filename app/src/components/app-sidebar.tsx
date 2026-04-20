@@ -7,6 +7,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  ChevronRight,
 } from "lucide-react";
 import { LumeriaLogo } from "@/components/lumeria-logo";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -47,7 +48,7 @@ export function AppSidebar() {
     : "LM";
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-4 py-0 bloom-accent">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -79,6 +80,12 @@ export function AppSidebar() {
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
+                        {isActive ? (
+                          <ChevronRight
+                            className="ml-auto h-3.5 w-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden"
+                            aria-hidden
+                          />
+                        ) : null}
                       </SidebarMenuButton>
                     )}
                   </NavLink>
@@ -115,13 +122,19 @@ export function AppSidebar() {
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
+                  {isActive ? (
+                    <ChevronRight
+                      className="ml-auto h-3.5 w-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden"
+                      aria-hidden
+                    />
+                  ) : null}
                 </SidebarMenuButton>
               )}
             </NavLink>
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <div className="mx-2 mt-1 flex items-center gap-2 rounded-md border bg-card/50 px-2 py-2 group-data-[collapsible=icon]:hidden">
+        <div className="mx-2 mt-1 flex items-center gap-2 rounded-lg border bg-card px-2 py-2 shadow-xs group-data-[collapsible=icon]:hidden">
           <Avatar className="h-8 w-8">
             <AvatarFallback
               className="bg-muted text-[11px] font-semibold"

@@ -13,7 +13,11 @@ export function AppShell() {
   return (
     <SidebarProvider className="h-svh min-h-svh">
       <AppSidebar />
-      <SidebarInset className="h-svh overflow-hidden">
+      {/* In inset mode the SidebarInset gets vertical margin (my-3 =
+         1.5rem) so it floats; subtract that from the height cap here
+         so the floating card fills the viewport without overflowing.
+         On mobile (no inset treatment) fall back to full svh. */}
+      <SidebarInset className="h-svh overflow-hidden md:h-[calc(100svh-1.5rem)]">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 md:hidden">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />

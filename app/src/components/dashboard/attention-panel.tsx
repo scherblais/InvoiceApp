@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, type StatusKind } from "@/components/ui/status-badge";
@@ -70,11 +70,26 @@ export function AttentionPanel({
   return (
     <Card className="gap-0 py-0">
       <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
-        <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
+          {items.length > 0 ? (
+            <Badge variant="secondary" className="rounded-full">
+              {items.length}
+            </Badge>
+          ) : null}
+        </div>
         {items.length > 0 ? (
-          <Badge variant="secondary" className="rounded-full">
-            {items.length}
-          </Badge>
+          <button
+            type="button"
+            onClick={() => navigate("/invoices")}
+            className="group inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            See all
+            <ArrowRight
+              className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </button>
         ) : null}
       </CardHeader>
       <CardContent className="p-0">
