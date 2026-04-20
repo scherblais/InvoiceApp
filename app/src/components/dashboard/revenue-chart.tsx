@@ -1,5 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo } from "react";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { formatCurrency } from "@/lib/format";
 import { computeMonthlyRevenue } from "@/lib/stats";
 import type { Invoice, Draft } from "@/lib/types";
@@ -10,14 +25,24 @@ interface RevenueChartProps {
   months?: number;
 }
 
-/** Round the chart's Y axis up to a friendly tick value. */
-function niceMax(max: number): number {
-  if (max <= 0) return 1000;
-  const pow = Math.pow(10, Math.floor(Math.log10(max)));
-  const n = max / pow;
-  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-  return nice * pow;
-}
+/**
+ * Rolling monthly revenue as a gradient-filled area chart. Built on
+ * the shadcn chart primitives (recharts under the hood) so the curve,
+ * grid, tooltip, and axis labels all pick up the design tokens
+ * without per-component styling.
+ *
+ * Single series — revenue only — because stacking tax on top would
+ * double-count money the photographer already saw on their stat
+ * cards. Card footer summarizes the window: 12-month average + total
+ * and a direction-of-travel trend vs. the previous half of the
+ * window.
+ */
+const chartConfig = {
+  revenue: {
+    label: "Revenue",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig;
 
 function shortCurrency(value: number): string {
   if (value >= 1000) {
@@ -32,219 +57,129 @@ export function RevenueChart({
   drafts,
   months = 12,
 }: RevenueChartProps) {
-  const allPoints = useMemo(
+  const points = useMemo(
     () => computeMonthlyRevenue(invoices, drafts, months),
     [invoices, drafts, months]
   );
 
-  // Measure the container so we can render in real pixels. This keeps text
-  // and bar widths constant-sized across breakpoints instead of scaling with
-  // a fixed viewBox.
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(720);
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    const el = wrapRef.current;
-    const update = () => setWidth(el.clientWidth);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const [hover, setHover] = useState<number | null>(null);
-
-  // Mobile shrinks the window to 6 months so bars stay readable. The summary
-  // (avg / total) still reflects the full 12-month window so the numbers line
-  // up with the stat cards above.
-  const compact = width < 520;
-  const points = compact ? allPoints.slice(-6) : allPoints;
-
-  const maxRevenue = Math.max(...points.map((p) => p.revenue), 0);
-  const yMax = niceMax(maxRevenue);
-  const windowTotal = points.reduce((sum, p) => sum + p.revenue, 0);
-  const windowAvg = windowTotal / points.length;
-
-  const H = compact ? 180 : 240;
-  const PAD_L = compact ? 38 : 48;
-  const PAD_R = 8;
-  const PAD_T = 12;
-  const PAD_B = 28;
-  const W = Math.max(width, 240);
-  const innerW = W - PAD_L - PAD_R;
-  const innerH = H - PAD_T - PAD_B;
-  const barSlot = innerW / points.length;
-  const barW = Math.max(
-    compact ? 10 : 12,
-    Math.min(compact ? 28 : 42, barSlot * 0.62)
-  );
-
-  const yTicks = compact ? 3 : 4;
-  const tickValues = Array.from({ length: yTicks + 1 }, (_, i) =>
-    Math.round((yMax / yTicks) * i)
-  );
-
-  const barFor = (i: number, value: number) => {
-    const x = PAD_L + barSlot * i + (barSlot - barW) / 2;
-    const h = yMax > 0 ? (value / yMax) * innerH : 0;
-    const y = PAD_T + innerH - h;
-    return { x, y, h };
-  };
-
-  const active = hover != null ? points[hover] : null;
-  const activeGeom = hover != null ? barFor(hover, points[hover].revenue) : null;
-
-  // One continuous hit region across all bars — prevents the mouseleave /
-  // mouseenter flicker you get when each bar owns its own <rect>.
-  const handleMove = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>) => {
-    const svg = e.currentTarget;
-    const rect = svg.getBoundingClientRect();
-    const clientX =
-      "touches" in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
-    const x = clientX - rect.left;
-    if (x < PAD_L || x > W - PAD_R) {
-      setHover(null);
-      return;
-    }
-    const idx = Math.floor((x - PAD_L) / barSlot);
-    if (idx < 0 || idx >= points.length) {
-      setHover(null);
-      return;
-    }
-    if (idx !== hover) setHover(idx);
-  };
-
-  // Tooltip positioning: clamp horizontally so it never overflows the card.
-  const tooltipLeft = activeGeom
-    ? Math.max(60, Math.min(W - 60, activeGeom.x + barW / 2))
-    : 0;
+  const { avg, total, trendPct, trendDirection } = useMemo(() => {
+    const total = points.reduce((sum, p) => sum + p.revenue, 0);
+    const avg = points.length ? total / points.length : 0;
+    // Compare the back half of the window to the front half — gives a
+    // smoother read than month-over-month on a 12-point series.
+    const half = Math.floor(points.length / 2);
+    const front = points
+      .slice(0, half)
+      .reduce((s, p) => s + p.revenue, 0);
+    const back = points
+      .slice(half)
+      .reduce((s, p) => s + p.revenue, 0);
+    const pct = front > 0 ? ((back - front) / front) * 100 : 0;
+    return {
+      avg,
+      total,
+      trendPct: pct,
+      trendDirection:
+        pct > 1 ? ("up" as const) : pct < -1 ? ("down" as const) : ("flat" as const),
+    };
+  }, [points]);
 
   return (
-    <Card className="gap-3">
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
-        <div>
-          <CardTitle className="text-sm font-medium">
-            Revenue · last {compact ? 6 : months} months
-          </CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Avg <span className="font-medium text-foreground">{formatCurrency(windowAvg)}</span>
-            <span className="mx-1.5">·</span>
-            Total <span className="font-medium text-foreground">{formatCurrency(windowTotal)}</span>
-          </p>
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Revenue · last {months} months</CardTitle>
+        <CardDescription>
+          Avg {formatCurrency(avg)} · Total {formatCurrency(total)}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pb-4">
-        <div ref={wrapRef} className="relative w-full">
-          <svg
-            width={W}
-            height={H}
-            className="block"
-            role="img"
-            aria-label={`Monthly revenue for the last ${points.length} months`}
-            onMouseMove={handleMove}
-            onMouseLeave={() => setHover(null)}
-            onTouchStart={handleMove}
-            onTouchMove={handleMove}
-            onTouchEnd={() => setHover(null)}
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[240px] w-full">
+          <AreaChart
+            accessibilityLayer
+            data={points}
+            margin={{ left: 12, right: 12, top: 8, bottom: 0 }}
           >
-            {/* Y-axis grid + labels */}
-            {tickValues.map((v, i) => {
-              const y = PAD_T + innerH - (v / yMax) * innerH;
-              return (
-                <g key={i}>
-                  <line
-                    x1={PAD_L}
-                    x2={W - PAD_R}
-                    y1={y}
-                    y2={y}
-                    className="stroke-border"
-                    strokeDasharray={i === 0 ? "0" : "2 3"}
-                  />
-                  <text
-                    x={PAD_L - 6}
-                    y={y + 3}
-                    textAnchor="end"
-                    className="fill-muted-foreground"
-                    fontSize={10}
-                  >
-                    {shortCurrency(v)}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Average line */}
-            {windowAvg > 0 && yMax > 0 && (
-              <line
-                x1={PAD_L}
-                x2={W - PAD_R}
-                y1={PAD_T + innerH - (windowAvg / yMax) * innerH}
-                y2={PAD_T + innerH - (windowAvg / yMax) * innerH}
-                className="stroke-muted-foreground/40"
-                strokeWidth={1}
-                strokeDasharray="4 4"
-              />
-            )}
-
-            {/* Bars + X labels */}
-            {points.map((p, i) => {
-              const { x, y, h } = barFor(i, p.revenue);
-              const isActive = hover === i;
-              const isEmpty = p.revenue === 0;
-              return (
-                <g key={p.key} style={{ pointerEvents: "none" }}>
-                  <rect
-                    x={x}
-                    y={isEmpty ? PAD_T + innerH - 2 : y}
-                    width={barW}
-                    height={isEmpty ? 2 : h}
-                    rx={3}
-                    className={
-                      isEmpty
-                        ? "fill-muted"
-                        : isActive
-                          ? "fill-primary"
-                          : "fill-primary/70"
-                    }
-                  />
-                  <text
-                    x={x + barW / 2}
-                    y={H - 10}
-                    textAnchor="middle"
-                    className="fill-muted-foreground"
-                    fontSize={10}
-                  >
-                    {p.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Tooltip */}
-          {active && activeGeom && (
-            <div
-              className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2 py-1.5 text-xs text-popover-foreground"
-              style={{
-                left: `${tooltipLeft}px`,
-                top: `${activeGeom.y - 4}px`,
-              }}
-            >
-              <div className="font-medium">
-                {active.label} {active.year}
-              </div>
-              <div className="tabular-nums">
-                {formatCurrency(active.revenue)}
-              </div>
-              {active.tax > 0 && (
-                <div className="tabular-nums text-muted-foreground">
-                  incl. {formatCurrency(active.tax)} tax
-                </div>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={4}
+              width={44}
+              tickFormatter={(v) => shortCurrency(Number(v))}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(_, payload) => {
+                    const p = payload?.[0]?.payload as
+                      | { label: string; year: number }
+                      | undefined;
+                    return p ? `${p.label} ${p.year}` : "";
+                  }}
+                  formatter={(value) => [
+                    formatCurrency(Number(value)),
+                    "Revenue",
+                  ]}
+                  indicator="dot"
+                />
+              }
+            />
+            <defs>
+              <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
+            <Area
+              dataKey="revenue"
+              type="natural"
+              fill="url(#fillRevenue)"
+              fillOpacity={0.4}
+              stroke="var(--color-revenue)"
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter>
+        <div className="flex w-full items-start gap-2 text-sm">
+          <div className="grid gap-2">
+            <div className="flex items-center gap-2 leading-none font-medium">
+              {trendDirection === "up"
+                ? `Trending up by ${trendPct.toFixed(1)}% this half`
+                : trendDirection === "down"
+                  ? `Trending down by ${Math.abs(trendPct).toFixed(1)}% this half`
+                  : "Flat vs. the previous half"}{" "}
+              {trendDirection === "down" ? (
+                <TrendingDown className="h-4 w-4" />
+              ) : (
+                <TrendingUp className="h-4 w-4" />
               )}
             </div>
-          )}
+            <div className="flex items-center gap-2 leading-none text-muted-foreground">
+              {points.length
+                ? `${points[0].label} ${points[0].year} – ${points[points.length - 1].label} ${points[points.length - 1].year}`
+                : "No data yet"}
+            </div>
+          </div>
         </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }
