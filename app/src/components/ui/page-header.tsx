@@ -33,14 +33,16 @@ export function PageHeader({
         className
       )}
     >
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-3">
         {lead ? <div className="shrink-0">{lead}</div> : null}
         <div className="min-w-0">
-          <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground md:text-base">
+          <h1 className="truncate text-[19px] font-semibold tracking-tight text-foreground md:text-[22px]">
             {title}
           </h1>
           {subtitle ? (
-            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+            <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+              {subtitle}
+            </p>
           ) : null}
         </div>
       </div>

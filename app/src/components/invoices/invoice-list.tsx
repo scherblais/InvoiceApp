@@ -170,7 +170,7 @@ export function InvoiceList({
                         <button
                           type="button"
                           onClick={() => onOpenDraft(d.id)}
-                          className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 md:px-10"
+                          className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-10"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-medium">
@@ -216,7 +216,7 @@ export function InvoiceList({
                         <button
                           type="button"
                           onClick={() => onOpenInvoice(inv.id)}
-                          className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 md:px-10"
+                          className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-10"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-baseline gap-2">

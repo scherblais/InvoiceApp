@@ -175,7 +175,7 @@ export function ClientsView() {
                   <button
                     type="button"
                     onClick={() => setDialog({ open: true, initial: c })}
-                    className="group flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 md:px-10"
+                    className="group relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-10"
                   >
                     <Avatar className="h-9 w-9 shrink-0">
                       <AvatarFallback
