@@ -7,7 +7,6 @@ import {
   Home,
   LogOut,
   Moon,
-  Search,
   Settings2,
   Sun,
   Users,
@@ -183,25 +182,19 @@ function TeamSwitcher() {
   );
 }
 
-/** Top header nav: Search (⌘K palette) + Overview. */
-function NavMain({ onOpenSearch }: { onOpenSearch: () => void }) {
+/** Top header nav: Overview (home). */
+function NavMain() {
   const location = useLocation();
+  const navigate = useNavigate();
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton onClick={onOpenSearch}>
-          <Search />
-          <span>Search</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={location.pathname === "/"}>
           <a
             href="/"
             onClick={(e) => {
               e.preventDefault();
-              window.history.pushState(null, "", "/");
-              window.dispatchEvent(new PopStateEvent("popstate"));
+              navigate("/");
             }}
           >
             <Home />
@@ -388,24 +381,11 @@ function NavSecondary() {
 // ---------- Top-level composition ----------
 
 export function AppSidebar() {
-  // The ⌘K command palette listens globally for the shortcut; the
-  // sidebar's "Search" entry synthesizes that same event so mouse
-  // users get the same palette the keyboard flow opens.
-  const openSearch = () => {
-    window.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        key: "k",
-        metaKey: true,
-        bubbles: true,
-      })
-    );
-  };
-
   return (
     <Sidebar className="border-r-0">
       <SidebarHeader>
         <TeamSwitcher />
-        <NavMain onOpenSearch={openSearch} />
+        <NavMain />
       </SidebarHeader>
       <SidebarContent>
         <NavWorkspaces />
