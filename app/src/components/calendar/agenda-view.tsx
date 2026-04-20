@@ -8,18 +8,30 @@ import {
   eventColor,
   normalizeStatus,
   toISODate,
+  type EventStatus,
 } from "@/lib/calendar";
 import { formatTime12 } from "@/lib/format";
 import { eventClientId, type CalEvent, type Client } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { EventContextMenu } from "@/components/calendar/event-context-menu";
 
 interface AgendaViewProps {
   events: CalEvent[];
   clients: Client[];
   onEventClick: (id: string) => void;
+  onDuplicate: (ev: CalEvent) => void;
+  onStatusChange: (id: string, status: EventStatus) => void;
+  onDelete: (id: string) => void;
 }
 
-export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
+export function AgendaView({
+  events,
+  clients,
+  onEventClick,
+  onDuplicate,
+  onStatusChange,
+  onDelete,
+}: AgendaViewProps) {
   const clientById = useMemo(() => {
     const m = new Map<string, Client>();
     for (const c of clients) m.set(c.id, c);
@@ -86,6 +98,13 @@ export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
                   const client = cid ? clientById.get(cid) : null;
                   return (
                     <li key={ev.id}>
+                    <EventContextMenu
+                      event={ev}
+                      onOpen={() => onEventClick(ev.id)}
+                      onDuplicate={() => onDuplicate(ev)}
+                      onStatusChange={(s) => onStatusChange(ev.id, s)}
+                      onDelete={() => onDelete(ev.id)}
+                    >
                       <button
                         type="button"
                         onClick={() => onEventClick(ev.id)}
@@ -131,6 +150,7 @@ export function AgendaView({ events, clients, onEventClick }: AgendaViewProps) {
                           {STATUS_META[status].label}
                         </span>
                       </button>
+                    </EventContextMenu>
                     </li>
                   );
                 })}

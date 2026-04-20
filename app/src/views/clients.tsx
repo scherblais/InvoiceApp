@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   ChevronRight,
+  Copy,
   Mail,
+  PenLine,
   Phone,
   Plus,
   Search,
+  Trash2,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -15,6 +19,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { KbdSequence } from "@/components/ui/kbd";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
@@ -176,6 +187,8 @@ export function ClientsView() {
 
               return (
                 <li key={c.id}>
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
                   <button
                     type="button"
                     onClick={() => setDialog({ open: true, initial: c })}
@@ -242,6 +255,54 @@ export function ClientsView() {
                       aria-hidden
                     />
                   </button>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onSelect={() => setDialog({ open: true, initial: c })}
+                      >
+                        <PenLine />
+                        <span>Edit client</span>
+                      </ContextMenuItem>
+                      {c.email ? (
+                        <ContextMenuItem
+                          onSelect={() => {
+                            void navigator.clipboard?.writeText(c.email ?? "");
+                            toast.success("Email copied");
+                          }}
+                        >
+                          <Copy />
+                          <span>Copy email</span>
+                        </ContextMenuItem>
+                      ) : null}
+                      {c.phone ? (
+                        <ContextMenuItem
+                          onSelect={() => {
+                            void navigator.clipboard?.writeText(c.phone ?? "");
+                            toast.success("Phone copied");
+                          }}
+                        >
+                          <Copy />
+                          <span>Copy phone</span>
+                        </ContextMenuItem>
+                      ) : null}
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        variant="destructive"
+                        onSelect={() => {
+                          if (
+                            window.confirm(
+                              `Delete ${c.name || c.company || "this client"}? This can't be undone.`
+                            )
+                          ) {
+                            handleDelete(c.id);
+                          }
+                        }}
+                      >
+                        <Trash2 />
+                        <span>Delete client</span>
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 </li>
               );
             })}

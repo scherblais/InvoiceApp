@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { FileText, Plus, Search } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleDashed,
+  FileText,
+  PenLine,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { KbdSequence } from "@/components/ui/kbd";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import {
   clientLabel,
@@ -25,6 +40,9 @@ interface InvoiceListProps {
   onNew: () => void;
   onOpenInvoice: (id: string) => void;
   onOpenDraft: (id: string) => void;
+  onToggleStatus: (id: string) => void;
+  onDeleteInvoice: (id: string) => void;
+  onDeleteDraft: (id: string) => void;
 }
 
 export function InvoiceList({
@@ -34,6 +52,9 @@ export function InvoiceList({
   onNew,
   onOpenInvoice,
   onOpenDraft,
+  onToggleStatus,
+  onDeleteInvoice,
+  onDeleteDraft,
 }: InvoiceListProps) {
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
@@ -173,35 +194,53 @@ export function InvoiceList({
                     const total = draftTotal(d);
                     return (
                       <li key={d.id}>
-                        <button
-                          type="button"
-                          onClick={() => onOpenDraft(d.id)}
-                          className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium">
-                              {clientLabel(client)}
-                            </div>
-                            <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                              <StatusBadge kind="draft" />
-                              {d.month ? <span>{monthName(d.month)}</span> : null}
-                              <span>
-                                {(d.items ?? []).length} item
-                                {(d.items ?? []).length === 1 ? "" : "s"}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium tabular-nums">
-                              {formatCurrency(total, 2)}
-                            </div>
-                            {d.updatedAt ? (
-                              <div className="text-xs text-muted-foreground">
-                                Saved {formatShortDate(d.updatedAt)}
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={() => onOpenDraft(d.id)}
+                              className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate text-sm font-medium">
+                                  {clientLabel(client)}
+                                </div>
+                                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                                  <StatusBadge kind="draft" />
+                                  {d.month ? <span>{monthName(d.month)}</span> : null}
+                                  <span>
+                                    {(d.items ?? []).length} item
+                                    {(d.items ?? []).length === 1 ? "" : "s"}
+                                  </span>
+                                </div>
                               </div>
-                            ) : null}
-                          </div>
-                        </button>
+                              <div className="text-right">
+                                <div className="text-sm font-medium tabular-nums">
+                                  {formatCurrency(total, 2)}
+                                </div>
+                                {d.updatedAt ? (
+                                  <div className="text-xs text-muted-foreground">
+                                    Saved {formatShortDate(d.updatedAt)}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </button>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onSelect={() => onOpenDraft(d.id)}>
+                              <PenLine />
+                              <span>Open draft</span>
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                              variant="destructive"
+                              onSelect={() => onDeleteDraft(d.id)}
+                            >
+                              <Trash2 />
+                              <span>Delete draft</span>
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       </li>
                     );
                   })}
@@ -217,49 +256,74 @@ export function InvoiceList({
                 <ul className="divide-y">
                   {visibleInvoices.map((inv) => {
                     const overdue = isOverdue(inv);
+                    const paid = inv.status === "paid";
                     return (
                       <li key={inv.id}>
-                        <button
-                          type="button"
-                          onClick={() => onOpenInvoice(inv.id)}
-                          className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-baseline gap-2">
-                              <span className="truncate text-sm font-medium">
-                                {inv.clientName ||
-                                  clientLabel(
-                                    inv.clientId
-                                      ? clientById.get(inv.clientId)
-                                      : undefined
-                                  )}
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={() => onOpenInvoice(inv.id)}
+                              className="relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-baseline gap-2">
+                                  <span className="truncate text-sm font-medium">
+                                    {inv.clientName ||
+                                      clientLabel(
+                                        inv.clientId
+                                          ? clientById.get(inv.clientId)
+                                          : undefined
+                                      )}
+                                  </span>
+                                  <span className="truncate text-xs tabular-nums text-muted-foreground">
+                                    {inv.number}
+                                  </span>
+                                </div>
+                                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                  <StatusBadge
+                                    kind={
+                                      paid
+                                        ? "paid"
+                                        : overdue
+                                          ? "overdue"
+                                          : "unpaid"
+                                    }
+                                  />
+                                  {inv.month ? <span>{monthName(inv.month)}</span> : null}
+                                  {inv.createdAt ? (
+                                    <span>· {formatShortDate(inv.createdAt)}</span>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-medium tabular-nums">
+                                  {formatCurrency(inv.total ?? 0, 2)}
+                                </div>
+                              </div>
+                            </button>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onSelect={() => onOpenInvoice(inv.id)}>
+                              <PenLine />
+                              <span>Open invoice</span>
+                            </ContextMenuItem>
+                            <ContextMenuItem onSelect={() => onToggleStatus(inv.id)}>
+                              {paid ? <CircleDashed /> : <CheckCircle2 />}
+                              <span>
+                                {paid ? "Mark as unpaid" : "Mark as paid"}
                               </span>
-                              <span className="truncate text-xs tabular-nums text-muted-foreground">
-                                {inv.number}
-                              </span>
-                            </div>
-                            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                              <StatusBadge
-                                kind={
-                                  inv.status === "paid"
-                                    ? "paid"
-                                    : overdue
-                                      ? "overdue"
-                                      : "unpaid"
-                                }
-                              />
-                              {inv.month ? <span>{monthName(inv.month)}</span> : null}
-                              {inv.createdAt ? (
-                                <span>· {formatShortDate(inv.createdAt)}</span>
-                              ) : null}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium tabular-nums">
-                              {formatCurrency(inv.total ?? 0, 2)}
-                            </div>
-                          </div>
-                        </button>
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                              variant="destructive"
+                              onSelect={() => onDeleteInvoice(inv.id)}
+                            >
+                              <Trash2 />
+                              <span>Delete invoice</span>
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       </li>
                     );
                   })}

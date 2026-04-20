@@ -152,6 +152,31 @@ export function CalendarView() {
     [calEvents, saveCalEvents]
   );
 
+  const handleDuplicate = useCallback(
+    (ev: CalEvent) => {
+      // Strip files and id — duplicated shoot is a brand-new slot
+      // the photographer can edit. Everything else (address, client,
+      // package-time-slot) carries over so duplicating a recurring
+      // listing is a one-click operation.
+      const { id: _oldId, files: _files, ...rest } = ev;
+      void _oldId;
+      void _files;
+      const clone: CalEvent = {
+        ...rest,
+        id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      };
+      saveCalEvents([...calEvents, clone]);
+      setEditingId(clone.id);
+      setDefaultDate("");
+      setDefaultTime("");
+      setModalOpen(true);
+      toast.success("Event duplicated", {
+        description: "Opened the copy — adjust the date or time to save.",
+      });
+    },
+    [calEvents, saveCalEvents]
+  );
+
   const handlePrev = useCallback(() => {
     setCursor((d) => {
       if (view === "month") {
@@ -272,6 +297,9 @@ export function CalendarView() {
           events={calEvents}
           onEventClick={openEdit}
           onDayClick={(iso) => openNew(iso)}
+          onDuplicate={handleDuplicate}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
         />
       ) : null}
 
@@ -283,6 +311,9 @@ export function CalendarView() {
           onSlotClick={(iso, hour) =>
             openNew(iso, `${String(hour).padStart(2, "0")}:00`)
           }
+          onDuplicate={handleDuplicate}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
         />
       ) : null}
 
@@ -291,6 +322,9 @@ export function CalendarView() {
           events={calEvents}
           clients={clients}
           onEventClick={openEdit}
+          onDuplicate={handleDuplicate}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
         />
       ) : null}
 
@@ -300,6 +334,8 @@ export function CalendarView() {
           clients={clients}
           onEventClick={openEdit}
           onStatusChange={handleStatusChange}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
         />
       ) : null}
 

@@ -111,6 +111,9 @@ export function InvoicesView() {
         onNew={() => setMode({ kind: "edit-draft", draftId: null })}
         onOpenInvoice={(id) => setMode({ kind: "view", invoiceId: id })}
         onOpenDraft={(id) => setMode({ kind: "edit-draft", draftId: id })}
+        onToggleStatus={handleToggleStatus}
+        onDeleteInvoice={handleDeleteInvoice}
+        onDeleteDraft={handleDeleteDraft}
       />
     );
   }

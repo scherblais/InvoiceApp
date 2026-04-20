@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/contexts/theme-context";
 import { useData } from "@/contexts/data-context";
+import { EventContextMenu } from "@/components/calendar/event-context-menu";
 import {
   COLOR_CHIP_DARK,
   COLOR_CHIP_LIGHT,
@@ -10,6 +11,7 @@ import {
   isToday,
   minutesFromHHMM,
   toISODate,
+  type EventStatus,
 } from "@/lib/calendar";
 import { formatTime12 } from "@/lib/format";
 import type { CalEvent } from "@/lib/types";
@@ -20,6 +22,9 @@ interface WeekViewProps {
   events: CalEvent[];
   onEventClick: (id: string) => void;
   onSlotClick: (iso: string, hour: number) => void;
+  onDuplicate: (ev: CalEvent) => void;
+  onStatusChange: (id: string, status: EventStatus) => void;
+  onDelete: (id: string) => void;
 }
 
 const HOUR_HEIGHT = 48;
@@ -30,6 +35,9 @@ export function WeekView({
   events,
   onEventClick,
   onSlotClick,
+  onDuplicate,
+  onStatusChange,
+  onDelete,
 }: WeekViewProps) {
   const { theme } = useTheme();
   const { clientsById } = useData();
@@ -128,15 +136,23 @@ export function WeekView({
                     ? COLOR_CHIP_DARK[color]
                     : COLOR_CHIP_LIGHT[color];
                 return (
-                  <button
+                  <EventContextMenu
                     key={ev.id}
-                    type="button"
-                    onClick={() => onEventClick(ev.id)}
-                    style={{ backgroundColor: chip.bg, color: chip.fg }}
-                    className="mb-0.5 block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] font-medium"
+                    event={ev}
+                    onOpen={() => onEventClick(ev.id)}
+                    onDuplicate={() => onDuplicate(ev)}
+                    onStatusChange={(s) => onStatusChange(ev.id, s)}
+                    onDelete={() => onDelete(ev.id)}
                   >
-                    {ev.title || ev.address || "Untitled"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => onEventClick(ev.id)}
+                      style={{ backgroundColor: chip.bg, color: chip.fg }}
+                      className="mb-0.5 block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] font-medium"
+                    >
+                      {ev.title || ev.address || "Untitled"}
+                    </button>
+                  </EventContextMenu>
                 );
               })}
             </div>
@@ -206,33 +222,41 @@ export function WeekView({
                     ((endMin - startMin) / 60) * HOUR_HEIGHT
                   );
                   return (
-                    <button
+                    <EventContextMenu
                       key={ev.id}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick(ev.id);
-                      }}
-                      style={{
-                        top,
-                        height,
-                        backgroundColor: chip.bg,
-                        color: chip.fg,
-                      }}
-                      className="absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-[11px] font-medium leading-tight ring-1 ring-inset ring-black/5 transition-opacity hover:opacity-85 dark:ring-white/5"
+                      event={ev}
+                      onOpen={() => onEventClick(ev.id)}
+                      onDuplicate={() => onDuplicate(ev)}
+                      onStatusChange={(s) => onStatusChange(ev.id, s)}
+                      onDelete={() => onDelete(ev.id)}
                     >
-                      <div className="truncate tabular-nums text-[10px] opacity-80">
-                        {formatTime12(ev.start)}
-                      </div>
-                      <div className="truncate font-semibold">
-                        {ev.title || ev.address || "Untitled"}
-                      </div>
-                      {ev.contactName ? (
-                        <div className="truncate text-[10px] opacity-70">
-                          {ev.contactName}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEventClick(ev.id);
+                        }}
+                        style={{
+                          top,
+                          height,
+                          backgroundColor: chip.bg,
+                          color: chip.fg,
+                        }}
+                        className="absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-[11px] font-medium leading-tight ring-1 ring-inset ring-black/5 transition-opacity hover:opacity-85 dark:ring-white/5"
+                      >
+                        <div className="truncate tabular-nums text-[10px] opacity-80">
+                          {formatTime12(ev.start)}
                         </div>
-                      ) : null}
-                    </button>
+                        <div className="truncate font-semibold">
+                          {ev.title || ev.address || "Untitled"}
+                        </div>
+                        {ev.contactName ? (
+                          <div className="truncate text-[10px] opacity-70">
+                            {ev.contactName}
+                          </div>
+                        ) : null}
+                      </button>
+                    </EventContextMenu>
                   );
                 })}
                 {/* Now indicator */}

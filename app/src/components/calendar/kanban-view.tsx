@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { MapPin, Paperclip } from "lucide-react";
+import { EventContextMenu } from "@/components/calendar/event-context-menu";
 import { useTheme } from "@/contexts/theme-context";
 import {
   STATUS_CHIP_DARK,
@@ -19,6 +20,8 @@ interface KanbanViewProps {
   clients: Client[];
   onEventClick: (id: string) => void;
   onStatusChange: (id: string, status: EventStatus) => void;
+  onDuplicate: (event: CalEvent) => void;
+  onDelete: (id: string) => void;
 }
 
 export function KanbanView({
@@ -26,6 +29,8 @@ export function KanbanView({
   clients,
   onEventClick,
   onStatusChange,
+  onDuplicate,
+  onDelete,
 }: KanbanViewProps) {
   const { theme } = useTheme();
   const [dragOver, setDragOver] = useState<EventStatus | null>(null);
@@ -111,8 +116,15 @@ export function KanbanView({
                     ? `${ev.address}, Apt ${ev.unit}`
                     : ev.address ?? "";
                   return (
-                    <button
+                    <EventContextMenu
                       key={ev.id}
+                      event={ev}
+                      onOpen={() => onEventClick(ev.id)}
+                      onDuplicate={() => onDuplicate(ev)}
+                      onStatusChange={(s) => onStatusChange(ev.id, s)}
+                      onDelete={() => onDelete(ev.id)}
+                    >
+                    <button
                       type="button"
                       draggable
                       onDragStart={(e) => {
@@ -127,7 +139,7 @@ export function KanbanView({
                         // Pastel tonal card — pulls bg from the event's
                         // color palette so scanning the board by
                         // category is as fast as scanning by status.
-                        "group flex cursor-grab flex-col gap-1.5 rounded-lg p-3 text-left ring-1 ring-inset ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-sm active:cursor-grabbing dark:ring-white/5",
+                        "group flex w-full cursor-grab flex-col gap-1.5 rounded-lg p-3 text-left ring-1 ring-inset ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-sm active:cursor-grabbing dark:ring-white/5",
                         draggingId === ev.id && "opacity-40"
                       )}
                     >
@@ -183,6 +195,7 @@ export function KanbanView({
                         </div>
                       ) : null}
                     </button>
+                    </EventContextMenu>
                   );
                 })}
                 {items.length === 0 ? (

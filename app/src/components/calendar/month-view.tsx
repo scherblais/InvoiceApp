@@ -5,10 +5,12 @@ import {
   getMonthGrid,
   isToday,
   toISODate,
+  type EventStatus,
 } from "@/lib/calendar";
 import type { CalEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { EventChip } from "@/components/calendar/event-chip";
+import { EventContextMenu } from "@/components/calendar/event-context-menu";
 
 interface MonthViewProps {
   year: number;
@@ -16,6 +18,9 @@ interface MonthViewProps {
   events: CalEvent[];
   onEventClick: (id: string) => void;
   onDayClick: (iso: string) => void;
+  onDuplicate: (ev: CalEvent) => void;
+  onStatusChange: (id: string, status: EventStatus) => void;
+  onDelete: (id: string) => void;
 }
 
 export function MonthView({
@@ -24,6 +29,9 @@ export function MonthView({
   events,
   onEventClick,
   onDayClick,
+  onDuplicate,
+  onStatusChange,
+  onDelete,
 }: MonthViewProps) {
   const cells = useMemo(() => getMonthGrid(year, month), [year, month]);
   const byDate = useMemo(() => {
@@ -87,12 +95,20 @@ export function MonthView({
               </div>
               <div className="flex flex-col gap-0.5 overflow-hidden">
                 {visible.map((ev) => (
-                  <EventChip
+                  <EventContextMenu
                     key={ev.id}
                     event={ev}
-                    onClick={() => onEventClick(ev.id)}
-                    compact
-                  />
+                    onOpen={() => onEventClick(ev.id)}
+                    onDuplicate={() => onDuplicate(ev)}
+                    onStatusChange={(s) => onStatusChange(ev.id, s)}
+                    onDelete={() => onDelete(ev.id)}
+                  >
+                    <EventChip
+                      event={ev}
+                      onClick={() => onEventClick(ev.id)}
+                      compact
+                    />
+                  </EventContextMenu>
                 ))}
                 {overflow > 0 ? (
                   <span className="px-1.5 text-[10px] font-medium text-muted-foreground">
