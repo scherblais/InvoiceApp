@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { EventFiles } from "@/components/calendar/event-files";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -40,15 +42,6 @@ interface EventModalProps {
   clients: Client[];
   onSave: (ev: CalEvent) => void;
   onDelete?: (id: string) => void;
-}
-
-/** YYYY-MM-DD for today — used when a user un-TBDs a dateless event
- *  and we need to seed the date input with something valid. */
-function todayDateString(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate()
-  ).padStart(2, "0")}`;
 }
 
 interface FormState {
@@ -217,46 +210,36 @@ export function EventModal({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="ev-date">Date</Label>
-                {/* TBD toggle lets the photographer save an event
-                    without committing to a day — the shoot then
-                    lives in the To Schedule panel on the dashboard
-                    until it's booked. */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm((f) => ({
-                      ...f,
-                      date: f.date ? "" : todayDateString(),
-                      start: f.date ? "" : f.start,
-                    }))
-                  }
-                  className="text-[11px] text-muted-foreground hover:text-foreground"
-                  aria-pressed={!form.date}
-                >
-                  {form.date ? "Mark as TBD" : "Set a date"}
-                </button>
-              </div>
-              <Input
+              <Label htmlFor="ev-date">Date</Label>
+              {/* Clearing the date puts the event back in the dashboard's
+                  To Schedule panel — it stays a known shoot that just
+                  hasn't been booked onto a specific day yet. */}
+              <DatePicker
                 id="ev-date"
-                type="date"
                 value={form.date}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, date: e.target.value }))
+                onChange={(next) =>
+                  setForm((f) => ({
+                    ...f,
+                    date: next,
+                    // Clear the time when the date is cleared — a
+                    // TBD shoot shouldn't carry a stale start time.
+                    start: next ? f.start : "",
+                  }))
                 }
                 placeholder="TBD"
+                clearable
+                ariaLabel="Shoot date"
               />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="ev-start">Time</Label>
-              <Input
+              <TimePicker
                 id="ev-start"
-                type="time"
                 value={form.start}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, start: e.target.value }))
-                }
+                onChange={(next) => setForm((f) => ({ ...f, start: next }))}
+                placeholder="All day"
+                clearable
+                ariaLabel="Start time"
               />
             </div>
           </div>
