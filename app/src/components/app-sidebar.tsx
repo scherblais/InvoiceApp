@@ -1,23 +1,41 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
-  LayoutDashboard,
-  FileText,
   Calendar as CalendarIcon,
-  Users,
-  Settings,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Home,
   LogOut,
   Moon,
+  Search,
+  Settings2,
   Sun,
+  Users,
 } from "lucide-react";
-import { LumeriaLogo } from "@/components/lumeria-logo";
 import { useLocation, useNavigate } from "react-router-dom";
+import { LumeriaLogo } from "@/components/lumeria-logo";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -25,276 +43,374 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
-import { ActivityBell } from "@/components/activity-bell";
 
 /**
- * Navigation tree, structured after the shadcn `sidebar-03` block:
- * each top-level entry can optionally declare sub-items, rendered
- * via SidebarMenuSub. Sub-items drive URL-param state the target
- * pages read (invoice filter, calendar view, settings tab) so the
- * sidebar acts as a full-fidelity jump table instead of just top-
- * level navigation.
+ * Sidebar composition modeled after the shadcn `sidebar-10` block.
+ *
+ *   [SidebarHeader]
+ *     TeamSwitcher — brand chip with a dropdown for account actions
+ *     NavMain     — compact top-level quick-jumps (Search, Overview)
+ *
+ *   [SidebarContent]
+ *     NavWorkspaces — "Navigate" group with collapsible entries
+ *                     (Invoicing, Calendar) + flat Clients
+ *     NavSecondary  — mt-auto: Settings (collapsible), theme toggle,
+ *                     sign out
+ *
+ *   SidebarRail   — right-edge handle for collapse / expand
+ *
+ * Sub-items drive URL-param state that the target pages read so the
+ * sidebar acts as a full-fidelity jump table (e.g. "Unpaid invoices"
+ * → /invoices?status=unpaid; the list seeds its filter from the
+ * param, and writes back when the user clicks a tab inside).
  */
-interface NavItem {
+
+// ---------- Navigation data ----------
+
+interface NavSub {
   title: string;
-  to: string; // pathname only
-  icon: React.ComponentType<{ className?: string }>;
-  items?: { title: string; search?: string; activeSearchKey?: string; activeSearchValue?: string | null }[];
+  search: string; // "?status=..." or ""
+  searchKey: string;
+  searchValue: string | null; // null = "no param set" (e.g. All)
 }
 
-const mainNav: NavItem[] = [
-  { title: "Overview", to: "/", icon: LayoutDashboard },
+interface NavEntry {
+  title: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  subs?: NavSub[];
+}
+
+const workspaceNav: NavEntry[] = [
   {
     title: "Invoicing",
     to: "/invoices",
     icon: FileText,
-    items: [
-      { title: "All", activeSearchKey: "status", activeSearchValue: null },
-      { title: "Drafts", search: "?status=drafts", activeSearchKey: "status", activeSearchValue: "drafts" },
-      { title: "Unpaid", search: "?status=unpaid", activeSearchKey: "status", activeSearchValue: "unpaid" },
-      { title: "Paid", search: "?status=paid", activeSearchKey: "status", activeSearchValue: "paid" },
+    subs: [
+      { title: "All", search: "", searchKey: "status", searchValue: null },
+      { title: "Drafts", search: "?status=drafts", searchKey: "status", searchValue: "drafts" },
+      { title: "Unpaid", search: "?status=unpaid", searchKey: "status", searchValue: "unpaid" },
+      { title: "Paid", search: "?status=paid", searchKey: "status", searchValue: "paid" },
     ],
   },
   {
     title: "Calendar",
     to: "/calendar",
     icon: CalendarIcon,
-    items: [
-      { title: "Agenda", search: "?view=agenda", activeSearchKey: "view", activeSearchValue: "agenda" },
-      { title: "Week", search: "?view=week", activeSearchKey: "view", activeSearchValue: "week" },
-      { title: "Month", search: "?view=month", activeSearchKey: "view", activeSearchValue: "month" },
-      { title: "Board", search: "?view=kanban", activeSearchKey: "view", activeSearchValue: "kanban" },
+    subs: [
+      { title: "Agenda", search: "?view=agenda", searchKey: "view", searchValue: "agenda" },
+      { title: "Week", search: "?view=week", searchKey: "view", searchValue: "week" },
+      { title: "Month", search: "?view=month", searchKey: "view", searchValue: "month" },
+      { title: "Board", search: "?view=kanban", searchKey: "view", searchValue: "kanban" },
     ],
   },
-  { title: "Clients", to: "/clients", icon: Users },
+  {
+    title: "Clients",
+    to: "/clients",
+    icon: Users,
+  },
 ];
 
-const settingsNav: NavItem = {
+const settingsEntry: NavEntry = {
   title: "Settings",
   to: "/settings",
-  icon: Settings,
-  items: [
-    { title: "Pricing", search: "?tab=pricing", activeSearchKey: "tab", activeSearchValue: "pricing" },
-    { title: "Tax report", search: "?tab=taxes", activeSearchKey: "tab", activeSearchValue: "taxes" },
-    { title: "Account", search: "?tab=account", activeSearchKey: "tab", activeSearchValue: "account" },
+  icon: Settings2,
+  subs: [
+    { title: "Pricing", search: "?tab=pricing", searchKey: "tab", searchValue: "pricing" },
+    { title: "Tax report", search: "?tab=taxes", searchKey: "tab", searchValue: "taxes" },
+    { title: "Account", search: "?tab=account", searchKey: "tab", searchValue: "account" },
   ],
 };
 
-export function AppSidebar() {
-  const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
+// ---------- Building blocks ----------
 
+function TeamSwitcher() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "LM";
 
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton className="w-fit px-1.5">
+              <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+                <LumeriaLogo className="size-3" />
+              </div>
+              <span className="truncate font-medium">Lumeria Media</span>
+              <ChevronDown className="opacity-50" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-64 rounded-lg"
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              Account
+            </DropdownMenuLabel>
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <div className="flex size-8 items-center justify-center rounded-md bg-muted text-[11px] font-semibold">
+                {initials}
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-medium">
+                  {user?.displayName ?? user?.email?.split("@")[0] ?? "Account"}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user?.email}
+                </span>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={async () => {
+                await logout();
+                navigate("/login");
+              }}
+            >
+              <LogOut />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
+
+/** Top header nav: Search (⌘K palette) + Overview. */
+function NavMain({ onOpenSearch }: { onOpenSearch: () => void }) {
+  const location = useLocation();
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton onClick={onOpenSearch}>
+          <Search />
+          <span>Search</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={location.pathname === "/"}>
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState(null, "", "/");
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}
+          >
+            <Home />
+            <span>Overview</span>
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
+
+/** "Navigate" group: collapsible Invoicing/Calendar + flat Clients. */
+function NavWorkspaces() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const currentSearch = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
   );
 
-  // Top-level item is active when the pathname matches. For sub-items
-  // we also check the matching URL param so "Drafts" highlights only
-  // when `?status=drafts` is present, not on every `/invoices` visit.
   const isRouteActive = (to: string) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
-
-  const isSubActive = (
-    to: string,
-    key: string | undefined,
-    value: string | null | undefined
-  ) => {
+  const isSubActive = (to: string, key: string, value: string | null) => {
     if (!isRouteActive(to)) return false;
-    if (!key) return true;
     const current = currentSearch.get(key);
-    // A null/undefined target value means "parent route, no filter set"
     if (value == null) return current == null || current === "";
     return current === value;
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader>
+    <SidebarGroup>
+      <SidebarGroupLabel>Navigate</SidebarGroupLabel>
+      <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="w-full text-left"
-              >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <LumeriaLogo className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium">Lumeria Media</span>
-                  <span className="text-xs text-muted-foreground">
-                    Invoicing
-                  </span>
-                </div>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu>
-            {mainNav.map((item) => {
-              const active = isRouteActive(item.to);
-              return (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={active && !item.items}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => navigate(item.to)}
-                      className="w-full text-left font-medium"
-                    >
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </button>
-                  </SidebarMenuButton>
-                  {item.items?.length ? (
-                    <SidebarMenuSub>
-                      {item.items.map((sub) => {
-                        const subActive = isSubActive(
-                          item.to,
-                          sub.activeSearchKey,
-                          sub.activeSearchValue
-                        );
-                        return (
-                          <SidebarMenuSubItem key={sub.title}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={subActive}
-                            >
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  navigate(`${item.to}${sub.search ?? ""}`)
-                                }
-                                className="w-full text-left"
-                              >
-                                {sub.title}
-                              </button>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
-                    </SidebarMenuSub>
-                  ) : null}
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Settings lives as its own group at the bottom of content
-           so its submenu is always reachable without scrolling past
-           the main nav. */}
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={
-                  isRouteActive(settingsNav.to) && !settingsNav.items
+          {workspaceNav.map((item) =>
+            item.subs?.length ? (
+              <CollapsibleNavEntry
+                key={item.to}
+                entry={item}
+                activeRoute={isRouteActive(item.to)}
+                isSubActive={(sub) =>
+                  isSubActive(item.to, sub.searchKey, sub.searchValue)
                 }
-              >
-                <button
-                  type="button"
-                  onClick={() => navigate(settingsNav.to)}
-                  className="w-full text-left font-medium"
+                onNavigate={(url) => navigate(url)}
+              />
+            ) : (
+              <SidebarMenuItem key={item.to}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isRouteActive(item.to)}
                 >
-                  <settingsNav.icon className="size-4" />
-                  <span>{settingsNav.title}</span>
-                </button>
-              </SidebarMenuButton>
-              {settingsNav.items?.length ? (
-                <SidebarMenuSub>
-                  {settingsNav.items.map((sub) => {
-                    const subActive = isSubActive(
-                      settingsNav.to,
-                      sub.activeSearchKey,
-                      sub.activeSearchValue
-                    );
-                    return (
-                      <SidebarMenuSubItem key={sub.title}>
-                        <SidebarMenuSubButton asChild isActive={subActive}>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(
-                                `${settingsNav.to}${sub.search ?? ""}`
-                              )
-                            }
-                            className="w-full text-left"
-                          >
-                            {sub.title}
-                          </button>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    );
-                  })}
-                </SidebarMenuSub>
-              ) : null}
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
+                  <a
+                    href={item.to}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(item.to);
+                    }}
+                  >
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          )}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
-      <SidebarFooter>
+/** One collapsible nav entry — top-level link + nested sub-items. */
+function CollapsibleNavEntry({
+  entry,
+  activeRoute,
+  isSubActive,
+  onNavigate,
+}: {
+  entry: NavEntry;
+  activeRoute: boolean;
+  isSubActive: (sub: NavSub) => boolean;
+  onNavigate: (url: string) => void;
+}) {
+  // Default the section to open when we're currently inside it so
+  // users don't have to re-expand to find the active sub-item.
+  const [open, setOpen] = useState(activeRoute);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={activeRoute}
+        >
+          <a
+            href={entry.to}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate(entry.to);
+            }}
+          >
+            <entry.icon />
+            <span>{entry.title}</span>
+          </a>
+        </SidebarMenuButton>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction
+            className="data-[state=open]:rotate-90"
+            showOnHover
+          >
+            <ChevronRight />
+            <span className="sr-only">Toggle {entry.title} submenu</span>
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {entry.subs!.map((sub) => (
+              <SidebarMenuSubItem key={sub.title}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isSubActive(sub)}
+                >
+                  <a
+                    href={`${entry.to}${sub.search}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onNavigate(`${entry.to}${sub.search}`);
+                    }}
+                  >
+                    {sub.title}
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
+
+/** Bottom nav (mt-auto): Settings (collapsible) + theme toggle. */
+function NavSecondary() {
+  const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentSearch = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+
+  const isRouteActive = (to: string) => location.pathname.startsWith(to);
+  const isSubActive = (to: string, key: string, value: string | null) => {
+    if (!isRouteActive(to)) return false;
+    const current = currentSearch.get(key);
+    if (value == null) return current == null || current === "";
+    return current === value;
+  };
+
+  return (
+    <SidebarGroup className="mt-auto">
+      <SidebarGroupContent>
         <SidebarMenu>
+          <CollapsibleNavEntry
+            entry={settingsEntry}
+            activeRoute={isRouteActive(settingsEntry.to)}
+            isSubActive={(sub) =>
+              isSubActive(settingsEntry.to, sub.searchKey, sub.searchValue)
+            }
+            onNavigate={(url) => navigate(url)}
+          />
           <SidebarMenuItem>
             <SidebarMenuButton onClick={toggleTheme}>
-              {theme === "dark" ? (
-                <Sun className="size-4" />
-              ) : (
-                <Moon className="size-4" />
-              )}
+              {theme === "dark" ? <Sun /> : <Moon />}
               <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <Avatar className="size-7">
-            <AvatarFallback className="text-[10px] font-medium">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-xs font-medium">
-              {user?.displayName ?? user?.email?.split("@")[0] ?? "Account"}
-            </span>
-            <span className="truncate text-[11px] text-muted-foreground">
-              {user?.email}
-            </span>
-          </div>
-          <ActivityBell />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 text-muted-foreground hover:text-foreground"
-            aria-label="Sign out"
-            onClick={async () => {
-              await logout();
-              navigate("/login");
-            }}
-          >
-            <LogOut className="size-3.5" aria-hidden />
-          </Button>
-        </div>
-      </SidebarFooter>
+// ---------- Top-level composition ----------
 
+export function AppSidebar() {
+  // The ⌘K command palette listens globally for the shortcut; the
+  // sidebar's "Search" entry synthesizes that same event so mouse
+  // users get the same palette the keyboard flow opens.
+  const openSearch = () => {
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "k",
+        metaKey: true,
+        bubbles: true,
+      })
+    );
+  };
+
+  return (
+    <Sidebar className="border-r-0">
+      <SidebarHeader>
+        <TeamSwitcher />
+        <NavMain onOpenSearch={openSearch} />
+      </SidebarHeader>
+      <SidebarContent>
+        <NavWorkspaces />
+        <NavSecondary />
+      </SidebarContent>
       <SidebarRail />
     </Sidebar>
   );
