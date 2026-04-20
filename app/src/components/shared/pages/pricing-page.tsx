@@ -13,7 +13,7 @@ export function PricingPage() {
         title="Pricing"
         subtitle="Your current rate sheet"
       />
-      <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8">
         {!pricing ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-card p-14 text-center shadow-xs">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-muted/40 text-muted-foreground">

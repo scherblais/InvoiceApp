@@ -362,7 +362,7 @@ export function InvoiceEditor({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8">
         <div className="mx-auto flex max-w-4xl flex-col gap-8">
           {/* Meta section */}
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">

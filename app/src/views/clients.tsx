@@ -113,7 +113,7 @@ export function ClientsView() {
         }
       />
 
-      <div className="flex items-center border-b px-6 py-3 md:px-10">
+      <div className="flex items-center border-b px-6 py-3 md:px-8">
         <div className="relative w-full md:max-w-sm">
           <Search
             className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -175,7 +175,7 @@ export function ClientsView() {
                   <button
                     type="button"
                     onClick={() => setDialog({ open: true, initial: c })}
-                    className="group relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-10"
+                    className="group relative flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/30 before:absolute before:left-0 before:top-1/2 before:h-8 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-transparent before:transition-colors hover:before:bg-foreground/30 md:px-8"
                   >
                     <Avatar className="h-9 w-9 shrink-0">
                       <AvatarFallback

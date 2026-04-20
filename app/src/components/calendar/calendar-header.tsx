@@ -43,7 +43,7 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   const noun = NAV_NOUN[view];
   return (
-    <header className="app-header flex flex-col justify-center gap-3 border-b bg-background/60 px-6 py-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between md:px-10">
+    <header className="app-header flex flex-col justify-center gap-3 border-b bg-background/60 px-6 py-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between md:px-8">
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
         {showNav ? (

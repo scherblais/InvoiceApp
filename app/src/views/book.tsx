@@ -139,7 +139,7 @@ export function BookingView() {
     <div className="min-h-svh bg-background">
       {/* Header */}
       <header className="border-b">
-        <div className="mx-auto flex max-w-2xl items-center gap-2.5 px-6 py-4 md:px-10">
+        <div className="mx-auto flex max-w-2xl items-center gap-2.5 px-6 py-4 md:px-8">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
             <LumeriaLogo className="h-3.5 w-3.5" aria-hidden />
           </div>
@@ -149,7 +149,7 @@ export function BookingView() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-6 py-10 md:px-10 md:py-14">
+      <div className="mx-auto max-w-2xl px-6 py-10 md:px-8 md:py-14">
         {/* Hero */}
         <div className="flex flex-col gap-2">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">

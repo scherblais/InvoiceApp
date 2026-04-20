@@ -64,10 +64,10 @@ export function HomePage({
         title={`${getGreeting()}${name ? ", " + name : ""}`}
         subtitle={company}
       />
-      <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8">
         <div className="flex flex-col gap-6 md:gap-8">
           {/* Next up row */}
-          <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
             <QuickCard
               icon={Camera}
               label="Latest delivery"
@@ -107,7 +107,7 @@ export function HomePage({
           </div>
 
           {/* Section shortcuts */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
             <SectionShortcut
               icon={Images}
               title="Deliveries"

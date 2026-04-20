@@ -27,9 +27,14 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "16rem"
+// Width values pulled from the AlignUI grid kit:
+//   expanded  272px  — sidebar nav content column
+//   collapsed  80px  — icon-only rail (bigger than the default 48px
+//                      so the tooltip triggers feel clickable)
+//   mobile    288px  — off-canvas Sheet drawer
+const SIDEBAR_WIDTH = "17rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+const SIDEBAR_WIDTH_ICON = "5rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContextProps = {

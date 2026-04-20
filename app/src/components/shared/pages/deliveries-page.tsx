@@ -32,7 +32,7 @@ export function DeliveriesPage() {
             : "Your photographer's uploads will show up here"
         }
       />
-      <div className="flex-1 overflow-y-auto p-6 md:p-10">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8">
         {delivered.length === 0 ? (
           <EmptyDeliveries />
         ) : (
