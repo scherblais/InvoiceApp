@@ -71,7 +71,7 @@ export function InvoicePreview({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant={paid ? "outline" : "default"}
+            variant={paid ? "outline" : "soft-success"}
             size="sm"
             onClick={onToggleStatus}
           >
@@ -95,12 +95,7 @@ export function InvoicePreview({
             )}
             {downloading ? "Building PDF…" : "Download PDF"}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onDelete}
-            className="text-destructive hover:text-destructive"
-          >
+          <Button variant="soft-destructive" size="sm" onClick={onDelete}>
             <Trash2 className="mr-1.5 h-4 w-4" aria-hidden />
             Delete
           </Button>

@@ -1,15 +1,19 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Shared invoice/draft status badge. Single source of truth for the color
- * system so the dashboard panels, invoice list, and invoice document all
- * read identically.
+ * Shared invoice/draft status badge. Drives the color system used
+ * across dashboard panels, invoice rows, kanban cards, and invoice
+ * documents — single source of truth.
  *
- *  - paid     → emerald  (positive, done)
- *  - unpaid   → amber    (attention, waiting)
- *  - overdue  → red      (urgent)
- *  - draft    → muted    (not yet issued)
- *  - custom   → primary  (informational, generic)
+ * Visual language matches the Badge primitive's tonal family:
+ * soft background + matching text + ring-inset at 20% so chips
+ * read as proper surfaces rather than flat fills.
+ *
+ *  paid     → emerald  (positive, done)
+ *  unpaid   → amber    (attention, waiting)
+ *  overdue  → red      (urgent)
+ *  draft    → muted    (not yet issued)
+ *  custom   → primary  (informational / generic)
  */
 export type StatusKind = "paid" | "unpaid" | "overdue" | "draft" | "custom";
 
@@ -23,24 +27,27 @@ interface StatusBadgeProps {
 const VARIANTS: Record<StatusKind, { classes: string; defaultLabel: string }> = {
   paid: {
     classes:
-      "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+      "bg-emerald-500/10 text-emerald-700 ring-1 ring-inset ring-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/25",
     defaultLabel: "Paid",
   },
   unpaid: {
     classes:
-      "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+      "bg-amber-500/10 text-amber-700 ring-1 ring-inset ring-amber-500/20 dark:text-amber-400 dark:ring-amber-500/25",
     defaultLabel: "Unpaid",
   },
   overdue: {
-    classes: "border-destructive/40 bg-destructive/10 text-destructive",
+    classes:
+      "bg-destructive/10 text-destructive ring-1 ring-inset ring-destructive/20",
     defaultLabel: "Overdue",
   },
   draft: {
-    classes: "border-border bg-muted text-muted-foreground",
+    classes:
+      "bg-muted text-muted-foreground ring-1 ring-inset ring-border",
     defaultLabel: "Draft",
   },
   custom: {
-    classes: "border-primary/30 bg-primary/10 text-primary",
+    classes:
+      "bg-primary/10 text-primary ring-1 ring-inset ring-primary/20",
     defaultLabel: "Custom",
   },
 };
@@ -55,8 +62,10 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border font-medium",
-        size === "sm" ? "px-1.5 py-0 text-[10px] h-5" : "px-2 py-0.5 text-xs",
+        "inline-flex items-center rounded-full font-medium",
+        size === "sm"
+          ? "px-1.5 py-0 text-[10px] h-5"
+          : "px-2 py-0.5 text-xs",
         v.classes,
         className
       )}
