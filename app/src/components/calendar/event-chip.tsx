@@ -33,8 +33,11 @@ export function EventChip({ event, onClick, compact }: EventChipProps) {
       }}
       style={{ backgroundColor: chip.bg, color: chip.fg }}
       className={cn(
-        "w-full truncate rounded px-1.5 text-left text-[11px] font-medium leading-tight transition-opacity hover:opacity-80",
-        compact ? "py-0.5" : "py-1"
+        // AlignUI-style pastel tile — slightly more rounded, a touch
+        // taller, and hover dips opacity instead of color so the
+        // tonal feel survives.
+        "w-full truncate rounded-md px-1.5 text-left text-[11px] font-medium leading-tight transition-opacity hover:opacity-85",
+        compact ? "py-1" : "py-1.5"
       )}
       title={time ? `${time} · ${label}` : label}
     >

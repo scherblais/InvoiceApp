@@ -8,6 +8,7 @@ import {
   Moon,
   Sun,
   ChevronRight,
+  ChevronsUpDown,
 } from "lucide-react";
 import { LumeriaLogo } from "@/components/lumeria-logo";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -49,24 +51,38 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-4 py-0 bloom-accent">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+      <SidebarHeader className="app-header relative justify-center overflow-hidden border-b px-2 py-0 bloom-accent">
+        {/* Brand block styled like AlignUI's workspace selector — even
+           though we only have one workspace, the chevron + hover state
+           signals "this is the identity block" and gives the top of
+           the sidebar a clear anchor. */}
+        <button
+          type="button"
+          className="flex h-12 items-center gap-2.5 rounded-lg px-2 text-left transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-sidebar"
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
             <LumeriaLogo className="h-4 w-4" />
           </div>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold leading-tight tracking-tight">
+          <div className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">
+            <span className="truncate text-sm font-semibold leading-tight tracking-tight">
               Lumeria Media
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="truncate text-[11px] text-muted-foreground">
               Invoicing
             </span>
           </div>
-        </div>
+          <ChevronsUpDown
+            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70 group-data-[collapsible=icon]:hidden"
+            aria-hidden
+          />
+        </button>
       </SidebarHeader>
 
       <SidebarContent className="gap-0">
         <SidebarGroup className="py-3">
+          <SidebarGroupLabel className="px-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+            Main
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
               {nav.map((item) => (

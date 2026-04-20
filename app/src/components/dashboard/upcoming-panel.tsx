@@ -58,6 +58,10 @@ export function UpcomingPanel({ calEvents }: { calEvents: CalEvent[] }) {
     <Card className="gap-0 py-0">
       <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
         <div className="flex items-center gap-2">
+          <CalendarDays
+            className="h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden
+          />
           <CardTitle className="text-sm font-medium">Upcoming week</CardTitle>
           {upcoming.length > 0 ? (
             <Badge variant="secondary" className="rounded-full">

@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { KbdSequence } from "@/components/ui/kbd";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import {
   clientLabel,
@@ -138,7 +139,12 @@ export function InvoiceList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search client or number"
-            className="pl-8"
+            className="pl-8 pr-14"
+          />
+          {/* Advertise the global ⌘K palette for broader searches. */}
+          <KbdSequence
+            keys="⌘K"
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
           />
         </div>
       </div>

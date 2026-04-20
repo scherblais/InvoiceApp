@@ -172,12 +172,44 @@ export function CalendarView() {
     return "Board";
   }, [view, cursor]);
 
+  // Event count that maps to what the user's actually looking at —
+  // drives the "X shoots" subtitle under the calendar title.
+  const visibleCount = useMemo(() => {
+    if (view === "month") {
+      const y = cursor.getFullYear();
+      const m = cursor.getMonth();
+      return calEvents.filter((e) => {
+        if (!e.date) return false;
+        const d = new Date(`${e.date}T12:00:00`);
+        return d.getFullYear() === y && d.getMonth() === m;
+      }).length;
+    }
+    if (view === "week") {
+      const start = getWeekStart(cursor);
+      const end = addDays(start, 7);
+      const startISO = toISODate(start);
+      const endISO = toISODate(end);
+      return calEvents.filter(
+        (e) => !!e.date && e.date >= startISO && e.date < endISO
+      ).length;
+    }
+    if (view === "agenda") {
+      const todayISOStr = toISODate(new Date());
+      const endISOStr = toISODate(addDays(new Date(), 30));
+      return calEvents.filter(
+        (e) => !!e.date && e.date >= todayISOStr && e.date <= endISOStr
+      ).length;
+    }
+    return calEvents.length;
+  }, [view, cursor, calEvents]);
+
   return (
     <div className="flex h-full flex-col">
       <CalendarHeader
         view={view}
         onView={setView}
         title={title}
+        count={visibleCount}
         onPrev={handlePrev}
         onNext={handleNext}
         onToday={handleToday}

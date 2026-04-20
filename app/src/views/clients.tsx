@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { KbdSequence } from "@/components/ui/kbd";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { eventClientId, type Client } from "@/lib/types";
 import { clientColor, COLOR_DOT } from "@/lib/calendar";
@@ -123,7 +124,11 @@ export function ClientsView() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, company, email, or phone"
-            className="pl-8"
+            className="pl-8 pr-14"
+          />
+          <KbdSequence
+            keys="⌘K"
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
           />
         </div>
       </div>

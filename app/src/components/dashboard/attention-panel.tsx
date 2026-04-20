@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, type StatusKind } from "@/components/ui/status-badge";
@@ -71,6 +71,10 @@ export function AttentionPanel({
     <Card className="gap-0 py-0">
       <CardHeader className="flex flex-row items-center justify-between border-b py-5 pb-5">
         <div className="flex items-center gap-2">
+          <AlertTriangle
+            className="h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden
+          />
           <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
           {items.length > 0 ? (
             <Badge variant="secondary" className="rounded-full">

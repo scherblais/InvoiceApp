@@ -133,7 +133,7 @@ export function WeekView({
                     type="button"
                     onClick={() => onEventClick(ev.id)}
                     style={{ backgroundColor: chip.bg, color: chip.fg }}
-                    className="mb-0.5 block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] font-medium"
+                    className="mb-0.5 block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] font-medium"
                   >
                     {ev.title || ev.address || "Untitled"}
                   </button>
@@ -219,7 +219,7 @@ export function WeekView({
                         backgroundColor: chip.bg,
                         color: chip.fg,
                       }}
-                      className="absolute left-0 right-0 overflow-hidden px-2 py-1 text-left text-[11px] font-medium leading-tight transition-opacity hover:opacity-80"
+                      className="absolute left-0.5 right-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-[11px] font-medium leading-tight ring-1 ring-inset ring-black/5 transition-opacity hover:opacity-85 dark:ring-white/5"
                     >
                       <div className="truncate tabular-nums text-[10px] opacity-80">
                         {formatTime12(ev.start)}
