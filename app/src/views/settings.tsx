@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useData } from "@/contexts/data-context";
 import {
   Tabs,
@@ -11,9 +12,34 @@ import { PricingTab } from "@/components/settings/pricing-tab";
 import { AccountTab } from "@/components/settings/account-tab";
 import { TaxReportTab } from "@/components/settings/tax-report-tab";
 
+const VALID_TABS = ["pricing", "taxes", "account"] as const;
+
 export function SettingsView() {
   const { config, saveConfig } = useData();
-  const [tab, setTab] = useState("pricing");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Tab state mirrors ?tab= in the URL so the sidebar sub-links can
+  // jump straight to "Account" / "Tax report" and the active
+  // highlight follows.
+  const [tab, setTabState] = useState<string>(() => {
+    const p = searchParams.get("tab");
+    return p && (VALID_TABS as readonly string[]).includes(p) ? p : "pricing";
+  });
+
+  useEffect(() => {
+    const p = searchParams.get("tab");
+    if (p && (VALID_TABS as readonly string[]).includes(p) && p !== tab) {
+      setTabState(p);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const setTab = (next: string) => {
+    setTabState(next);
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", next);
+    setSearchParams(params, { replace: true });
+  };
 
   return (
     <div className="flex h-full flex-col">

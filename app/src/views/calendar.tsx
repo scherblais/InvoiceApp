@@ -35,13 +35,47 @@ export function CalendarView() {
     saveDrafts,
   } = useData();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [view, setView] = useState<CalendarViewMode>(() => {
+    // Seed from URL first (sidebar sub-links pass ?view=), then
+    // fall back to the last persisted choice, then to week.
+    const url = new URLSearchParams(window.location.search).get("view");
+    if (url === "agenda" || url === "week" || url === "month" || url === "kanban") {
+      return url;
+    }
     const saved = localStorage.getItem(VIEW_KEY) as CalendarViewMode | null;
     return saved ?? "week";
   });
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view);
   }, [view]);
+
+  // Keep the URL's ?view= in sync whenever the user switches via the
+  // in-page tabs so the sidebar's active sub-item highlight follows
+  // along. Only rewrite when the value actually differs to avoid
+  // triggering an infinite setState → URL → setState loop.
+  useEffect(() => {
+    const current = searchParams.get("view");
+    if (current === view) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("view", view);
+    setSearchParams(next, { replace: true });
+  }, [view, searchParams, setSearchParams]);
+
+  // If the URL changes externally (sidebar click), pick it up.
+  useEffect(() => {
+    const urlView = searchParams.get("view");
+    if (
+      urlView === "agenda" ||
+      urlView === "week" ||
+      urlView === "month" ||
+      urlView === "kanban"
+    ) {
+      if (urlView !== view) setView(urlView);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const [cursor, setCursor] = useState<Date>(() => new Date());
 
@@ -54,7 +88,6 @@ export function CalendarView() {
   // ?event=<id> so we can open the event directly from a cross-link.
   // Remove the param once we've honored it so subsequent navigations
   // don't loop the modal back open.
-  const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     const eid = searchParams.get("event");
     if (!eid) return;

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   CheckCircle2,
   CircleDashed,
@@ -45,6 +46,23 @@ interface InvoiceListProps {
   onDeleteDraft: (id: string) => void;
 }
 
+// URL param ↔ internal filter name. Keeps the sidebar using friendly
+// URLs (?status=unpaid) while the list component still thinks in
+// terms of its internal "sent" bucket (historically named after the
+// status value stored on invoices).
+const STATUS_TO_FILTER: Record<string, Filter> = {
+  drafts: "drafts",
+  unpaid: "sent",
+  paid: "paid",
+  all: "all",
+};
+const FILTER_TO_STATUS: Record<Filter, string | null> = {
+  all: null,
+  drafts: "drafts",
+  sent: "unpaid",
+  paid: "paid",
+};
+
 export function InvoiceList({
   invoices,
   drafts,
@@ -56,7 +74,17 @@ export function InvoiceList({
   onDeleteInvoice,
   onDeleteDraft,
 }: InvoiceListProps) {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get("status");
+  const filter: Filter =
+    (statusParam && STATUS_TO_FILTER[statusParam]) || "all";
+  const setFilter = (next: Filter) => {
+    const nextParams = new URLSearchParams(searchParams);
+    const value = FILTER_TO_STATUS[next];
+    if (value) nextParams.set("status", value);
+    else nextParams.delete("status");
+    setSearchParams(nextParams, { replace: true });
+  };
   const [query, setQuery] = useState("");
 
   const clientById = useMemo(() => {
