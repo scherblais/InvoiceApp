@@ -12,16 +12,17 @@ import { clientLabel, monthName } from "@/lib/invoice";
 import type { Client, Invoice } from "@/lib/types";
 import type { InvoiceItem } from "@/lib/invoice";
 
-// Register Inter via the same CDN the Google fonts repo serves so
-// we don't ship the font file. react-pdf fetches it once and caches
-// per page generation.
+// Register Geist via jsDelivr's fontsource mirror so we don't bundle
+// the font files. @react-pdf/renderer fetches once per worker and
+// caches, so the PDF worker has the full weight axis ready without
+// pulling megabytes into the main JS chunk.
 Font.register({
-  family: "Inter",
+  family: "Geist",
   fonts: [
-    { src: "https://rsms.me/inter/font-files/Inter-Regular.woff", fontWeight: 400 },
-    { src: "https://rsms.me/inter/font-files/Inter-Medium.woff", fontWeight: 500 },
-    { src: "https://rsms.me/inter/font-files/Inter-SemiBold.woff", fontWeight: 600 },
-    { src: "https://rsms.me/inter/font-files/Inter-Bold.woff", fontWeight: 700 },
+    { src: "https://cdn.jsdelivr.net/npm/@fontsource/geist@latest/files/geist-latin-400-normal.woff", fontWeight: 400 },
+    { src: "https://cdn.jsdelivr.net/npm/@fontsource/geist@latest/files/geist-latin-500-normal.woff", fontWeight: 500 },
+    { src: "https://cdn.jsdelivr.net/npm/@fontsource/geist@latest/files/geist-latin-600-normal.woff", fontWeight: 600 },
+    { src: "https://cdn.jsdelivr.net/npm/@fontsource/geist@latest/files/geist-latin-700-normal.woff", fontWeight: 700 },
   ],
 });
 
@@ -39,7 +40,7 @@ const palette = {
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: "Inter",
+    fontFamily: "Geist",
     fontSize: 10,
     color: palette.ink,
     padding: 48,
