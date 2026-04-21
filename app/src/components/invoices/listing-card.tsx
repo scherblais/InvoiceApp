@@ -1,16 +1,11 @@
 import { useRef, useState } from "react";
-import { Car, Loader2, RotateCw, Trash2 } from "lucide-react";
+import { Car, Loader2, Minus, Plus, RotateCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   computeItemTotals,
   type Addon,
@@ -207,74 +202,181 @@ export function ListingCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_120px]">
-        <div className="flex flex-col gap-1.5">
-          <Label>Package</Label>
-          <Select value={item.pkg?.id ?? ""} onValueChange={setPackage}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose package" />
-            </SelectTrigger>
-            <SelectContent>
-              {packages.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name} · {formatCurrency(p.price, 0)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`extras-${index}`}>
-            {item.pkg?.extraLabel ?? "Extras"}
-          </Label>
-          <Input
-            id={`extras-${index}`}
-            type="number"
-            min="0"
-            value={item.extrasQty ?? 0}
-            onChange={(e) =>
-              setField("extrasQty", Math.max(0, parseInt(e.target.value) || 0))
-            }
-          />
-        </div>
+      <div className="mt-4 flex flex-col gap-2">
+        <Label>Package</Label>
+        {/* Radio cards instead of a Select dropdown — with only a
+            couple packages in the system, a visible grid lets the
+            user scan name + price at a glance and pick in one
+            click. The whole row is the label, so click anywhere to
+            select. */}
+        <RadioGroup
+          value={item.pkg?.id ?? ""}
+          onValueChange={setPackage}
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          {packages.map((p) => {
+            const active = item.pkg?.id === p.id;
+            return (
+              <Label
+                key={p.id}
+                htmlFor={`pkg-${index}-${p.id}`}
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors",
+                  active
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                    : "hover:bg-muted/40"
+                )}
+              >
+                <RadioGroupItem
+                  id={`pkg-${index}-${p.id}`}
+                  value={p.id}
+                  className="mt-0.5"
+                />
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-sm font-medium leading-none">
+                    {p.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {formatCurrency(p.price, 0)}
+                    {p.extraLabel ? (
+                      <>
+                        {" "}
+                        · {formatCurrency(p.extraPrice ?? 0, 0)}/
+                        {p.extraLabel.toLowerCase()}
+                      </>
+                    ) : null}
+                  </span>
+                </div>
+              </Label>
+            );
+          })}
+        </RadioGroup>
+
+        {item.pkg?.extraLabel ? (
+          <div className="mt-1 flex items-center justify-between gap-3 rounded-md border border-dashed px-3 py-2">
+            <div className="flex min-w-0 flex-col">
+              <Label
+                htmlFor={`extras-${index}`}
+                className="text-sm font-medium"
+              >
+                {item.pkg.extraLabel}
+              </Label>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {formatCurrency(item.pkg.extraPrice ?? 0, 0)} each
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-7"
+                onClick={() =>
+                  setField(
+                    "extrasQty",
+                    Math.max(0, (item.extrasQty ?? 0) - 1)
+                  )
+                }
+                disabled={(item.extrasQty ?? 0) <= 0}
+                aria-label={`Decrease ${item.pkg.extraLabel.toLowerCase()}`}
+              >
+                <Minus className="h-3.5 w-3.5" aria-hidden />
+              </Button>
+              <Input
+                id={`extras-${index}`}
+                type="number"
+                min="0"
+                value={item.extrasQty ?? 0}
+                onChange={(e) =>
+                  setField(
+                    "extrasQty",
+                    Math.max(0, parseInt(e.target.value) || 0)
+                  )
+                }
+                className="h-7 w-14 text-center"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-7"
+                onClick={() =>
+                  setField("extrasQty", (item.extrasQty ?? 0) + 1)
+                }
+                aria-label={`Increase ${item.pkg.extraLabel.toLowerCase()}`}
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden />
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      <div className="mt-4">
-        <Label className="mb-2 block">Add-ons</Label>
-        <div className="flex flex-col gap-1">
+      <div className="mt-4 flex flex-col gap-2">
+        <Label>Add-ons</Label>
+        <div className="flex flex-col gap-1.5">
           {addons.map((a) => {
             const active = currentAddonIds.has(a.id);
             const current = (item.addons ?? []).find((x) => x.id === a.id);
+            const count = current?.count ?? 1;
+            const rowId = `addon-${index}-${a.id}`;
             return (
-              <div
+              <Label
                 key={a.id}
+                htmlFor={rowId}
                 className={cn(
-                  "flex items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors",
-                  active ? "border-primary/40 bg-primary/5" : "border-transparent"
+                  "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors",
+                  active
+                    ? "border-primary/50 bg-primary/5"
+                    : "hover:bg-muted/40"
                 )}
               >
-                <input
-                  type="checkbox"
+                <Checkbox
+                  id={rowId}
                   checked={active}
-                  onChange={() => toggleAddon(a.id)}
-                  className="h-4 w-4 rounded border-input"
+                  onCheckedChange={() => toggleAddon(a.id)}
                 />
-                <span className="flex-1">{a.name}</span>
+                <span className="flex-1 text-sm font-medium">{a.name}</span>
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {formatCurrency(a.price, 0)}
+                  {a.qty ? " each" : ""}
                 </span>
                 {active && a.qty ? (
-                  <Input
-                    type="number"
-                    min="1"
-                    value={current?.count ?? 1}
-                    onChange={(e) =>
-                      setAddonCount(a.id, Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    className="h-7 w-16"
-                  />
+                  <div
+                    // Prevent the label click from re-toggling the row
+                    // when the user is interacting with the counter.
+                    onClick={(e) => e.preventDefault()}
+                    className="flex items-center gap-1"
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-6"
+                      onClick={() =>
+                        setAddonCount(a.id, Math.max(1, count - 1))
+                      }
+                      disabled={count <= 1}
+                      aria-label={`Decrease ${a.name}`}
+                    >
+                      <Minus className="h-3 w-3" aria-hidden />
+                    </Button>
+                    <span className="w-6 text-center text-xs font-medium tabular-nums">
+                      {count}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-6"
+                      onClick={() => setAddonCount(a.id, count + 1)}
+                      aria-label={`Increase ${a.name}`}
+                    >
+                      <Plus className="h-3 w-3" aria-hidden />
+                    </Button>
+                  </div>
                 ) : null}
-              </div>
+              </Label>
             );
           })}
         </div>
