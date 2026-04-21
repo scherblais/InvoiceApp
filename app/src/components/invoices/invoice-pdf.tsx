@@ -273,7 +273,14 @@ interface InvoiceDocProps {
 /** React-PDF document mirroring the on-screen InvoiceDocument as
  *  closely as the PDF primitive set allows. Kept deliberately
  *  monochrome — the goal is a document that prints clean on any
- *  printer / renders crisp in any viewer. */
+ *  printer / renders crisp in any viewer.
+ *
+ *  Co-located with `downloadInvoicePdf` because the helper is the only
+ *  call site; splitting would force re-importing every React-PDF
+ *  primitive plus the shared style/format helpers in this file. The
+ *  doc is never mounted as a regular React component, so fast-refresh
+ *  doesn't apply. */
+// eslint-disable-next-line react-refresh/only-export-components
 function InvoiceDoc({ invoice, client }: InvoiceDocProps) {
   const items: InvoiceItem[] = invoice.items ?? [];
   const overdue = isOverdue(invoice);

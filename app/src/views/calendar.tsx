@@ -15,6 +15,7 @@ import {
   syncEventDraftLink,
 } from "@/lib/invoice-link";
 import { monthName } from "@/lib/invoice";
+import { newEventId } from "@/lib/id";
 import { CalendarHeader } from "@/components/calendar/calendar-header";
 import { MonthView } from "@/components/calendar/month-view";
 import { WeekView } from "@/components/calendar/week-view";
@@ -202,7 +203,7 @@ export function CalendarView() {
       void _files;
       const clone: CalEvent = {
         ...rest,
-        id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        id: newEventId(),
       };
       saveCalEvents([...calEvents, clone]);
       setEditingId(clone.id);

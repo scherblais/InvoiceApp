@@ -32,6 +32,7 @@ import {
   type EventStatus,
 } from "@/lib/calendar";
 import { eventClientId, type CalEvent, type Client } from "@/lib/types";
+import { newEventId } from "@/lib/id";
 
 interface EventModalProps {
   open: boolean;
@@ -113,6 +114,12 @@ export function EventModal({
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
+  // Re-hydrate the form every time the dialog re-opens or the target event
+  // changes. The setState-in-effect lint rule is overly strict here: the
+  // dialog stays mounted across opens (so we can't rely on useState init)
+  // and the defaults are derived from props, so the cleanest pattern is
+  // to mirror them in on each open.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     setError(null);
@@ -121,6 +128,7 @@ export function EventModal({
       event ? eventToForm(event) : emptyForm(defaultDate ?? "", defaultTime)
     );
   }, [open, event, defaultDate, defaultTime]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSave = () => {
     if (!form.address.trim()) {
@@ -133,7 +141,7 @@ export function EventModal({
     // Strip the deprecated `realtorId` field on save so new writes only carry
     // `clientId`. The legacy field is still tolerated on reads via
     // `eventClientId`.
-    const { realtorId: _drop, ...base } = event ?? { id: `ev_${Date.now()}` };
+    const { realtorId: _drop, ...base } = event ?? { id: newEventId() };
     void _drop;
     const merged: CalEvent = {
       ...base,

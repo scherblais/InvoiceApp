@@ -19,6 +19,7 @@ import {
 } from "@/lib/calendar";
 import { formatShortDate, todayISO } from "@/lib/format";
 import { eventClientId, type CalEvent } from "@/lib/types";
+import { newEventId } from "@/lib/id";
 import { useInquiries, type Inquiry } from "@/hooks/use-inquiries";
 
 /**
@@ -44,7 +45,7 @@ export function ToSchedulePanel() {
    * inquiry, and deep-links into the event modal for quick review.
    */
   const convertInquiry = async (inq: Inquiry) => {
-    const eventId = `ev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const eventId = newEventId();
     const ev: CalEvent = {
       id: eventId,
       title: inq.address,

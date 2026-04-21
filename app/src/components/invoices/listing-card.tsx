@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Car,
   ChevronDown,
@@ -69,9 +69,14 @@ export function ListingCard({
   >({ status: "idle" });
   // Mirror the latest item into a ref so async travel-fee callbacks use
   // the current item (with the address / package the user just typed)
-  // rather than the stale snapshot from when the request began.
+  // rather than the stale snapshot from when the request began. Updated
+  // in an effect (not at render) per React 19's "no ref writes during
+  // render" rule — by the time any async callback resolves, the post-
+  // render effect has already synced the ref.
   const itemRef = useRef(item);
-  itemRef.current = item;
+  useEffect(() => {
+    itemRef.current = item;
+  });
 
   const setField = <K extends keyof InvoiceItem>(
     key: K,

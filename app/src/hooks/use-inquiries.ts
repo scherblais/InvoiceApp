@@ -28,11 +28,17 @@ export function useInquiries(): {
   const { user } = useAuth();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
 
+  // Drop the previous user's inquiries on sign-out / user-switch via the
+  // "adjust state on prop change" pattern. See
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [lastUid, setLastUid] = useState<string | undefined>(user?.uid);
+  if (lastUid !== user?.uid) {
+    setLastUid(user?.uid);
+    setInquiries([]);
+  }
+
   useEffect(() => {
-    if (!user) {
-      setInquiries([]);
-      return;
-    }
+    if (!user) return;
     const r = ref(db, `inquiries/${user.uid}`);
     const listener = onValue(r, (snap) => {
       const val = snap.val() as Record<string, Inquiry> | null;

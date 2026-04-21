@@ -41,12 +41,18 @@ export function PricingTab({ config, onSave }: PricingTabProps) {
     config.taxes ?? DEFAULT_TAXES
   );
 
+  // Re-sync local form state when the persisted `config` prop changes —
+  // e.g. after an Import-backup in the Account tab overwrites everything.
+  // Mirroring server state into local form state is a legitimate use of
+  // useEffect; the React 19 strict-mode warning is a false positive here.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setPackages(config.packages ?? DEFAULT_PACKAGES);
     setAddons(config.addons ?? DEFAULT_ADDONS);
     setTravel(config.travel ?? DEFAULT_TRAVEL);
     setTaxes(config.taxes ?? DEFAULT_TAXES);
   }, [config]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const updatePackage = (idx: number, patch: Partial<ConfigPackage>) => {
     setPackages((prev) => prev.map((p, i) => (i === idx ? { ...p, ...patch } : p)));

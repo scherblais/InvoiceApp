@@ -74,8 +74,13 @@ export function SharedView() {
   const [params] = useSearchParams();
   const token = params.get("share");
   const [data, setData] = useState<SharedData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Initialize loading + error from the URL token directly so the missing-
+  // token branch doesn't need a setState-in-effect — there's nothing async
+  // to wait on if there's no token.
+  const [loading, setLoading] = useState<boolean>(!!token);
+  const [error, setError] = useState<string | null>(
+    token ? null : "Missing share token"
+  );
   const [galleryEvent, setGalleryEvent] = useState<SharedEvent | null>(null);
   const [page, setPage] = useState<SharedPageId>(() => {
     const saved = localStorage.getItem(PAGE_KEY) as SharedPageId | null;
@@ -87,11 +92,7 @@ export function SharedView() {
   }, [page]);
 
   useEffect(() => {
-    if (!token) {
-      setError("Missing share token");
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
     const r = ref(db, `shared/${token}`);
     const listener = onValue(
       r,

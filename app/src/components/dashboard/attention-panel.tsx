@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,10 @@ export function AttentionPanel({
   clients,
 }: AttentionPanelProps) {
   const navigate = useNavigate();
-  const now = Date.now();
+  // Pinned at mount so the day-count stays stable across re-renders. The
+  // dashboard naturally refreshes when underlying data changes; we don't
+  // need second-by-second precision for "X days ago" labels.
+  const [now] = useState(() => Date.now());
 
   const items: AttentionItem[] = [];
 

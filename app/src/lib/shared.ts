@@ -196,7 +196,6 @@ export function syncSharedData(
     // promise rejection and — under React 19's stricter default error
     // policy — unmount the whole app.
     set(ref(db, `shared/${token}`), payload).catch((err) => {
-      /* eslint-disable-next-line no-console */
       console.warn("[lumeria shared sync] skipped:", c.id, err?.message ?? err);
     });
   }

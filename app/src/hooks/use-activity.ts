@@ -27,11 +27,18 @@ export function useActivityFeed(): {
     return Number.isFinite(n) ? n : 0;
   });
 
+  // Reset the cached entries when the signed-in user changes (or signs out).
+  // Done in render via the "adjust state on prop change" pattern instead of
+  // an effect+setState so there's no extra render cycle. See
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [lastUid, setLastUid] = useState<string | undefined>(user?.uid);
+  if (lastUid !== user?.uid) {
+    setLastUid(user?.uid);
+    setEntries([]);
+  }
+
   useEffect(() => {
-    if (!user) {
-      setEntries([]);
-      return;
-    }
+    if (!user) return;
     const r = ref(db, `activity/${user.uid}`);
     const listener = onValue(r, (snap) => {
       const val = snap.val() as Record<string, ActivityEntry> | null;

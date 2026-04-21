@@ -184,7 +184,6 @@ function buildPlan(
 }
 
 function summarize(plan: MigrationPlan): void {
-  /* eslint-disable no-console */
   console.groupCollapsed(
     `[lumeria migration] uid=${plan.uid} — dry-run summary`
   );
@@ -205,7 +204,6 @@ function summarize(plan: MigrationPlan): void {
   }
   console.log("Result preview →", plan);
   console.groupEnd();
-  /* eslint-enable no-console */
 }
 
 /** Run the migration without writing anything. Returns the full plan. */
@@ -234,7 +232,6 @@ export async function commitMigration(uid: string): Promise<MigrationPlan> {
   }
   await remove(ref(db, `${base}/realtors`));
 
-  /* eslint-disable-next-line no-console */
   console.log("[lumeria migration] committed", plan);
   return plan;
 }

@@ -28,6 +28,11 @@ export function NewClientDialog({
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // Clear the form on close so reopening the dialog starts fresh. Dialog
+  // stays mounted, so we can't lean on useState init for this — the
+  // mirror-from-prop pattern is the clearest fit and the React 19 strict
+  // warning isn't actionable here.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) {
       setName("");
@@ -36,6 +41,7 @@ export function NewClientDialog({
       setError(null);
     }
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleCreate = () => {
     if (!name.trim() && !company.trim()) {

@@ -67,6 +67,9 @@ export function ClientDialog({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // Rehydrate form every time the dialog opens or target client changes.
+  // The dialog stays mounted across opens, so useState init is one-shot;
+  // mirroring props in via an effect is the clearest pattern here.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     setName(initial?.name ?? "");
@@ -100,6 +103,7 @@ export function ClientDialog({
 
     setError(null);
   }, [open, initial]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const shareLink =
     initial && user ? clientShareLink(user.uid, initial.id) : "";
