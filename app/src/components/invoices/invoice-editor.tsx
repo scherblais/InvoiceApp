@@ -71,6 +71,13 @@ export function InvoiceEditor({
   const [items, setItems] = useState<InvoiceItem[]>(
     source?.items?.map(computeItemTotals) ?? []
   );
+  // Track which listings are expanded. Seeds empty so all existing
+  // items start collapsed (an invoice with 5 listings shows as 5
+  // summary rows, not 5 fully-expanded forms). Newly-added items
+  // are stamped open via the `addItem` handler below. Keyed by
+  // array index which is stable as long as items are
+  // append/remove-only (no reordering in this editor).
+  const [openItems, setOpenItems] = useState<Record<number, boolean>>({});
   const [notes, setNotes] = useState<string>(
     (source as { notes?: string })?.notes ?? ""
   );
@@ -170,17 +177,24 @@ export function InvoiceEditor({
   }, [clientId, month, items, notes]);
 
   const addItem = useCallback(() => {
-    setItems((prev) => [
-      ...prev,
-      computeItemTotals({
-        address: "",
-        unit: "",
-        pkg: undefined,
-        extrasQty: 0,
-        addons: [],
-        travel: { distance: 0, fee: 0, calculated: false },
-      }),
-    ]);
+    setItems((prev) => {
+      const next = [
+        ...prev,
+        computeItemTotals({
+          address: "",
+          unit: "",
+          pkg: undefined,
+          extrasQty: 0,
+          addons: [],
+          travel: { distance: 0, fee: 0, calculated: false },
+        }),
+      ];
+      // Auto-expand the freshly-added listing so the photographer
+      // can immediately pick a package; leave the others however
+      // the user left them.
+      setOpenItems((prevOpen) => ({ ...prevOpen, [next.length - 1]: true }));
+      return next;
+    });
   }, []);
 
   const updateItem = (idx: number, next: InvoiceItem) => {
@@ -191,6 +205,21 @@ export function InvoiceEditor({
 
   const removeItem = (idx: number) => {
     setItems((prev) => prev.filter((_, i) => i !== idx));
+    // Shift the open-state map down to cover the removed index so
+    // each remaining listing keeps its expanded / collapsed state.
+    setOpenItems((prev) => {
+      const next: Record<number, boolean> = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const k = Number(key);
+        if (k < idx) next[k] = value;
+        else if (k > idx) next[k - 1] = value;
+      }
+      return next;
+    });
+  };
+
+  const setItemOpen = (idx: number, open: boolean) => {
+    setOpenItems((prev) => ({ ...prev, [idx]: open }));
   };
 
   const canSend =
@@ -362,8 +391,8 @@ export function InvoiceEditor({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-6 md:p-8">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="flex-1 overflow-y-auto p-6 md:p-10">
+        <div className="mx-auto flex max-w-4xl flex-col gap-10">
           {/* Meta section */}
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="flex flex-col gap-1.5">
@@ -449,6 +478,8 @@ export function InvoiceEditor({
                       packages={resolvedPackages}
                       addons={resolvedAddons}
                       travel={config.travel}
+                      open={openItems[idx] ?? false}
+                      onOpenChange={(o) => setItemOpen(idx, o)}
                       onChange={(next) => updateItem(idx, next)}
                       onRemove={() => removeItem(idx)}
                     />

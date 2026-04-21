@@ -1,7 +1,20 @@
 import { useRef, useState } from "react";
-import { Car, Loader2, Minus, Plus, RotateCw, Trash2 } from "lucide-react";
+import {
+  Car,
+  ChevronDown,
+  Loader2,
+  Minus,
+  Plus,
+  RotateCw,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -29,6 +42,10 @@ interface ListingCardProps {
   packages: Package[];
   addons: Addon[];
   travel?: ConfigTravel;
+  /** Controlled expanded state. Parent owns which listings are
+   *  open so add / remove stays in sync with the items array. */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onChange: (item: InvoiceItem) => void;
   onRemove: () => void;
 }
@@ -39,6 +56,8 @@ export function ListingCard({
   packages,
   addons,
   travel,
+  open,
+  onOpenChange,
   onChange,
   onRemove,
 }: ListingCardProps) {
@@ -163,22 +182,71 @@ export function ListingCard({
       ? Math.round((travelInfo.distance - freeKm) * 10) / 10
       : 0;
 
+  const summaryAddress = item.unit
+    ? `${item.address}, Apt ${item.unit}`
+    : item.address || `Listing ${index + 1}`;
+  const summaryPackage = item.pkg?.name ?? "No package";
+  const addonCount = item.addons?.length ?? 0;
+
   return (
-    <div className="rounded-lg border bg-card p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Listing {index + 1}
-        </div>
+    <Collapsible
+      open={open}
+      onOpenChange={onOpenChange}
+      className={cn(
+        "rounded-lg border bg-card transition-shadow",
+        open && "shadow-sm"
+      )}
+    >
+      {/* Summary row — always visible. Collapsed, it acts as the only
+          row; expanded, it's the header above the full form. */}
+      <div className="flex items-center gap-2 px-4 py-3">
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="group flex min-w-0 flex-1 items-center gap-3 text-left"
+            aria-label={open ? "Collapse listing" : "Expand listing"}
+          >
+            <ChevronDown
+              className={cn(
+                "size-4 shrink-0 text-muted-foreground transition-transform",
+                open && "rotate-180"
+              )}
+              aria-hidden
+            />
+            <span className="shrink-0 text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Listing {index + 1}
+            </span>
+            <span className="mx-1 shrink-0 text-muted-foreground/40">·</span>
+            <span className="min-w-0 flex-1 truncate text-sm font-medium">
+              {summaryAddress}
+            </span>
+            <span className="hidden shrink-0 text-xs text-muted-foreground md:inline">
+              {summaryPackage}
+              {addonCount > 0
+                ? ` · ${addonCount} add-on${addonCount === 1 ? "" : "s"}`
+                : ""}
+            </span>
+            <span className="shrink-0 text-sm font-semibold tabular-nums">
+              {formatCurrency(totals.subtotal ?? 0, 2)}
+            </span>
+          </button>
+        </CollapsibleTrigger>
         <Button
           variant="ghost"
           size="icon"
-          onClick={onRemove}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
           aria-label={`Remove listing ${index + 1}`}
-          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+          className="size-7 text-muted-foreground hover:text-destructive"
         >
-          <Trash2 className="h-4 w-4" aria-hidden />
+          <Trash2 className="size-4" aria-hidden />
         </Button>
       </div>
+
+      <CollapsibleContent>
+        <div className="space-y-5 border-t px-4 pb-4 pt-4">
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_140px]">
         <div className="flex flex-col gap-1.5">
@@ -202,7 +270,7 @@ export function ListingCard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <Label>Package</Label>
         {/* Radio cards instead of a Select dropdown — with only a
             couple packages in the system, a visible grid lets the
@@ -312,7 +380,7 @@ export function ListingCard({
         ) : null}
       </div>
 
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <Label>Add-ons</Label>
         <div className="flex flex-col gap-1.5">
           {addons.map((a) => {
@@ -382,8 +450,10 @@ export function ListingCard({
         </div>
       </div>
 
-      {/* Travel */}
-      <div className="mt-4 rounded-md border bg-muted/20 p-3">
+      {/* Travel — no outer bordered box; the section label + spacing
+          is enough visual separation now that the card's other
+          sections dropped their bordered wrappers too. */}
+      <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <Car
@@ -512,19 +582,14 @@ export function ListingCard({
           <button
             type="button"
             onClick={handleClearTravel}
-            className="mt-2 text-[11px] text-muted-foreground underline hover:text-foreground"
+            className="text-[11px] text-muted-foreground underline hover:text-foreground"
           >
             Clear manual entry
           </button>
         ) : null}
       </div>
-
-      <div className="mt-4 flex items-center justify-between border-t pt-3 text-sm">
-        <span className="text-muted-foreground">Listing subtotal</span>
-        <span className="font-semibold tabular-nums">
-          {formatCurrency(totals.subtotal ?? 0, 2)}
-        </span>
-      </div>
-    </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
