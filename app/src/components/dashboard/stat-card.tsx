@@ -53,7 +53,7 @@ export function StatCard({
   }
 
   return (
-    <Card className="group gap-4 p-6 transition-all duration-200 hover:shadow-sm">
+    <Card className="group gap-3 p-4 transition-all duration-200 hover:shadow-sm md:gap-4 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <Icon className="h-4 w-4" aria-hidden />
@@ -87,7 +87,7 @@ export function StatCard({
         </div>
         <div
           className={cn(
-            "text-[26px] font-semibold leading-none tracking-tight tabular-nums",
+            "text-[22px] font-semibold leading-none tracking-tight tabular-nums md:text-[26px]",
             warn && "text-amber-600 dark:text-amber-400"
           )}
         >

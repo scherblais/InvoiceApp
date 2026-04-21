@@ -173,7 +173,7 @@ export function Weather() {
 
   return (
     <Card className="gap-0 overflow-hidden p-0">
-      <div className="flex flex-col gap-5 px-6 py-5 md:flex-row md:items-center md:gap-8">
+      <div className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:gap-8 md:px-6 md:py-5">
         {/* Current */}
         <div className="flex items-center gap-4">
           <WeatherIcon

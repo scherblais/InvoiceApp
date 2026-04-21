@@ -249,15 +249,21 @@ function EmptyColumn({
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-10 text-center transition-colors",
+        "flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-6 text-center transition-colors md:py-10",
         isDragTarget && "border-primary bg-primary/5"
       )}
     >
       <p className="text-xs text-muted-foreground">
         No {label.toLowerCase()} shoots
       </p>
-      <p className="text-[10.5px] text-muted-foreground/60">
+      {/* Drag affordance only makes sense when a pointer is in use —
+         hide the 'drag' hint on touch devices and let the empty
+         state read as a clean 'intentionally empty' marker. */}
+      <p className="hidden text-[10.5px] text-muted-foreground/60 md:block">
         {isDragTarget ? `Drop to mark as ${label.toLowerCase()}` : "Drag a card here"}
+      </p>
+      <p className="text-[10.5px] text-muted-foreground/60 md:hidden">
+        Long-press any card to change status
       </p>
     </div>
   );

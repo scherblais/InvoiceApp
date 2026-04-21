@@ -61,15 +61,15 @@ export function TodaySection() {
 
   if (todayShoots.length === 0) {
     return (
-      <Card className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Coffee className="h-5 w-5" aria-hidden />
+      <Card className="flex flex-col items-center justify-center gap-3 p-6 text-center md:p-10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <Coffee className="h-4 w-4" aria-hidden />
         </div>
         <div className="flex flex-col gap-1">
-          <div className="text-base font-semibold tracking-tight">
+          <div className="text-sm font-semibold tracking-tight md:text-base">
             Nothing on deck today
           </div>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="max-w-sm text-xs text-muted-foreground md:text-sm">
             No shoots scheduled. Good time for editing, admin, or a
             break.
           </p>

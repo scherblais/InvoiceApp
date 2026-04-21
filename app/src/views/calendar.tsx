@@ -39,13 +39,19 @@ export function CalendarView() {
 
   const [view, setView] = useState<CalendarViewMode>(() => {
     // Seed from URL first (sidebar sub-links pass ?view=), then
-    // fall back to the last persisted choice, then to week.
+    // fall back to the last persisted choice. Final default depends
+    // on viewport: desktop gets Week (7 full columns work), mobile
+    // gets Agenda (7 crammed columns don't — events truncate to
+    // "1 PM 15... Nor..." and become unusable on the road).
     const url = new URLSearchParams(window.location.search).get("view");
     if (url === "agenda" || url === "week" || url === "month" || url === "kanban") {
       return url;
     }
     const saved = localStorage.getItem(VIEW_KEY) as CalendarViewMode | null;
-    return saved ?? "week";
+    if (saved) return saved;
+    const isMobile =
+      typeof window !== "undefined" && window.innerWidth < 640;
+    return isMobile ? "agenda" : "week";
   });
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view);

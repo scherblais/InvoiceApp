@@ -154,8 +154,15 @@ export function InvoiceList({
       />
 
       <div className="flex flex-col gap-4 border-b px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-          <TabsList>
+        {/* Tabs wrap in an overflow-x-auto scroller so the 4 filter
+           chips don't clip off the right edge on a narrow phone —
+           they stay fully reachable with a sideways swipe. */}
+        <Tabs
+          value={filter}
+          onValueChange={(v) => setFilter(v as Filter)}
+          className="-mx-6 overflow-x-auto px-6 md:mx-0 md:overflow-visible md:px-0"
+        >
+          <TabsList className="min-w-max">
             <TabsTrigger value="all">
               All
               <Badge variant="secondary" className="ml-1.5 tabular-nums">
@@ -188,12 +195,15 @@ export function InvoiceList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search client or number"
-            className="pl-8 pr-14"
+            className="pl-8 md:pr-14"
           />
-          {/* Advertise the global ⌘K palette for broader searches. */}
+          {/* Advertise the global ⌘K palette for broader searches.
+             Hidden on mobile — no keyboard shortcut affordance is
+             useful there, and the chip visibly clutters a narrow
+             input. */}
           <KbdSequence
             keys="⌘K"
-            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 md:inline-flex"
           />
         </div>
       </div>

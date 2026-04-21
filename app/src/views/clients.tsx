@@ -134,11 +134,11 @@ export function ClientsView() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, company, email, or phone"
-            className="pl-8 pr-14"
+            className="pl-8 md:pr-14"
           />
           <KbdSequence
             keys="⌘K"
-            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 md:inline-flex"
           />
         </div>
       </div>
