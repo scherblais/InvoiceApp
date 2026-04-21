@@ -11,8 +11,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PricingTab } from "@/components/settings/pricing-tab";
 import { AccountTab } from "@/components/settings/account-tab";
 import { TaxReportTab } from "@/components/settings/tax-report-tab";
+import { NotificationsTab } from "@/components/settings/notifications-tab";
 
-const VALID_TABS = ["pricing", "taxes", "account"] as const;
+const VALID_TABS = ["pricing", "taxes", "notifications", "account"] as const;
 
 export function SettingsView() {
   const { config, saveConfig } = useData();
@@ -50,6 +51,7 @@ export function SettingsView() {
             <TabsList>
               <TabsTrigger value="pricing">Pricing</TabsTrigger>
               <TabsTrigger value="taxes">Tax report</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
             <TabsContent value="pricing" className="mt-8">
@@ -57,6 +59,9 @@ export function SettingsView() {
             </TabsContent>
             <TabsContent value="taxes" className="mt-8">
               <TaxReportTab />
+            </TabsContent>
+            <TabsContent value="notifications" className="mt-8">
+              <NotificationsTab config={config} onSave={saveConfig} />
             </TabsContent>
             <TabsContent value="account" className="mt-8">
               <AccountTab />

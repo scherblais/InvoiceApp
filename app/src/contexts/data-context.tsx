@@ -1,10 +1,13 @@
-import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 import { useFirebaseData } from "@/hooks/use-firebase-data";
 import { useAuth } from "@/contexts/auth-context";
 import { syncSharedData } from "@/lib/shared";
 import { db, ref, get } from "@/lib/firebase";
 import { commitMigration } from "@/lib/migration";
+import { sendBookingConfirmationEmail } from "@/lib/notifications";
+import { normalizeStatus } from "@/lib/calendar";
+import { eventClientId } from "@/lib/types";
 import type {
   Invoice,
   Draft,
@@ -12,6 +15,25 @@ import type {
   CalEvent,
   Config,
 } from "@/lib/types";
+
+/**
+ * A calendar event is "confirmable" once it has a date, an assigned client with
+ * an email on file, and has left the inquiry stage (status !== "received"). A
+ * booking-confirmation email is dispatched the first time an event transitions
+ * into this state — see `saveCalEventsWithNotifications` below.
+ */
+function isConfirmable(
+  ev: CalEvent,
+  clientsById: Map<string, Client>
+): { ok: true; client: Client } | { ok: false } {
+  if (!ev.date) return { ok: false };
+  if (normalizeStatus(ev.status) === "received") return { ok: false };
+  const cid = eventClientId(ev);
+  if (!cid) return { ok: false };
+  const client = clientsById.get(cid);
+  if (!client || !client.email) return { ok: false };
+  return { ok: true, client };
+}
 
 interface DataContextValue {
   invoices: Invoice[];
@@ -47,7 +69,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     asArray: true,
     fallback: [],
   });
-  const [calEvents, saveCalEvents] = useFirebaseData<CalEvent[]>("calEvents", {
+  const [calEvents, rawSaveCalEvents] = useFirebaseData<CalEvent[]>("calEvents", {
     asArray: true,
     fallback: [],
   });
@@ -81,7 +103,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
           description: `${plan.mergedPairs.length} paired, ${plan.standaloneRealtors} kept, ${plan.eventsRewrites} events updated.`,
         });
       } catch (err) {
-        /* eslint-disable-next-line no-console */
         console.error("[lumeria migration] auto-run failed", err);
       }
     })();
@@ -103,6 +124,80 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
     return m;
   }, [clients]);
+
+  // Keep the latest snapshots in refs so `saveCalEvents` can stay stable
+  // (no identity churn for consumers) while still reading fresh state inside
+  // the notification-dispatch logic.
+  const calEventsRef = useRef<CalEvent[]>(calEvents ?? []);
+  const clientsByIdRef = useRef<Map<string, Client>>(clientsById);
+  const configRef = useRef<Config>(config ?? {});
+  useEffect(() => {
+    calEventsRef.current = calEvents ?? [];
+  }, [calEvents]);
+  useEffect(() => {
+    clientsByIdRef.current = clientsById;
+  }, [clientsById]);
+  useEffect(() => {
+    configRef.current = config ?? {};
+  }, [config]);
+
+  const saveCalEvents = useCallback(
+    (next: CalEvent[]) => {
+      const prev = calEventsRef.current;
+      const prevById = new Map(prev.map((e) => [e.id, e]));
+      const clientsByIdNow = clientsByIdRef.current;
+      const configNow = configRef.current;
+
+      // Persist immediately — notifications are fire-and-forget so a slow or
+      // failing email must not delay the calendar write.
+      rawSaveCalEvents(next);
+
+      // Respect the master toggle in Settings → Notifications. Default is
+      // enabled (undefined / true). Only an explicit `false` disables sends.
+      if (configNow.bookingEmail?.enabled === false) return;
+
+      const toEmail: Array<{ ev: CalEvent; client: Client }> = [];
+      for (const ev of next) {
+        if (ev.confirmationEmailedAt) continue;
+        const check = isConfirmable(ev, clientsByIdNow);
+        if (!check.ok) continue;
+        const before = prevById.get(ev.id);
+        // Skip if it was already confirmable before this save — the latch is
+        // the source of truth, but this extra guard avoids sending in edge
+        // cases where the latch was cleared manually or lost to a bad merge.
+        if (before && isConfirmable(before, clientsByIdNow).ok) continue;
+        toEmail.push({ ev, client: check.client });
+      }
+
+      if (toEmail.length === 0) return;
+
+      void Promise.all(
+        toEmail.map(async ({ ev, client }) => {
+          try {
+            await sendBookingConfirmationEmail(ev, client, configNow);
+            // Re-read latest state so we don't stomp unrelated concurrent edits.
+            const latest = calEventsRef.current;
+            const patched = latest.map((e) =>
+              e.id === ev.id
+                ? { ...e, confirmationEmailedAt: Date.now() }
+                : e
+            );
+            rawSaveCalEvents(patched);
+            toast.success("Confirmation sent", {
+              description: `Emailed ${client.email}`,
+            });
+          } catch (err) {
+            console.error("[booking-email] send failed", err);
+            toast.error("Confirmation email failed", {
+              description:
+                err instanceof Error ? err.message : "Unknown error",
+            });
+          }
+        })
+      );
+    },
+    [rawSaveCalEvents]
+  );
 
   return (
     <DataContext.Provider

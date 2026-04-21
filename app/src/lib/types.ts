@@ -116,6 +116,12 @@ export interface CalEvent {
   realtorId?: string;
   /** Photographer-uploaded deliverables. */
   files?: EventFile[];
+  /**
+   * Timestamp (ms) when the booking-confirmation email was sent to the
+   * assigned client. One-way latch — set once the email goes out so that
+   * subsequent edits (reschedule, notes, deliverables) don't re-trigger it.
+   */
+  confirmationEmailedAt?: number;
 }
 
 /**
@@ -158,6 +164,18 @@ export interface ConfigTaxes {
   qst: number;
 }
 
+/**
+ * Booking-confirmation email template overrides. See `lib/booking-email.ts`
+ * for the placeholder grammar and built-in defaults applied when these are
+ * blank.
+ */
+export interface ConfigBookingEmail {
+  enabled?: boolean;
+  fromName?: string;
+  subject?: string;
+  body?: string;
+}
+
 export interface Config {
   company?: string;
   email?: string;
@@ -168,5 +186,6 @@ export interface Config {
   addons?: ConfigAddon[];
   travel?: ConfigTravel;
   taxes?: ConfigTaxes;
+  bookingEmail?: ConfigBookingEmail;
   [key: string]: unknown;
 }
