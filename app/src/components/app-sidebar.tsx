@@ -98,12 +98,6 @@ const workspaceNav: NavEntry[] = [
     title: "Calendar",
     to: "/calendar",
     icon: CalendarIcon,
-    subs: [
-      { title: "Agenda", search: "?view=agenda", searchKey: "view", searchValue: "agenda" },
-      { title: "Week", search: "?view=week", searchKey: "view", searchValue: "week" },
-      { title: "Month", search: "?view=month", searchKey: "view", searchValue: "month" },
-      { title: "Board", search: "?view=kanban", searchKey: "view", searchValue: "kanban" },
-    ],
   },
   {
     title: "Clients",

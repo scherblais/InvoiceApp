@@ -33,8 +33,7 @@ interface EventContextMenuProps {
  * Right-click surface for a calendar event tile. Exposes the four
  * actions the user most often reaches for without having to open the
  * full event modal: edit (same as click), duplicate, change status,
- * and delete. Re-used across month, week, agenda, and kanban views
- * so the keyboard-free flow is consistent.
+ * and delete.
  */
 export function EventContextMenu({
   event,

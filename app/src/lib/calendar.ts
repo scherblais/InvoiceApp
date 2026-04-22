@@ -1,5 +1,4 @@
 import { type CalEvent, type Client } from "@/lib/types";
-import { todayISO } from "@/lib/format";
 
 export type EventColor =
   | "blue"
@@ -169,27 +168,6 @@ export function addDays(d: Date, days: number): Date {
   return out;
 }
 
-export function getWeekStart(d: Date): Date {
-  // Sunday-based week
-  const out = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  out.setDate(out.getDate() - out.getDay());
-  return out;
-}
-
-export function getMonthGrid(year: number, month: number): Date[] {
-  // Always 6 rows × 7 cols, starting on Sunday
-  const first = new Date(year, month, 1);
-  const start = getWeekStart(first);
-  const cells: Date[] = [];
-  for (let i = 0; i < 42; i++) cells.push(addDays(start, i));
-  return cells;
-}
-
-export function minutesFromHHMM(t: string): number {
-  const [h, m] = t.split(":").map(Number);
-  return (h ?? 0) * 60 + (m ?? 0);
-}
-
 export function compareEvents(a: CalEvent, b: CalEvent): number {
   const ad = a.date ?? "";
   const bd = b.date ?? "";
@@ -201,23 +179,3 @@ export function compareEvents(a: CalEvent, b: CalEvent): number {
   if (!bs) return 1;
   return as < bs ? -1 : 1;
 }
-
-export function isToday(iso: string): boolean {
-  return iso === todayISO();
-}
-
-export const DAY_NAMES_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];

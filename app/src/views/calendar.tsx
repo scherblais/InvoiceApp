@@ -2,13 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useData } from "@/contexts/data-context";
-import {
-  MONTH_NAMES,
-  addDays,
-  getWeekStart,
-  toISODate,
-  type EventStatus,
-} from "@/lib/calendar";
+import { type EventStatus } from "@/lib/calendar";
 import type { CalEvent } from "@/lib/types";
 import {
   removeEventDraftLink,
@@ -17,14 +11,8 @@ import {
 import { monthName } from "@/lib/invoice";
 import { newEventId } from "@/lib/id";
 import { CalendarHeader } from "@/components/calendar/calendar-header";
-import { MonthView } from "@/components/calendar/month-view";
-import { WeekView } from "@/components/calendar/week-view";
 import { AgendaView } from "@/components/calendar/agenda-view";
-import { KanbanView } from "@/components/calendar/kanban-view";
 import { EventModal } from "@/components/calendar/event-modal";
-import type { CalendarViewMode } from "@/components/calendar/types";
-
-const VIEW_KEY = "lumeria_cal_view";
 
 export function CalendarView() {
   const {
@@ -38,54 +26,6 @@ export function CalendarView() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [view, setView] = useState<CalendarViewMode>(() => {
-    // Seed from URL first (sidebar sub-links pass ?view=), then
-    // fall back to the last persisted choice. Final default depends
-    // on viewport: desktop gets Week (7 full columns work), mobile
-    // gets Agenda (7 crammed columns don't — events truncate to
-    // "1 PM 15... Nor..." and become unusable on the road).
-    const url = new URLSearchParams(window.location.search).get("view");
-    if (url === "agenda" || url === "week" || url === "month" || url === "kanban") {
-      return url;
-    }
-    const saved = localStorage.getItem(VIEW_KEY) as CalendarViewMode | null;
-    if (saved) return saved;
-    const isMobile =
-      typeof window !== "undefined" && window.innerWidth < 640;
-    return isMobile ? "agenda" : "week";
-  });
-  useEffect(() => {
-    localStorage.setItem(VIEW_KEY, view);
-  }, [view]);
-
-  // Keep the URL's ?view= in sync whenever the user switches via the
-  // in-page tabs so the sidebar's active sub-item highlight follows
-  // along. Only rewrite when the value actually differs to avoid
-  // triggering an infinite setState → URL → setState loop.
-  useEffect(() => {
-    const current = searchParams.get("view");
-    if (current === view) return;
-    const next = new URLSearchParams(searchParams);
-    next.set("view", view);
-    setSearchParams(next, { replace: true });
-  }, [view, searchParams, setSearchParams]);
-
-  // If the URL changes externally (sidebar click), pick it up.
-  useEffect(() => {
-    const urlView = searchParams.get("view");
-    if (
-      urlView === "agenda" ||
-      urlView === "week" ||
-      urlView === "month" ||
-      urlView === "kanban"
-    ) {
-      if (urlView !== view) setView(urlView);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
-  const [cursor, setCursor] = useState<Date>(() => new Date());
-
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultDate, setDefaultDate] = useState<string>("");
@@ -94,7 +34,10 @@ export function CalendarView() {
   // Deep-link support: dashboard panels (To Schedule, Attention) pass
   // ?event=<id> so we can open the event directly from a cross-link.
   // Remove the param once we've honored it so subsequent navigations
-  // don't loop the modal back open.
+  // don't loop the modal back open. Reacting to a URL change is a
+  // legitimate useEffect pattern; the React 19 strict warning doesn't
+  // apply.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const eid = searchParams.get("event");
     if (!eid) return;
@@ -106,6 +49,7 @@ export function CalendarView() {
     next.delete("event");
     setSearchParams(next, { replace: true });
   }, [searchParams, calEvents, setSearchParams]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const editingEvent = useMemo(
     () => (editingId ? calEvents.find((e) => e.id === editingId) ?? null : null),
@@ -115,11 +59,11 @@ export function CalendarView() {
   const openNew = useCallback(
     (iso?: string, time?: string) => {
       setEditingId(null);
-      setDefaultDate(iso ?? toISODate(cursor));
+      setDefaultDate(iso ?? "");
       setDefaultTime(time ?? "");
       setModalOpen(true);
     },
-    [cursor]
+    []
   );
 
   const openEdit = useCallback((id: string) => {
@@ -217,167 +161,49 @@ export function CalendarView() {
     [calEvents, saveCalEvents]
   );
 
-  const handlePrev = useCallback(() => {
-    setCursor((d) => {
-      if (view === "month") {
-        return new Date(d.getFullYear(), d.getMonth() - 1, 1);
-      }
-      if (view === "week") return addDays(d, -7);
-      return d;
-    });
-  }, [view]);
+  // Agenda always shows the rolling "next 30 days" window — see AgendaView
+  // for the exact slice. Header surfaces that count as the subtitle.
+  const visibleCount = useMemo(() => {
+    const today = new Date();
+    const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const end = new Date(today);
+    end.setDate(end.getDate() + 30);
+    const endISO = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}`;
+    return calEvents.filter(
+      (e) => !!e.date && e.date >= todayISO && e.date <= endISO
+    ).length;
+  }, [calEvents]);
 
-  const handleNext = useCallback(() => {
-    setCursor((d) => {
-      if (view === "month") {
-        return new Date(d.getFullYear(), d.getMonth() + 1, 1);
-      }
-      if (view === "week") return addDays(d, 7);
-      return d;
-    });
-  }, [view]);
-
-  const handleToday = useCallback(() => setCursor(new Date()), []);
-
-  // Keyboard shortcuts
+  // Keyboard shortcuts — agenda doesn't navigate by date, so only the
+  // "new event" shortcut remains useful here.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // ignore when typing in inputs/textareas or when modal open
       const tag = (e.target as HTMLElement | null)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (modalOpen) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-      if (e.key === "ArrowLeft") handlePrev();
-      else if (e.key === "ArrowRight") handleNext();
-      else if (e.key.toLowerCase() === "t") handleToday();
-      else if (e.key.toLowerCase() === "n") openNew();
-      else if (e.key.toLowerCase() === "m") setView("month");
-      else if (e.key.toLowerCase() === "w") setView("week");
-      else if (e.key.toLowerCase() === "a") setView("agenda");
-      else if (e.key.toLowerCase() === "b") setView("kanban");
+      if (e.key.toLowerCase() === "n") openNew();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [modalOpen, handlePrev, handleNext, handleToday, openNew]);
-
-  const title = useMemo(() => {
-    if (view === "month") {
-      return `${MONTH_NAMES[cursor.getMonth()]} ${cursor.getFullYear()}`;
-    }
-    if (view === "week") {
-      const start = getWeekStart(cursor);
-      const end = addDays(start, 6);
-      const sameMonth = start.getMonth() === end.getMonth();
-      const startLabel = start.toLocaleDateString("en-CA", {
-        month: "short",
-        day: "numeric",
-      });
-      const endLabel = sameMonth
-        ? String(end.getDate())
-        : end.toLocaleDateString("en-CA", {
-            month: "short",
-            day: "numeric",
-          });
-      return `${startLabel} – ${endLabel}, ${end.getFullYear()}`;
-    }
-    if (view === "agenda") return "Agenda";
-    return "Board";
-  }, [view, cursor]);
-
-  // Event count that maps to what the user's actually looking at —
-  // drives the "X shoots" subtitle under the calendar title.
-  const visibleCount = useMemo(() => {
-    if (view === "month") {
-      const y = cursor.getFullYear();
-      const m = cursor.getMonth();
-      return calEvents.filter((e) => {
-        if (!e.date) return false;
-        const d = new Date(`${e.date}T12:00:00`);
-        return d.getFullYear() === y && d.getMonth() === m;
-      }).length;
-    }
-    if (view === "week") {
-      const start = getWeekStart(cursor);
-      const end = addDays(start, 7);
-      const startISO = toISODate(start);
-      const endISO = toISODate(end);
-      return calEvents.filter(
-        (e) => !!e.date && e.date >= startISO && e.date < endISO
-      ).length;
-    }
-    if (view === "agenda") {
-      const todayISOStr = toISODate(new Date());
-      const endISOStr = toISODate(addDays(new Date(), 30));
-      return calEvents.filter(
-        (e) => !!e.date && e.date >= todayISOStr && e.date <= endISOStr
-      ).length;
-    }
-    return calEvents.length;
-  }, [view, cursor, calEvents]);
+  }, [modalOpen, openNew]);
 
   return (
     <div className="flex h-full flex-col">
       <CalendarHeader
-        view={view}
-        onView={setView}
-        title={title}
+        title="Agenda"
         count={visibleCount}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        onToday={handleToday}
         onNew={() => openNew()}
-        showNav={view === "month" || view === "week"}
       />
 
-      {view === "month" ? (
-        <MonthView
-          year={cursor.getFullYear()}
-          month={cursor.getMonth()}
-          events={calEvents}
-          onEventClick={openEdit}
-          onDayClick={(iso) => openNew(iso)}
-          onDuplicate={handleDuplicate}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-        />
-      ) : null}
-
-      {view === "week" ? (
-        <WeekView
-          weekStart={getWeekStart(cursor)}
-          events={calEvents}
-          onEventClick={openEdit}
-          onSlotClick={(iso, hour) =>
-            openNew(iso, `${String(hour).padStart(2, "0")}:00`)
-          }
-          onDuplicate={handleDuplicate}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-        />
-      ) : null}
-
-      {view === "agenda" ? (
-        <AgendaView
-          events={calEvents}
-          clients={clients}
-          onEventClick={openEdit}
-          onDuplicate={handleDuplicate}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-        />
-      ) : null}
-
-      {view === "kanban" ? (
-        <KanbanView
-          events={calEvents}
-          clients={clients}
-          onEventClick={openEdit}
-          onStatusChange={handleStatusChange}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-        />
-      ) : null}
+      <AgendaView
+        events={calEvents}
+        clients={clients}
+        onEventClick={openEdit}
+        onDuplicate={handleDuplicate}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+      />
 
       <EventModal
         open={modalOpen}
