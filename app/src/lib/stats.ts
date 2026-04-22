@@ -7,6 +7,10 @@ export interface MonthlyRevenuePoint {
   year: number;
   revenue: number; // gross total for the month (matches the stat cards)
   tax: number;
+  /** Invoice + draft count rolled into this month — surfaced in the
+   *  chart tooltip so a $0 month shows "no invoices" rather than
+   *  reading as data-loss. */
+  count: number;
 }
 
 export interface DashboardStats {
@@ -171,6 +175,7 @@ export function computeMonthlyRevenue(
       year: d.getFullYear(),
       revenue: 0,
       tax: 0,
+      count: 0,
     });
   }
 
@@ -180,6 +185,7 @@ export function computeMonthlyRevenue(
     if (!b) continue;
     b.revenue += inv.total ?? 0;
     b.tax += (inv.totalGst ?? 0) + (inv.totalQst ?? 0);
+    b.count += 1;
   }
 
   for (const d of drafts) {
@@ -188,6 +194,7 @@ export function computeMonthlyRevenue(
     const { total, tax } = sumItems(d.items);
     b.revenue += total;
     b.tax += tax;
+    b.count += 1;
   }
 
   return Array.from(buckets.values());

@@ -1,20 +1,22 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ReferenceLine,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/format";
 import { computeMonthlyRevenue } from "@/lib/stats";
 import type { Invoice, Draft } from "@/lib/types";
@@ -22,20 +24,26 @@ import type { Invoice, Draft } from "@/lib/types";
 interface RevenueChartProps {
   invoices: Invoice[];
   drafts: Draft[];
-  months?: number;
 }
 
+type RangeMonths = 3 | 6 | 12;
+const RANGE_OPTIONS: RangeMonths[] = [3, 6, 12];
+const RANGE_LABEL: Record<RangeMonths, string> = {
+  3: "3M",
+  6: "6M",
+  12: "12M",
+};
+
 /**
- * Rolling monthly revenue as a gradient-filled area chart. Built on
- * the shadcn chart primitives (recharts under the hood) so the curve,
- * grid, tooltip, and axis labels all pick up the design tokens
- * without per-component styling.
+ * Monthly revenue history rendered as bars — one bar per calendar month
+ * within the selected window. The current month gets the primary colour
+ * so the eye lands on "where am I right now"; prior months sit at lower
+ * opacity. A dashed reference line at the window's average makes each
+ * bar readable as above- or below-trend at a glance.
  *
- * Single series — revenue only — because stacking tax on top would
- * double-count money the photographer already saw on their stat
- * cards. Card footer summarizes the window: 12-month average + total
- * and a direction-of-travel trend vs. the previous half of the
- * window.
+ * Header doubles as a stat card: this month's revenue is the hero number,
+ * with a delta vs. last month, then average / total / range tabs as the
+ * supporting layer.
  */
 const chartConfig = {
   revenue: {
@@ -52,134 +60,213 @@ function shortCurrency(value: number): string {
   return `$${Math.round(value)}`;
 }
 
-export function RevenueChart({
-  invoices,
-  drafts,
-  months = 12,
-}: RevenueChartProps) {
-  const points = useMemo(
-    () => computeMonthlyRevenue(invoices, drafts, months),
-    [invoices, drafts, months]
-  );
+export function RevenueChart({ invoices, drafts }: RevenueChartProps) {
+  const [range, setRange] = useState<RangeMonths>(12);
 
-  const { avg, total, trendPct, trendDirection } = useMemo(() => {
-    const total = points.reduce((sum, p) => sum + p.revenue, 0);
-    const avg = points.length ? total / points.length : 0;
-    // Compare the back half of the window to the front half — gives a
-    // smoother read than month-over-month on a 12-point series.
-    const half = Math.floor(points.length / 2);
-    const front = points
-      .slice(0, half)
-      .reduce((s, p) => s + p.revenue, 0);
-    const back = points
-      .slice(half)
-      .reduce((s, p) => s + p.revenue, 0);
-    const pct = front > 0 ? ((back - front) / front) * 100 : 0;
-    return {
-      avg,
-      total,
-      trendPct: pct,
-      trendDirection:
-        pct > 1 ? ("up" as const) : pct < -1 ? ("down" as const) : ("flat" as const),
-    };
-  }, [points]);
+  // Always compute the full 12-month series so range changes are
+  // instant (no recomputation of invoices/drafts), then slice the tail.
+  const fullPoints = useMemo(
+    () => computeMonthlyRevenue(invoices, drafts, 12),
+    [invoices, drafts]
+  );
+  const points = useMemo(() => fullPoints.slice(-range), [fullPoints, range]);
+
+  const { avg, total, monthRevenue, prevMonthRevenue, deltaPct, deltaKind } =
+    useMemo(() => {
+      const total = points.reduce((sum, p) => sum + p.revenue, 0);
+      const avg = points.length ? total / points.length : 0;
+      const monthRevenue = points.length
+        ? points[points.length - 1].revenue
+        : 0;
+      const prevMonthRevenue =
+        points.length > 1 ? points[points.length - 2].revenue : 0;
+      const deltaPct =
+        prevMonthRevenue > 0
+          ? ((monthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100
+          : 0;
+      const deltaKind: "up" | "down" | "flat" =
+        prevMonthRevenue <= 0
+          ? "flat"
+          : deltaPct > 1
+            ? "up"
+            : deltaPct < -1
+              ? "down"
+              : "flat";
+      return {
+        avg,
+        total,
+        monthRevenue,
+        prevMonthRevenue,
+        deltaPct,
+        deltaKind,
+      };
+    }, [points]);
+
+  const lastIndex = points.length - 1;
+  const hasAnyRevenue = total > 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue · last {months} months</CardTitle>
-        <CardDescription>
-          Avg {formatCurrency(avg)} · Total {formatCurrency(total)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[240px] w-full">
-          <AreaChart
-            accessibilityLayer
-            data={points}
-            margin={{ left: 12, right: 12, top: 8, bottom: 0 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="label"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={4}
-              width={44}
-              tickFormatter={(v) => shortCurrency(Number(v))}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(_, payload) => {
-                    const p = payload?.[0]?.payload as
-                      | { label: string; year: number }
-                      | undefined;
-                    return p ? `${p.label} ${p.year}` : "";
-                  }}
-                  formatter={(value) => [
-                    formatCurrency(Number(value)),
-                    "Revenue",
-                  ]}
-                  indicator="dot"
-                />
-              }
-            />
-            <defs>
-              <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="revenue"
-              type="natural"
-              fill="url(#fillRevenue)"
-              fillOpacity={0.4}
-              stroke="var(--color-revenue)"
-              strokeWidth={2}
-            />
-          </AreaChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 leading-none font-medium">
-              {trendDirection === "up"
-                ? `Trending up by ${trendPct.toFixed(1)}% this half`
-                : trendDirection === "down"
-                  ? `Trending down by ${Math.abs(trendPct).toFixed(1)}% this half`
-                  : "Flat vs. the previous half"}{" "}
-              {trendDirection === "down" ? (
-                <TrendingDown className="h-4 w-4" />
-              ) : (
-                <TrendingUp className="h-4 w-4" />
-              )}
+    <Card className="overflow-hidden">
+      <CardHeader className="gap-4 border-b bg-muted/20 sm:flex-row sm:items-end sm:justify-between">
+        {/* Hero: this month's revenue with a delta-vs-last-month chip
+            and supporting avg/total muted line. */}
+        <div className="flex flex-col gap-1.5">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            This month
+          </div>
+          <div className="flex items-baseline gap-3">
+            <div className="text-3xl font-semibold tracking-tight tabular-nums">
+              {formatCurrency(monthRevenue)}
             </div>
-            <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              {points.length
-                ? `${points[0].label} ${points[0].year} – ${points[points.length - 1].label} ${points[points.length - 1].year}`
-                : "No data yet"}
-            </div>
+            {deltaKind !== "flat" ? (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                  deltaKind === "up"
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                    : "bg-rose-500/15 text-rose-700 dark:text-rose-400"
+                )}
+              >
+                {deltaKind === "up" ? (
+                  <TrendingUp className="h-3 w-3" aria-hidden />
+                ) : (
+                  <TrendingDown className="h-3 w-3" aria-hidden />
+                )}
+                {deltaKind === "up" ? "+" : ""}
+                {deltaPct.toFixed(1)}%
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {prevMonthRevenue > 0 ? "flat vs last month" : "no prior data"}
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-muted-foreground tabular-nums">
+            Avg {formatCurrency(avg)} · Total {formatCurrency(total)} ·{" "}
+            <span className="lowercase">last {range} months</span>
           </div>
         </div>
-      </CardFooter>
+
+        {/* Range toggle — segmented control over the same window. */}
+        <div className="inline-flex shrink-0 items-center rounded-md border bg-background p-0.5">
+          {RANGE_OPTIONS.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRange(r)}
+              aria-pressed={range === r}
+              className={cn(
+                "rounded px-2.5 py-1 text-xs font-medium tabular-nums transition-colors",
+                range === r
+                  ? "bg-muted text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {RANGE_LABEL[r]}
+            </button>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent className="px-2 pt-6 pb-4 sm:px-4">
+        {hasAnyRevenue ? (
+          <ChartContainer config={chartConfig} className="h-[240px] w-full">
+            <BarChart
+              accessibilityLayer
+              data={points}
+              margin={{ left: 8, right: 8, top: 12, bottom: 0 }}
+            >
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                strokeOpacity={0.5}
+              />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={4}
+                width={48}
+                tickFormatter={(v) => shortCurrency(Number(v))}
+              />
+              <ChartTooltip
+                cursor={{ fill: "var(--color-revenue)", fillOpacity: 0.06 }}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    labelFormatter={(_, payload) => {
+                      const p = payload?.[0]?.payload as
+                        | { label: string; year: number }
+                        | undefined;
+                      return p ? `${p.label} ${p.year}` : "";
+                    }}
+                    formatter={(value, _name, item) => {
+                      const p = item?.payload as
+                        | { count?: number }
+                        | undefined;
+                      const count = p?.count ?? 0;
+                      const meta =
+                        count === 0
+                          ? "no invoices"
+                          : `${count} invoice${count === 1 ? "" : "s"}`;
+                      return (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-medium tabular-nums text-foreground">
+                            {formatCurrency(Number(value))}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {meta}
+                          </span>
+                        </div>
+                      );
+                    }}
+                  />
+                }
+              />
+              {avg > 0 ? (
+                <ReferenceLine
+                  y={avg}
+                  stroke="var(--color-revenue)"
+                  strokeOpacity={0.5}
+                  strokeDasharray="4 4"
+                  label={{
+                    value: `Avg ${shortCurrency(avg)}`,
+                    position: "insideTopRight",
+                    fill: "var(--color-revenue)",
+                    fontSize: 10,
+                    fillOpacity: 0.8,
+                  }}
+                />
+              ) : null}
+              <Bar
+                dataKey="revenue"
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
+              >
+                {points.map((_, idx) => (
+                  <Cell
+                    key={idx}
+                    fill="var(--color-revenue)"
+                    fillOpacity={idx === lastIndex ? 1 : 0.35}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <span>No invoices yet in this window.</span>
+            <span className="text-xs">
+              Once you start sending invoices, monthly revenue lands here.
+            </span>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
